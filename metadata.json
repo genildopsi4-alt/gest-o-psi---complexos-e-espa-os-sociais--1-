@@ -1,0 +1,7 @@
+{
+  "name": "Gestão PSI - Complexos e Espaços Sociais",
+  "description": "Sistema de gestão e monitoramento para psicólogos dos Complexos e Espaços Sociais.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
