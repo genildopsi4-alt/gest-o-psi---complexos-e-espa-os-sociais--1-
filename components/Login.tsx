@@ -34,11 +34,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     ];
 
     const avatarList = [
-        "avatars/avatar_01.png",
-        "avatars/avatar_02.png",
-        "avatars/avatar_03.png",
-        "avatars/avatar_04.png",
-        "avatars/avatar_05.png"
+        "/avatars/avatar_01.png",
+        "/avatars/avatar_02.png",
+        "/avatars/avatar_03.png",
+        "/avatars/avatar_04.png",
+        "/avatars/avatar_05.png"
     ];
 
     const availableCourses = [
@@ -71,7 +71,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                     role: 'admin',
                     crp: '11/04982',
                     unit: 'CSMI Cristo Redentor',
-                    avatar: 'avatars/avatar_01.png',
+                    avatar: '/avatars/avatar_01.png',
                     qualificacoes: ["ACT - Parentalidade Positiva", "Círculo de Construção de Paz"]
                 });
             } else {
@@ -81,7 +81,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                     role: 'tecnico',
                     crp: '00/00000',
                     unit: 'CSMI João XXIII', // Default para teste se não for admin
-                    avatar: 'avatars/avatar_02.png',
+                    avatar: '/avatars/avatar_02.png',
                     qualificacoes: []
                 });
             }
@@ -98,7 +98,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                 role: regRole,
                 crp: regCrp || '00/00000',
                 unit: regRole === 'tecnico' ? (regUnit || 'Não informada') : 'Gestão Central',
-                avatar: selectedAvatar || 'avatars/avatar_01.png',
+                avatar: selectedAvatar || '/avatars/avatar_01.png',
                 qualificacoes: selectedCourses
             });
         }, 1000);
