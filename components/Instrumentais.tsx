@@ -404,8 +404,8 @@ const DocumentContainer: React.FC<{ children: React.ReactNode, landscape?: boole
 
 const SPSHeader: React.FC = () => (
     <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-black px-4">
-        <img src="/logo-sps.png" alt="SPS - Secretaria da Proteção Social" className="h-16 object-contain" />
-        <img src="/logo-mais-infancia-new.png" alt="Mais Infância Ceará" className="h-20 object-contain" />
+        <img src="logo-sps.png" alt="SPS - Secretaria da Proteção Social" className="h-16 object-contain" />
+        <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="h-20 object-contain" />
     </div>
 );
 
