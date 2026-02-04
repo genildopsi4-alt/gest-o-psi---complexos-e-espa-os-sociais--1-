@@ -2,10 +2,12 @@
 export type Section = 'dashboard' | 'diario' | 'grupos' | 'eventos' | 'rede' | 'beneficiarios' | 'planejamento' | 'instrumentais';
 
 export interface UserProfile {
-  name: string;
-  role: string;
-  crp: string;
-  qualificacoes: string[];
+    name: string;
+    role: string;
+    crp: string;
+    qualificacoes: string[];
+    unit?: string;
+    avatar?: string;
 }
 
 export interface RedeItem {
