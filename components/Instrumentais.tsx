@@ -7,8 +7,49 @@ interface InstrumentaisProps {
 
 type InstrumentalType = 'planejamento' | 'escuta' | 'cadastro' | 'frequencia' | 'relatorio' | 'visita_domiciliar' | 'encaminhamento' | 'ci';
 
+const unitMap: Record<string, { name: string; address: string; email: string }> = {
+    "CSMI João XXIII": {
+        name: "Complexo Social Mais Infância João XXIII",
+        address: "Rua Araguaiana, 77 - João XXIII, Fortaleza - CE",
+        email: "complexojoho23@sps.ce.gov.br"
+    },
+    "CSMI Cristo Redentor": {
+        name: "Complexo Social Mais Infância Cristo Redentor",
+        address: "Rua Camélia, 450 - Cristo Redentor, Fortaleza - CE",
+        email: "complexocristoredentor@sps.ce.gov.br"
+    },
+    "CSMI Curió": {
+        name: "Complexo Social Mais Infância Curió",
+        address: "Rua Eduardo Campos, s/n - Curió, Fortaleza - CE",
+        email: "complexocurio@sps.ce.gov.br"
+    },
+    "CSMI Barbalha": {
+        name: "Complexo Social Mais Infância Barbalha",
+        address: "Av. Perimetral Leste, s/n - Barbalha - CE",
+        email: "complexobarbalha@sps.ce.gov.br"
+    },
+    "Espaço Social Quintino Cunha": {
+        name: "Espaço Social Quintino Cunha",
+        address: "Rua Ilha do Bote, 334 - Quintino Cunha",
+        email: "espacoquintino@sps.ce.gov.br"
+    },
+    "Espaço Social Barra do Ceará": {
+        name: "Espaço Social Barra do Ceará",
+        address: "Rua G, 100 - Barra do Ceará",
+        email: "espacobarra@sps.ce.gov.br"
+    },
+    "Espaço Social Dias Macedo": {
+        name: "Espaço Social Dias Macedo",
+        address: "Rua C, 50 - Dias Macedo",
+        email: "espacodiasmacedo@sps.ce.gov.br"
+    }
+};
+
 const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
+
+    const defaultUnit = unitMap["CSMI Cristo Redentor"];
+    const currentUnit = user?.unit && unitMap[user.unit] ? unitMap[user.unit] : defaultUnit;
 
     // Helper para gerar a assinatura em texto (para tabelas/textareas)
     const getSignatureText = () => {
@@ -55,8 +96,8 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <TableRow label="Tema:" content="Carnaval da alegria" contentInput />
                             <TableRow label="Subtema:" content="Ritmos, fantasias e tradições." contentInput />
                             <TableRow label="Área de Atuação:" content={user?.role || "Psicologia Social"} contentInput />
-                            <TableRow label="Unidade/Equipamento:" content="Complexo Social Mais Infância - Cristo Redentor" contentInput />
-                            <TableRow label="Endereço:" content="Rua Camélia, 450 - Cristo Redentor" contentInput />
+                            <TableRow label="Unidade/Equipamento:" content={currentUnit.name} contentInput />
+                            <TableRow label="Endereço:" content={currentUnit.address} contentInput />
                             <TableRow label="OSC Executora:" content="Centro de Formação e Inclusão Social Nossa Senhora de Fátima" contentInput />
                             <TableRow label="Mês/Ano:" content="FEVEREIRO/2026" contentInput />
                         </div>
@@ -127,7 +168,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             </div>
                         </div>
 
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -148,13 +189,11 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <div className="flex">
                                     <div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">UNIDADE:</div>
                                     <select className="w-full p-2 outline-none text-sm bg-white">
-                                        <option>João XXIII</option>
-                                        <option>Cristo Redentor</option>
-                                        <option>Curió</option>
-                                        <option>Barbalha</option>
-                                        <option>Quintino Cunha</option>
-                                        <option>Barra do Ceará</option>
-                                        <option>Dias Macedo</option>
+                                        <option>{currentUnit.name}</option>
+                                        <option>CSMI João XXIII</option>
+                                        <option>CSMI Cristo Redentor</option>
+                                        <option>CSMI Curió</option>
+                                        <option>CSMI Barbalha</option>
                                     </select>
                                 </div>
                             </div>
@@ -176,7 +215,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <ProfessionalSignatureBlock />
                         </div>
 
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -214,7 +253,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
                         <div className="border-2 border-black p-4 mb-8 text-justify text-xs leading-relaxed">
                             <p className="font-bold mb-2 uppercase">Termo de Declaração:</p>
-                            <p>Declaro ter ciência de que o Complexo Social Mais Infância é um equipamento de Proteção Social Básica. Autorizo a participação nas atividades de fortalecimento de vínculos e o uso de imagem para fins institucionais da Secretaria de Proteção Social (SPS).</p>
+                            <p>Declaro ter ciência de que o {currentUnit.name} é um equipamento de Proteção Social Básica. Autorizo a participação nas atividades de fortalecimento de vínculos e o uso de imagem para fins institucionais da Secretaria de Proteção Social (SPS).</p>
                         </div>
 
                         <div className="mt-12 mb-8 text-center">
@@ -222,7 +261,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <p className="text-[10px] uppercase font-bold text-black">BENEFICIÁRIO</p>
                         </div>
 
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -260,7 +299,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             </tbody>
                         </table>
                         <div className="mt-2 text-[10px] font-bold">Legenda: P (Presente) | F (Falta) | J (Justificada)</div>
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -272,7 +311,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <div className="bg-blue-300 border-b border-black p-2 text-center font-bold uppercase text-sm text-black">
                                 Relatório Mensal de Atividades
                             </div>
-                            <TableRow label="Unidade:" content="Complexo Social Mais Infância" />
+                            <TableRow label="Unidade:" content={currentUnit.name} />
                             <TableRow label="Mês de Referência:" contentInput />
                             <TableRow label="Técnico Responsável:" content={user?.name || ''} contentInput />
                         </div>
@@ -284,7 +323,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <div className="border-t-2 border-black"></div>
                             <TextAreaBlock label="3. DIFICULDADES E ENCAMINHAMENTOS" height="h-32" noBorder />
                         </div>
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -306,7 +345,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                         <div className="border-2 border-black mb-6">
                             <TextAreaBlock label="RELATO DA VISITA E OBSERVAÇÕES TÉCNICAS" height="h-96" noBorder />
                         </div>
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -318,7 +357,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <h2 className="text-center font-bold text-xl uppercase underline mb-8">GUIA DE ENCAMINHAMENTO</h2>
 
                             <div className="mb-6 text-sm leading-loose">
-                                <p><strong>De:</strong> Complexo Social Mais Infância (SPS)</p>
+                                <p><strong>De:</strong> {currentUnit.name} (SPS)</p>
                                 <div className="flex items-end gap-2">
                                     <strong>Para:</strong>
                                     <input className="flex-1 border-b border-black outline-none px-2 font-bold uppercase" placeholder="Nome da Instituição Destino (Ex: CRAS, CAPS...)" />
@@ -341,7 +380,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 </div>
                             </div>
                         </div>
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -367,7 +406,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 </div>
                             </div>
                         </div>
-                        <SPSFooter />
+                        <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
@@ -409,11 +448,11 @@ const SPSHeader: React.FC = () => (
     </div>
 );
 
-const SPSFooter: React.FC = () => (
+const SPSFooter: React.FC<{ unit: { name: string; address: string; email: string } }> = ({ unit }) => (
     <footer className="mt-auto pt-2 border-t-[3px] border-black text-sm print:fixed print:bottom-0 print:left-0 print:w-full print:bg-white print:px-8 print:pb-8">
-        <p className="font-bold">Complexo Mais Infância Padre Caetano Cristo Redentor</p>
-        <p>Endereço: Rua Camélia, 450 - Cristo Redentor, Fortaleza - CE.</p>
-        <p>E-mail: complexocristoredentor@sps.ce.gov.br</p>
+        <p className="font-bold">{unit.name}</p>
+        <p>Endereço: {unit.address}</p>
+        <p>E-mail: {unit.email}</p>
         <button className="print:hidden mt-4 bg-teal-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-teal-700 shadow-lg transition transform hover:-translate-y-1" onClick={() => window.print()}>
             <i className="fa-solid fa-print"></i> Imprimir Documento
         </button>
