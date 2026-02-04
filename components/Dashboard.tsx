@@ -14,33 +14,7 @@ import { UserProfile, Unidade, Atendimento } from '../types';
 import { getUnidades, getAtendimentos } from '../src/services/mockData';
 import { generateRelatorioMensal } from '../src/services/PDFGenerator';
 
-// ... (inside component)
 
-const handleGeneratePDF = () => {
-  const fullReportData = {
-    unidade: user?.unit || 'Unidade Não Identificada',
-    mesReferencia: new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-    responsavel: user?.name || 'Técnico Responsável',
-    ...reportData
-  };
-  generateRelatorioMensal(fullReportData);
-};
-
-// ... (Update buttons)
-             <button
-                onClick={handleGeneratePDF}
-                className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2 text-sm uppercase tracking-wider"
-              >
-                <i className="fa-solid fa-file-pdf"></i> Gerar Relatório PDF
-              </button>
-
-// ... (Second button)
-          <button
-            onClick={handleGeneratePDF}
-            className="w-full py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-900 transition flex items-center justify-center gap-2"
-          >
-            <i className="fa-solid fa-file-pdf"></i> Baixar Relatório PDF
-          </button>
 
 ChartJS.register(
   CategoryScale,
@@ -64,6 +38,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [parecerGestao, setParecerGestao] = useState(''); // State for Manager's Review
 
   const isAdmin = user?.role === 'admin' || user?.name === 'Genildo Barbosa'; // Fallback for dev
+
+  const handleGeneratePDF = () => {
+    const fullReportData = {
+      unidade: user?.unit || 'Unidade Não Identificada',
+      mesReferencia: new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+      responsavel: user?.name || 'Técnico Responsável',
+      ...reportData
+    };
+    generateRelatorioMensal(fullReportData);
+  };
 
   useEffect(() => {
     const loadData = async () => {

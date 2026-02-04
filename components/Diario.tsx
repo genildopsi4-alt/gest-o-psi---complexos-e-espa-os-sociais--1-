@@ -16,6 +16,7 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
     const [compazType, setCompazType] = useState<string>(''); // Added Compaz state
     const [actSessao, setActSessao] = useState<number | null>(null); // Added ACT state
     const [qtdParticipantesNum, setQtdParticipantesNum] = useState<number>(0); // Added manual count state
+    const [selectedUnidade, setSelectedUnidade] = useState<string>(''); // Added Unidade state
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -26,7 +27,7 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
         const participantes = beneficiarios.filter(b => attendance.includes(b.id));
 
         const dataToSave = {
-            unidade: "CSMI Cristo Redentor", // TODO: Get from user context
+            unidade: selectedUnidade || "Unidade Não Selecionada",
             tipo_acao: tipoAcao,
             atividade_especifica: atividade,
             data_registro: new Date().toISOString().split('T')[0],
@@ -53,14 +54,14 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
 
     const unidades = [
         { label: '-- Complexos Sociais --', disabled: true },
-        { value: 'joao23', label: 'João XXIII' },
-        { value: 'cristo', label: 'Cristo Redentor' },
-        { value: 'curio', label: 'Curió' },
-        { value: 'barbalha', label: 'Barbalha' },
+        { value: 'CSMI João XXIII', label: 'João XXIII' },
+        { value: 'CSMI Cristo Redentor', label: 'Cristo Redentor' },
+        { value: 'CSMI Curió', label: 'Curió' },
+        { value: 'CSMI Barbalha', label: 'Barbalha' },
         { label: '-- Espaços Sociais --', disabled: true },
-        { value: 'quintino', label: 'Quintino Cunha' },
-        { value: 'barra', label: 'Barra do Ceará' },
-        { value: 'dias_macedo', label: 'Dias Macedo' },
+        { value: 'Espaço Social Quintino Cunha', label: 'Quintino Cunha' },
+        { value: 'Espaço Social Barra do Ceará', label: 'Barra do Ceará' },
+        { value: 'Espaço Social Dias Macedo', label: 'Dias Macedo' },
     ];
 
     const handleAtividadeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -128,7 +129,11 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-xs font-black text-slate-500 uppercase mb-2">Unidade / Equipamento</label>
-                                <select className="w-full border-slate-200 border-2 rounded-xl p-3 focus:ring-orange-500 focus:border-orange-500 outline-none transition font-medium">
+                                <select
+                                    className="w-full border-slate-200 border-2 rounded-xl p-3 focus:ring-orange-500 focus:border-orange-500 outline-none transition font-medium"
+                                    value={selectedUnidade}
+                                    onChange={(e) => setSelectedUnidade(e.target.value)}
+                                >
                                     {unidades.map((u, i) => (
                                         <option key={i} value={u.value} disabled={u.disabled}>{u.label}</option>
                                     ))}

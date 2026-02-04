@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Atendimento, Beneficiario } from '../../types';
-import { MOCK_ATENDIMENTOS, MOCK_UNIDADES } from './mockData';
+import { getUnidades } from './mockData'; // Using the service function instead of constants
 
 // Tipo para o objeto de dados salvo (compatível com a tabela 'atendimentos')
 export interface AtendimentoDB {
@@ -102,7 +102,12 @@ export const RelatorioService = {
     },
 
     // 3. Buscar Unidades (Para consolidação Admin)
-    getUnidades() {
-        return MOCK_UNIDADES; // Por enquanto usando Mock, depois pode vir do DB
+    async getUnidades() {
+        const { data, error } = await supabase.from('unidades').select('*');
+        if (error) {
+            console.error('Error fetching units:', error);
+            return [];
+        }
+        return data || [];
     }
 };
