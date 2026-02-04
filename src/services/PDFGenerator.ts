@@ -1,132 +1,156 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { UserProfile } from '../../types';
-import { MOCK_UNIDADES } from './mockData';
 
-interface ReportOptions {
-    startDate: string;
-    endDate: string;
-    unit: string; // 'consolidado' ou nome da unidade
-    user: UserProfile;
-    data: any[]; // Dados vindos do RelatorioService
+interface ReportData {
+    unidade: string;
+    mesReferencia: string;
+    grupos: {
+        nome: string;
+        encontros: number;
+        beneficiarios: number;
+        status: string;
+    }[];
+    escuta: {
+        total: number;
+        encaminhamentos: {
+            saude: number;
+            assistencia: number;
+            educacao: number;
+        };
+    };
+    mobilizacao: {
+        titulo: string;
+        publico: number;
+        sintese: string;
+    };
+    fotos: {
+        url: string;
+        legenda: string;
+        data: string;
+    }[];
+    parecerGestao: string;
+    responsavel: string;
 }
 
-export const PDFGenerator = {
-    generateRelatorioMensal: (options: ReportOptions) => {
-        const doc = new jsPDF();
-        const { startDate, endDate, unit, user, data } = options;
+export const generateRelatorioMensal = (data: ReportData) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
 
-        // --- HEADER ---
-        const drawHeader = (pageUnit: string) => {
-            doc.setFillColor(23, 37, 84); // blue-950 roughly
-            doc.rect(0, 0, 210, 40, 'F');
+    // --- HEADER ---
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(220, 38, 38); // Red-600
+    doc.text('GOVERNO DO ESTADO DO CEARÁ', pageWidth / 2, 20, { align: 'center' });
 
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text('GOVERNO DO ESTADO DO CEARÁ', 105, 15, { align: 'center' });
-            doc.setFontSize(12);
-            doc.text('SECRETARIA DE PROTEÇÃO SOCIAL - SPS', 105, 22, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setTextColor(80);
+    doc.text('Secretaria da Proteção Social - SPS', pageWidth / 2, 28, { align: 'center' });
+    doc.text('Programa Mais Infância Ceará', pageWidth / 2, 34, { align: 'center' });
+
+    // Title
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.text(`RELATÓRIO MENSAL DE ATIVIDADES - ${data.mesReferencia}`, pageWidth / 2, 50, { align: 'center' });
+
+    doc.setFontSize(10);
+    doc.text(`Unidade: ${data.unidade}`, 15, 60);
+    doc.text(`Responsável Técnico: ${data.responsavel}`, 15, 66);
+
+    // --- TABLE 1: GRUPOS ---
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('1. Atividades Socioeducativas e Grupos', 15, 80);
+
+    autoTable(doc, {
+        startY: 85,
+        head: [['Grupo / Atividade', 'Encontros', 'Beneficiários', 'Status']],
+        body: data.grupos.map(g => [g.nome, g.encontros, g.beneficiarios, g.status]),
+        theme: 'grid',
+        headStyles: { fillColor: [220, 38, 38] }, // Red
+    });
+
+    let finalY = (doc as any).lastAutoTable.finalY + 15;
+
+    // --- SECTION 2: ESCUTA QUALIFICADA ---
+    doc.text('2. Escuta Qualificada e Encaminhamentos', 15, finalY);
+
+    const escutaData = [
+        ['Total de Atendimentos', data.escuta.total],
+        ['Encaminhamentos Saúde', data.escuta.encaminhamentos.saude],
+        ['Encaminhamentos Assistência Social', data.escuta.encaminhamentos.assistencia],
+        ['Encaminhamentos Educação', data.escuta.encaminhamentos.educacao],
+    ];
+
+    autoTable(doc, {
+        startY: finalY + 5,
+        head: [['Indicador', 'Quantidade']],
+        body: escutaData,
+        theme: 'striped',
+        headStyles: { fillColor: [249, 115, 22] }, // Orange
+    });
+
+    finalY = (doc as any).lastAutoTable.finalY + 15;
+
+    // --- SECTION 3: MOBILIZAÇÃO ---
+    doc.text('3. Mobilização Comunitária', 15, finalY);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Evento Destaque: ${data.mobilizacao.titulo}`, 15, finalY + 8);
+    doc.text(`Público Estimado: ${data.mobilizacao.publico} pessoas`, 15, finalY + 14);
+
+    const splitText = doc.splitTextToSize(data.mobilizacao.sintese, pageWidth - 30);
+    doc.text(splitText, 15, finalY + 22);
+
+    finalY += 22 + (splitText.length * 5) + 10;
+
+    // --- SECTION 4: PARECER TÉCNICO ---
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('4. Parecer Técnico da Gestão', 15, finalY);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const splitParecer = doc.splitTextToSize(data.parecerGestao, pageWidth - 30);
+    doc.text(splitParecer, 15, finalY + 8);
+
+    // --- PHOTOS ---
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Anexo: Registro Fotográfico', pageWidth / 2, 20, { align: 'center' });
+
+    let yPos = 40;
+    data.fotos.forEach((foto, index) => {
+        if (yPos > 250) {
+            doc.addPage();
+            yPos = 40;
+        }
+
+        // Placeholder logic for image (since we might not have base64)
+        // In a real app, 'foto.url' should be base64. Here assuming valid URL might not work in local jsPDF without proxy/CORS.
+        // We will draw a rect as placeholder if image fails, or try addImage.
+
+        try {
+            // doc.addImage(foto.url, 'JPEG', 15, yPos, 80, 60);
+            // Note: addImage is synchronous and requires base64 or loaded image data usually.
+            // For simplicity in this demo, we draw a box.
+
+            doc.setDrawColor(200);
+            doc.setFillColor(245, 245, 245);
+            doc.rect(15, yPos, 180, 80, 'FD');
             doc.setFontSize(10);
-            doc.text(`RELATÓRIO MENSAL DE ATIVIDADES - ${pageUnit.toUpperCase()}`, 105, 32, { align: 'center' });
-        };
+            doc.text(`[FOTO ${index + 1}: ${foto.url.substring(0, 30)}...]`, 105, yPos + 40, { align: 'center' });
 
-        // Se for consolidado, iteramos por unidade. Se não, apenas uma.
-        const unitsToProcess = unit === 'Overview Geral' || unit === 'consolidado'
-            ? MOCK_UNIDADES.map(u => u.nome) // Todas as unidades
-            : [unit];
+            doc.setFontSize(9);
+            doc.text(foto.legenda, 15, yPos + 85);
+            doc.text(foto.data, 180, yPos + 85, { align: 'right' });
 
-        let pageCount = 0;
+            yPos += 100;
+        } catch (e) {
+            console.error("Error adding image to PDF", e);
+        }
+    });
 
-        unitsToProcess.forEach((currentUnitName, index) => {
-            // Filtrar dados desta unidade
-            const unitData = data.filter((d: any) => d.unidade === currentUnitName || (unit !== 'consolidado' && unit === currentUnitName));
-
-            if (index > 0) doc.addPage();
-            pageCount++;
-
-            drawHeader(currentUnitName);
-
-            let currentY = 50;
-
-            // --- INFO BLOCK ---
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(10);
-            doc.text(`Período: ${startDate.split('-').reverse().join('/')} a ${endDate.split('-').reverse().join('/')}`, 14, currentY);
-            doc.text(`Responsável Técnico: ${user.name}`, 14, currentY + 6);
-            currentY += 15;
-
-            // --- TABELA DE RESUMO ---
-            const atividades = unitData.length;
-            const participantes = unitData.reduce((acc: number, curr: any) => acc + (curr.qtd_participantes || 0), 0);
-
-            autoTable(doc, {
-                startY: currentY,
-                head: [['Indicadores', 'Total']],
-                body: [
-                    ['Atividades Realizadas', atividades],
-                    ['Total de Participantes', participantes],
-                ],
-                theme: 'grid',
-                headStyles: { fillColor: [40, 167, 69] } // Green
-            });
-
-            currentY = (doc as any).lastAutoTable.finalY + 10;
-
-            // --- DETALHAMENTO DAS ATIVIDADES ---
-            doc.text('Detalhamento das Atividades:', 14, currentY);
-            currentY += 5;
-
-            // Mapear dados para tabela
-            const rows = unitData.map((atend: any) => [
-                atend.data_registro.split('-').reverse().join('/'),
-                atend.tipo_acao.toUpperCase(),
-                atend.atividade_especifica,
-                atend.qtd_participantes,
-                atend.observacoes ? atend.observacoes.substring(0, 50) + '...' : '-'
-            ]);
-
-            autoTable(doc, {
-                startY: currentY,
-                head: [['Data', 'Tipo', 'Atividade', 'Qtd', 'Resumo']],
-                body: rows,
-                theme: 'striped',
-                headStyles: { fillColor: [23, 162, 184] }
-            });
-
-            currentY = (doc as any).lastAutoTable.finalY + 10;
-
-            // --- IMAGENS (Se houver) ---
-            const images = unitData.flatMap((d: any) => d.fotos_urls || []);
-            if (images.length > 0) {
-                if (currentY > 250) { doc.addPage(); pageCount++; currentY = 20; }
-
-                doc.setFontSize(12);
-                doc.text('Registro Fotográfico:', 14, currentY);
-                currentY += 10;
-
-                let xPos = 14;
-                images.forEach((imgUrl: string, i: number) => {
-                    // Try to add image (assumes valid DataURL or URL supported by jspdf)
-                    try {
-                        // Limit to 4 images per page for simplicity in this version
-                        if (i < 4) {
-                            doc.text(`Foto ${i + 1}`, xPos, currentY);
-                            // Placeholder rect if image fails loading in pure JS context without async fetching
-                            doc.rect(xPos, currentY + 2, 40, 30);
-                            // doc.addImage(imgUrl, 'JPEG', xPos, currentY + 2, 40, 30);
-                            // NOTE: addImage sync requires Base64. If URLs are remote, we need to fetch them first.
-                            // For this iteration, we place placeholders or assume Base64 in state.
-                        }
-                        xPos += 50;
-                    } catch (e) {
-                        console.warn('Erro ao adionar imagem PDF', e);
-                    }
-                });
-            }
-        });
-
-        // Save
-        doc.save(`Relatorio_Mensal_${user.unit}_${startDate}.pdf`);
-    }
+    doc.save(`Relatorio_Mensal_${data.unidade}_${data.mesReferencia}.pdf`);
 };
