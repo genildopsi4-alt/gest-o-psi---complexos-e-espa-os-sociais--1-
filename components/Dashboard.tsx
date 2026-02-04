@@ -115,41 +115,131 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* --- EIXOS TRANSVERSAIS PSI --- */}
+      {/* --- GRUPOS E METODOLOGIAS --- */}
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px bg-slate-200 flex-1"></div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap px-2 text-center">
-            Atuação da Psicologia Social
+            Grupos de Fortalecimento de Vínculos
           </p>
           <div className="h-px bg-slate-200 flex-1"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <SecondaryStatCard
-            pillar="TEMPO DE NASCER"
-            title="ACT - Parentalidade"
-            value="12"
-            sub="Fortalecimento de Vínculos (ACT)"
-            color="cyan"
-            icon="fa-hands-holding-heart"
-          />
-          <SecondaryStatCard
-            pillar="TEMPO DE CRESCER"
-            title="Janelas da Infância"
-            value="TESTE"
-            sub="JDI (Plano em Fase de Implementação)"
-            color="salmon"
-            icon="fa-seedling"
-          />
-          <SecondaryStatCard
-            pillar="TEMPO DE APRENDER"
-            title="GAP - Habilidades Sociais"
-            value="08"
-            sub="Protagonismo e Vida Adulta"
-            color="purple"
-            icon="fa-user-graduate"
-          />
+
+          {/* GAP CARD */}
+          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-purple-100 hover:shadow-md transition">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="font-black text-slate-800 text-lg">GAP</h3>
+              <span className="bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-1 rounded-full uppercase">Adolescentes</span>
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Grupo de Adolescentes Participativos</p>
+            <p className="text-xs text-slate-600 leading-relaxed mb-4 text-justify">
+              Fundamentado na Psicologia do Desenvolvimento (Erikson, Aberastury), o grupo atua na fase de <strong>Identidade vs. Confusão de Papéis</strong>, promovendo a elaboração de lutos normais da adolescência e a construção da identidade. Foca no <strong>Protagonismo Juvenil</strong> e no <strong>Projeto de Vida</strong> como ferramentas para a transição saudável para a vida adulta.
+            </p>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Identidade e Projeto de Vida
+              </li>
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Cidadania Ativa e Participação Social
+              </li>
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Planejamento de Carreira e Futuro
+              </li>
+            </ul>
+          </div>
+
+          {/* GPI CARD */}
+          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-amber-100 hover:shadow-md transition">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="font-black text-slate-800 text-lg">GPI</h3>
+              <span className="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-1 rounded-full uppercase">Idosos</span>
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Grupo da Pessoa Idosa</p>
+            <p className="text-xs text-slate-600 leading-relaxed mb-4 text-justify">
+              A atuação é pautada na promoção da <strong>Senescência</strong> (envelhecimento saudável) e na busca pela <strong>Integridade do Ego</strong> (Erikson). O trabalho técnico foca na autonomia, na ressignificação de histórias de vida e na manutenção das funções cognitivas superiores, indo além do lazer e promovendo a cidadania ativa.
+            </p>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Estimulação Cognitiva
+              </li>
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Resgate da Memória Autobiográfica
+              </li>
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Vínculos Intergeracionais
+              </li>
+            </ul>
+          </div>
+
+          {/* GFA CARD */}
+          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-rose-100 hover:shadow-md transition">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="font-black text-slate-800 text-lg">GFA</h3>
+              <span className="bg-rose-100 text-rose-700 text-[10px] font-black px-2 py-1 rounded-full uppercase">Famílias Atípicas</span>
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Grupo da Família Atípica</p>
+            <p className="text-xs text-slate-600 leading-relaxed mb-4 text-justify">
+              Rede de apoio e acolhimento focada na <strong>Saúde Mental do Cuidador</strong> de pessoas com deficiência (PcD) e TEA. Utiliza a escuta qualificada para validar experiências ("o que ninguém vê") e fortalecer a capacidade de <strong>coping</strong> (enfrentamento) e resiliência familiar.
+            </p>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Empoderamento e Direitos
+              </li>
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Suporte Emocional
+              </li>
+              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Troca de Vivências
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
+
+      {/* --- PROGRAMAS PARCEIROS --- */}
+      <div className="mb-10 animate-fade-in-up delay-100">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px bg-slate-200 flex-1"></div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap px-2 text-center">
+            Programas Parceiros
+          </p>
+          <div className="h-px bg-slate-200 flex-1"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-br from-rose-500 to-rose-600 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-lg group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-bl-full -mr-8 -mt-8 transition transform group-hover:scale-110"></div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  Parentalidade
+                </span>
+                <i className="fa-solid fa-hands-holding-child text-3xl opacity-80"></i>
+              </div>
+              <h3 className="text-2xl font-black mb-2 tracking-tight">ACT</h3>
+              <p className="text-rose-100 text-xs font-medium leading-relaxed max-w-sm">
+                Programa de fortalecimento de vínculos familiares e prevenção da violência, promovendo estratégias de parentalidade positiva e ambientes seguros para crianças.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-lg group">
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-tr-full -ml-8 -mb-8 transition transform group-hover:scale-110"></div>
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  Cidadania e Paz
+                </span>
+                <i className="fa-solid fa-hand-holding-heart text-3xl opacity-80"></i>
+              </div>
+              <h3 className="text-2xl font-black mb-2 tracking-tight">COMPAZ</h3>
+              <p className="text-indigo-100 text-xs font-medium leading-relaxed max-w-sm">
+                A Coordenação de Mediação, Justiça Restaurativa e Cultura de Paz (Compaz), vinculada à SPS e ao Pacto por um Ceará Pacífico, atua na prevenção da violência e promoção da cultura de paz.
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Grid: Gráficos de Dados ao Vivo */}
