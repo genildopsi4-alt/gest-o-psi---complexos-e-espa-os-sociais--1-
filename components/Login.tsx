@@ -11,13 +11,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     const [loading, setLoading] = useState(false);
 
     // Login State
-    const [email, setEmail] = useState('');
+    const [cpf, setCpf] = useState('');
     const [password, setPassword] = useState('');
 
     // Register State
     const [regName, setRegName] = useState('');
+    const [regCpf, setRegCpf] = useState('');
     const [regCrp, setRegCrp] = useState('');
     const [regUnit, setRegUnit] = useState('');
+    const [regRole, setRegRole] = useState<'admin' | 'tecnico'>('tecnico'); // New State
     const [selectedAvatar, setSelectedAvatar] = useState<string>('');
     const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
@@ -32,11 +34,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     ];
 
     const avatarList = [
-        "/avatars/avatar_01.png",
-        "/avatars/avatar_02.png",
-        "/avatars/avatar_03.png",
-        "/avatars/avatar_04.png",
-        "/avatars/avatar_05.png"
+        "avatars/avatar_01.png",
+        "avatars/avatar_02.png",
+        "avatars/avatar_03.png",
+        "avatars/avatar_04.png",
+        "avatars/avatar_05.png"
     ];
 
     const availableCourses = [
@@ -57,19 +59,32 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     const handleLoginSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Simulação de login com usuário padrão (Genildo) se não estiver registrando
+
+        // Simulação de autenticação via CPF
         setTimeout(() => {
             setLoading(false);
-            onLogin({
-                name: 'Genildo Barbosa',
-                role: 'Psicólogo Social',
-                crp: '11/04982',
-                qualificacoes: [
-                    "ACT - Parentalidade Positiva",
-                    "Círculo de Construção de Paz",
-                    "Competências Socioemocionais"
-                ]
-            });
+
+            // Lógica para identificar Admin pelo CPF
+            if (cpf === '000.000.000-00') {
+                onLogin({
+                    name: 'Genildo Barbosa',
+                    role: 'admin',
+                    crp: '11/04982',
+                    unit: 'CSMI Cristo Redentor',
+                    avatar: 'avatars/avatar_01.png',
+                    qualificacoes: ["ACT - Parentalidade Positiva", "Círculo de Construção de Paz"]
+                });
+            } else {
+                // Login genérico de técnico
+                onLogin({
+                    name: 'Técnico de Unidade',
+                    role: 'tecnico',
+                    crp: '00/00000',
+                    unit: 'CSMI João XXIII', // Default para teste se não for admin
+                    avatar: 'avatars/avatar_02.png',
+                    qualificacoes: []
+                });
+            }
         }, 1000);
     };
 
@@ -80,10 +95,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
             setLoading(false);
             onLogin({
                 name: regName || 'Novo Usuário',
-                role: 'Psicólogo Social',
+                role: regRole,
                 crp: regCrp || '00/00000',
-                unit: regUnit || 'Não informada',
-                avatar: selectedAvatar || '/avatars/avatar_01.png',
+                unit: regRole === 'tecnico' ? (regUnit || 'Não informada') : 'Gestão Central',
+                avatar: selectedAvatar || 'avatars/avatar_01.png',
                 qualificacoes: selectedCourses
             });
         }, 1000);
@@ -119,7 +134,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                         {/* Tag de Login Técnico */}
                         <div className="inline-block bg-emerald-50 border border-emerald-100 px-4 py-1.5 rounded-full">
                             <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest flex items-center gap-2">
-                                <i className="fa-solid fa-id-card"></i> Login Usuário Técnico
+                                <i className="fa-solid fa-id-card"></i> Portal do Colaborador
                             </p>
                         </div>
                     </div>
@@ -128,14 +143,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                         // --- TELA DE LOGIN ---
                         <form onSubmit={handleLoginSubmit} className="space-y-5 animate-fade-in">
                             <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Usuário / CPF</label>
+                                <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">CPF</label>
                                 <input
                                     type="text"
                                     required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={cpf}
+                                    onChange={(e) => setCpf(e.target.value)}
                                     className="w-full pl-4 pr-4 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition"
-                                    placeholder="Digite seu usuário"
+                                    placeholder="000.000.000-00"
                                 />
                             </div>
 
@@ -180,10 +195,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Nome Completo</label>
+                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">CPF</label>
                                     <input
-                                        type="text" required value={regName} onChange={e => setRegName(e.target.value)}
+                                        type="text" required value={regCpf} onChange={e => setRegCpf(e.target.value)}
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
+                                        placeholder="000.000.000-00"
                                     />
                                 </div>
                                 <div>
@@ -194,23 +210,62 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
                                     />
                                 </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Nome Completo</label>
+                                    <input
+                                        type="text" required value={regName} onChange={e => setRegName(e.target.value)}
+                                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
+                                    />
+                                </div>
                             </div>
 
-                            {/* UNIDADE DE ATUAÇÃO */}
-                            <div>
-                                <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Unidade de Atuação</label>
-                                <select
-                                    required
-                                    value={regUnit}
-                                    onChange={(e) => setRegUnit(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 appearance-none"
-                                >
-                                    <option value="">Selecione sua unidade...</option>
-                                    {unitsList.map((unit, idx) => (
-                                        <option key={idx} value={unit}>{unit}</option>
-                                    ))}
-                                </select>
+                            <div className="mb-4">
+                                <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Perfil de Acesso</label>
+                                <div className="flex gap-4">
+                                    <label className={`flex-1 p-3 rounded-xl border-2 cursor-pointer transition flex items-center justify-center gap-2 ${regRole === 'admin' ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-100 text-slate-500 hover:border-orange-200'}`}>
+                                        <input
+                                            type="radio"
+                                            name="role"
+                                            value="admin"
+                                            checked={regRole === 'admin'}
+                                            onChange={() => setRegRole('admin')}
+                                            className="hidden"
+                                        />
+                                        <i className="fa-solid fa-user-tie"></i>
+                                        <span className="text-[10px] font-black uppercase text-center">Gestor / Psicólogo Referência</span>
+                                    </label>
+                                    <label className={`flex-1 p-3 rounded-xl border-2 cursor-pointer transition flex items-center justify-center gap-2 ${regRole === 'tecnico' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-slate-100 text-slate-500 hover:border-teal-200'}`}>
+                                        <input
+                                            type="radio"
+                                            name="role"
+                                            value="tecnico"
+                                            checked={regRole === 'tecnico'}
+                                            onChange={() => setRegRole('tecnico')}
+                                            className="hidden"
+                                        />
+                                        <i className="fa-solid fa-user-nurse"></i>
+                                        <span className="text-[10px] font-black uppercase text-center">Técnico de Unidade</span>
+                                    </label>
+                                </div>
                             </div>
+
+                            {/* UNIDADE DE ATUAÇÃO (Apenas p/ Técnico) */}
+                            {regRole === 'tecnico' && (
+                                <div className="mb-4 animate-fade-in-down">
+                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Unidade de Atuação</label>
+                                    <select
+                                        required
+                                        value={regUnit}
+                                        onChange={(e) => setRegUnit(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition font-bold text-slate-600 text-sm appearance-none"
+                                    >
+                                        <option value="">Selecione sua unidade...</option>
+                                        {unitsList.map((unit, idx) => (
+                                            <option key={idx} value={unit}>{unit}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             {/* AVATAR SELECTION */}
                             <div>
@@ -220,7 +275,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                         <div
                                             key={idx}
                                             onClick={() => setSelectedAvatar(avatar)}
-                                            className={`relative w-16 h-16 rounded-full border-4 cursor-pointer transition-transform hover:scale-110 flex-shrink-0 ${selectedAvatar === avatar ? 'border-emerald-500 scale-110 shadow-lg' : 'border-transparent filter grayscale hover:grayscale-0'}`}
+                                            className={`relative w-16 h-16 rounded-full border-4 cursor-pointer shrink-0 transition-all duration-300 ${selectedAvatar === avatar ? 'border-emerald-500 scale-110 shadow-lg' : 'border-transparent filter grayscale hover:grayscale-0'}`}
                                         >
                                             <img src={avatar} alt={`Avatar ${idx}`} className="w-full h-full object-cover rounded-full bg-white" />
                                             {selectedAvatar === avatar && (

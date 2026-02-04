@@ -105,7 +105,7 @@ const App: React.FC = () => {
 
   const renderSection = () => {
     switch (activeSection) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard user={user} />;
       case 'diario': return <Diario beneficiarios={beneficiariosList} />;
       case 'grupos': return <Grupos />;
       case 'eventos': return <Eventos />;

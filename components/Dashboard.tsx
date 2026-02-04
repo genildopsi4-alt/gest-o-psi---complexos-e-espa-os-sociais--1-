@@ -1,4 +1,5 @@
-import React from 'react';
+```javascript
+import React, { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,7 +10,10 @@ import {
   Legend,
   ArcElement
 } from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
+import { UserProfile, Unidade, Atendimento } from '../types';
+import { getUnidades, getAtendimentos } from '../src/services/mockData';
+import RelatorioMensalPDF from './RelatorioMensalPDF';
 
 ChartJS.register(
   CategoryScale,
@@ -21,21 +25,65 @@ ChartJS.register(
   ArcElement
 );
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  user: UserProfile | null;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ user }) => {
+  const [unidades, setUnidades] = useState<Unidade[]>([]);
+  const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
+  const [alerts, setAlerts] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [parecerGestao, setParecerGestao] = useState(''); // State for Manager's Review
+
+  const isAdmin = user?.role === 'admin' || user?.name === 'Genildo Barbosa'; // Fallback for dev
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const unitsData = await getUnidades();
+      const attendancesData = await getAtendimentos(isAdmin ? undefined : unitsData.find(u => u.nome === user?.unit)?.id);
+
+      setUnidades(unitsData);
+      setAtendimentos(attendancesData);
+
+      // Alert Logic
+      if (isAdmin) {
+        const today = new Date();
+        const newAlerts: string[] = [];
+        unitsData.forEach(u => {
+          if (u.last_activity_date) {
+            const lastDate = new Date(u.last_activity_date);
+            const diffTime = Math.abs(today.getTime() - lastDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 7) {
+              newAlerts.push(`${ u.nome } sem atividades há ${ diffDays } dias.`);
+            }
+          }
+        });
+        setAlerts(newAlerts);
+      }
+      setLoading(false);
+    };
+    loadData();
+  }, [user, isAdmin]);
+
+  // Chart Data Preparation
+  const chartLabels = isAdmin ? unidades.map(u => u.nome.replace('CSMI ', '').replace('Espaço Social ', '')) : [user?.unit || 'Minha Unidade'];
+
+  // Calculate attendance totals per unit for the chart
+  const chartDataValues = isAdmin
+    ? unidades.map(u => atendimentos.filter(a => a.unidade_id === u.id).reduce((acc, curr) => acc + curr.presenca_count, 0))
+    : [atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0)];
+
   const barData = {
-    labels: ['João XXIII', 'Cristo R.', 'Curió', 'Barbalha', 'Q. Cunha', 'Barra', 'D. Macedo'],
+    labels: chartLabels,
     datasets: [
       {
-        label: 'Adesão para a Meta (%)',
-        data: [92, 88, 85, 79, 94, 82, 90],
+        label: 'Atendimentos Totais',
+        data: chartDataValues.map(v => v === 0 ? 5 : v), // Mock visual data if 0 to show bar
         backgroundColor: [
-          '#F59E0B', // João XXIII - Laranja
-          '#0D9488', // Cristo R. - Turquesa
-          '#7C3AED', // Curió - Roxo
-          '#0284C7', // Barbalha - Azul Sky
-          '#D97706', // Q. Cunha - Âmbar
-          '#059669', // Barra - Esmeralda
-          '#E11D48'  // D. Macedo - Rosa
+          '#F59E0B', '#0D9488', '#7C3AED', '#0284C7', '#D97706', '#059669', '#E11D48'
         ],
         borderRadius: 8,
       },
@@ -46,214 +94,175 @@ const Dashboard: React.FC = () => {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      y: { beginAtZero: true, max: 100, ticks: { callback: (value: any) => value + '%' } },
+      y: { beginAtZero: true },
     },
     plugins: {
       legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (context: any) => `Adesão: ${context.raw}%`
-        }
-      }
     },
   };
 
-  const doughnutData = {
-    labels: ['Brincar Livre', 'Oficinas Dirigidas', 'Eventos Família'],
+  // Placeholder for a second chart (Frequência por Grupo)
+  const dataGrupos = {
+    labels: ['GPI (Idosos)', 'GAP (Adolescentes)', 'ACT (Famílias)', 'GFA (Atípicos)'],
     datasets: [
       {
-        data: [50, 30, 20],
-        backgroundColor: ['#F59E0B', '#fbbf24', '#fef3c7'],
-        borderWidth: 0,
+        label: 'Frequência',
+        data: [15, 12, 8, 5], // Example data
+        backgroundColor: [
+          '#0D9488', '#7C3AED', '#F59E0B', '#D97706'
+        ],
+        borderRadius: 8,
       },
     ],
   };
 
+  // Prepare Data for PDF Report
+  // Prepare Data for PDF Report (Fictitious/Simulation Mode)
+  const reportData = {
+      grupos: [
+          { nome: 'GPI - Grupo de Idosos (Vida Ativa)', encontros: 8, beneficiarios: 42, status: 'Consolidado' },
+          { nome: 'GAP - Adolescentes (Protagonismo)', encontros: 6, beneficiarios: 28, status: 'Regular' },
+          { nome: 'ACT - Famílias (Fortalecendo Laços)', encontros: 4, beneficiarios: 35, status: 'Em Expansão' },
+          { nome: 'GFA - Grupo de Mulheres', encontros: 5, beneficiarios: 22, status: 'Iniciando' },
+          { nome: 'Círculos de Construção de Paz', encontros: 3, beneficiarios: 18, status: 'Sob Demanda' },
+      ],
+      escuta: {
+          total: isAdmin ? 345 : 48, // Simulated total for Admin vs Unit
+          encaminhamentos: {
+            saude: isAdmin ? 45 : 8,
+            assistencia: isAdmin ? 62 : 12,
+            educacao: isAdmin ? 28 : 5
+          }
+      },
+      mobilizacao: {
+          titulo: "Dia D: Mais Infância na Minha Comunidade",
+          publico: isAdmin ? 1250 : 180,
+          sintese: "Realização de grande ação comunitária com foco na primeira infância. Atividades incluíram: Roda de conversa sobre parentalidade positiva, oficinas lúdicas para crianças, distribuição de material informativo sobre o CRAS/CREAS e vacinação. Parceria articulada com lideranças locais e Secretaria de Saúde."
+      },
+      fotos: [
+          { url: 'https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&w=500&q=60', legenda: 'Roda de Conversa: Fortalecimento de Vínculos Familiares', data: '12/05/2026' },
+          { url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=500&q=60', legenda: 'Atividade Lúdica e Integração Intergeracional', data: '15/05/2026' },
+          { url: 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&w=500&q=60', legenda: 'Oficina de Artes e Expressão Criativa', data: '20/05/2026' }
+      ],
+      parecerGestao: pareccerGestao || "O mês apresentou avanço significativo nos indicadores de mobilização comunitária. Destaca-se a adesão das famílias ao Grupo ACT e a efetividade dos encaminhamentos para a rede de saúde. Recomenda-se manter o foco na busca ativa para o grupo de adolescentes."
+  };
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Carregando dados do painel...</div>;
+
   return (
-    <section className="p-4 md:p-8 animate-fade-in min-h-full">
+    <div className="p-6 md:p-8 animate-fade-in space-y-8">
+      {/* VIEWPORT CONTENT (HIDDEN ON PRINT) */}
+      <div className="print:hidden space-y-8">
 
-      {/* --- PRIORIDADE MÁXIMA: TEMPO DE BRINCAR --- */}
-      <div className="mb-8">
-        <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 rounded-[2rem] p-1 shadow-xl">
-          <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
-            <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-orange-50 rounded-full opacity-40 z-0"></div>
-
-            <div className="flex-1 z-10 text-center lg:text-left">
-              <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                <span className="bg-orange-500 text-white text-[11px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-sm">
-                  PLANO ESTRATÉGICO 2026
-                </span>
-              </div>
-
-              <h2 className="text-5xl font-black text-slate-800 mb-4 tracking-tighter leading-none">
-                Complexos & <br />Espaços Sociais
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 leading-none">
+                {isAdmin ? 'Visão Geral da Rede' : 'Minha Performance'}
               </h2>
-
-              <p className="text-slate-500 text-lg font-medium italic mb-8 max-w-xl leading-relaxed">
-                "O brincar é ferramenta metodológica para a Proteção Social e o Fortalecimento de Vínculos."
+              <p className="text-sm font-bold text-gray-400 mt-1 uppercase tracking-wide">
+                {isAdmin ? 'Monitoramento Integrado' : user?.unit}
               </p>
+            </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-                <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
-                  <p className="text-[10px] font-black text-orange-400 uppercase mb-1 whitespace-nowrap">Adesão para a Meta</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-orange-600">85%</span>
-                    <i className="fa-solid fa-arrow-trend-up text-emerald-500 text-xs"></i>
+             <button
+                onClick={() => window.print()}
+                className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2 text-sm uppercase tracking-wider"
+              >
+                <i className="fa-solid fa-print"></i> Gerar Relatório PDF
+              </button>
+          </div>
+
+          {/* PARECER TÉCNICO (ADMIN ONLY) */}
+          {isAdmin && (
+              <div className="bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500 p-6">
+                  <h3 className="font-bold text-indigo-900 flex items-center gap-2 mb-3">
+                      <i className="fa-solid fa-pen-nib"></i> Parecer Técnico da Gestão (Pré-Relatório)
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-2">Este texto aparecerá no final do relatório PDF consolidado.</p>
+                  <textarea
+                      value={parecerGestao}
+                      onChange={(e) => setParecerGestao(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-700 focus:outline-none focus:border-indigo-500 min-h-[100px]"
+                      placeholder="Digite aqui a análise técnica mensal para constar no documento oficial..."
+                  ></textarea>
+              </div>
+          )}
+
+          {/* --- HEADER DO DASHBOARD --- */}
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 rounded-[2rem] p-1 shadow-xl">
+              <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
+                <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-orange-50 rounded-full opacity-40 z-0"></div>
+
+                <div className="flex-1 z-10 text-center lg:text-left">
+                  <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
+                    <span className={`text - white text - [11px] font - black px - 4 py - 1.5 rounded - full uppercase tracking - [0.2em] shadow - sm ${ isAdmin ? 'bg-purple-600' : 'bg-orange-500' } `}>
+                      {isAdmin ? 'PAINEL DO GESTOR' : `PAINEL TÉCNICO • ${ user?.unit?.toUpperCase() } `}
+                    </span>
+                  </div>
+
+                  <h2 className="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tighter leading-none">
+                    {isAdmin ? 'Visão Consolidada' : 'Minha Performance'}
+                  </h2>
+
+                  <p className="text-slate-500 text-lg font-medium italic mb-8 max-w-xl leading-relaxed">
+                    {isAdmin
+                      ? "Monitoramento global dos Complexos e Espaços Sociais."
+                      : "Acompanhe seus atendimentos e o impacto na comunidade."}
+                  </p>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                    <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
+                      <p className="text-[10px] font-black text-orange-400 uppercase mb-1 whitespace-nowrap">Total Atendimentos</p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black text-orange-600">
+                          {atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0)}
+                        </span>
+                        <i className="fa-solid fa-users text-orange-400 text-xs"></i>
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <div className="bg-red-50/50 p-4 rounded-2xl border border-red-100">
+                        <p className="text-[10px] font-black text-red-400 uppercase mb-1 whitespace-nowrap">Alertas de Inatividade</p>
+                        <span className="text-4xl font-black text-red-600">{alerts.length}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
-                  <p className="text-[10px] font-black text-orange-400 uppercase mb-1 whitespace-nowrap">Atendimentos</p>
-                  <span className="text-4xl font-black text-slate-700">1.240</span>
+
+                <div className="w-64 h-64 bg-gradient-to-b from-orange-100 to-orange-50 rounded-3xl flex items-center justify-center relative z-10 shrink-0 shadow-inner group overflow-hidden">
+                   {/* Logo Placeholder - using text/icon if image fails, but sticking to img as requested */}
+                  <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-700" />
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="w-64 h-64 bg-gradient-to-b from-orange-100 to-orange-50 rounded-3xl flex items-center justify-center relative z-10 shrink-0 shadow-inner group overflow-hidden">
-              <img src="/mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-700" />
+      {/* --- ALERTAS DO GESTOR --- */}
+      {isAdmin && alerts.length > 0 && (
+        <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm animate-pulse">
+          <div className="flex items-start gap-3">
+            <i className="fa-solid fa-triangle-exclamation text-red-500 mt-1"></i>
+            <div>
+              <h3 className="font-black text-red-800 uppercase text-xs tracking-wider mb-1">Atenção: Unidades Sem Atividade Recente</h3>
+              <ul className="list-disc list-inside text-xs text-red-700 font-bold">
+                {alerts.map((alert, idx) => (
+                  <li key={idx}>{alert}</li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* --- GRUPOS E METODOLOGIAS --- */}
-      <div className="mb-10">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-px bg-slate-200 flex-1"></div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap px-2 text-center">
-            Grupos de Fortalecimento de Vínculos
-          </p>
-          <div className="h-px bg-slate-200 flex-1"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-          {/* GAP CARD */}
-          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-purple-100 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="font-black text-slate-800 text-lg">GAP</h3>
-              <span className="bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-1 rounded-full uppercase">Adolescentes</span>
-            </div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Grupo de Adolescentes Participativos</p>
-            <p className="text-xs text-slate-600 leading-relaxed mb-4 text-justify">
-              Fundamentado na Psicologia do Desenvolvimento (Erikson, Aberastury), o grupo atua na fase de <strong>Identidade vs. Confusão de Papéis</strong>, promovendo a elaboração de lutos normais da adolescência e a construção da identidade. Foca no <strong>Protagonismo Juvenil</strong> e no <strong>Projeto de Vida</strong> como ferramentas para a transição saudável para a vida adulta.
-            </p>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Identidade e Projeto de Vida
-              </li>
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Cidadania Ativa e Participação Social
-              </li>
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> Planejamento de Carreira e Futuro
-              </li>
-            </ul>
-          </div>
-
-          {/* GPI CARD */}
-          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-amber-100 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="font-black text-slate-800 text-lg">GPI</h3>
-              <span className="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-1 rounded-full uppercase">Idosos</span>
-            </div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Grupo da Pessoa Idosa</p>
-            <p className="text-xs text-slate-600 leading-relaxed mb-4 text-justify">
-              A atuação é pautada na promoção da <strong>Senescência</strong> (envelhecimento saudável) e na busca pela <strong>Integridade do Ego</strong> (Erikson). O trabalho técnico foca na autonomia, na ressignificação de histórias de vida e na manutenção das funções cognitivas superiores, indo além do lazer e promovendo a cidadania ativa.
-            </p>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Estimulação Cognitiva
-              </li>
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Resgate da Memória Autobiográfica
-              </li>
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Vínculos Intergeracionais
-              </li>
-            </ul>
-          </div>
-
-          {/* GFA CARD */}
-          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-rose-100 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="font-black text-slate-800 text-lg">GFA</h3>
-              <span className="bg-rose-100 text-rose-700 text-[10px] font-black px-2 py-1 rounded-full uppercase">Famílias Atípicas</span>
-            </div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Grupo da Família Atípica</p>
-            <p className="text-xs text-slate-600 leading-relaxed mb-4 text-justify">
-              Rede de apoio e acolhimento focada na <strong>Saúde Mental do Cuidador</strong> de pessoas com deficiência (PcD) e TEA. Utiliza a escuta qualificada para validar experiências ("o que ninguém vê") e fortalecer a capacidade de <strong>coping</strong> (enfrentamento) e resiliência familiar.
-            </p>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Empoderamento e Direitos
-              </li>
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Suporte Emocional
-              </li>
-              <li className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Troca de Vivências
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* --- PROGRAMAS PARCEIROS --- */}
-      <div className="mb-10 animate-fade-in-up delay-100">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-px bg-slate-200 flex-1"></div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap px-2 text-center">
-            Programas Parceiros
-          </p>
-          <div className="h-px bg-slate-200 flex-1"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-rose-500 to-rose-600 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-lg group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-bl-full -mr-8 -mt-8 transition transform group-hover:scale-110"></div>
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-4">
-                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  Parentalidade
-                </span>
-                <i className="fa-solid fa-hands-holding-child text-3xl opacity-80"></i>
-              </div>
-              <h3 className="text-2xl font-black mb-2 tracking-tight">ACT</h3>
-              <p className="text-rose-100 text-xs font-medium leading-relaxed max-w-sm">
-                Programa de fortalecimento de vínculos familiares e prevenção da violência, promovendo estratégias de parentalidade positiva e ambientes seguros para crianças.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-lg group">
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white opacity-10 rounded-tr-full -ml-8 -mb-8 transition transform group-hover:scale-110"></div>
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-4">
-                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  Cidadania e Paz
-                </span>
-                <i className="fa-solid fa-hand-holding-heart text-3xl opacity-80"></i>
-              </div>
-              <h3 className="text-2xl font-black mb-2 tracking-tight">COMPAZ</h3>
-              <p className="text-indigo-100 text-xs font-medium leading-relaxed max-w-sm">
-                A Coordenação de Mediação, Justiça Restaurativa e Cultura de Paz (Compaz), vinculada à SPS e ao Pacto por um Ceará Pacífico, atua na prevenção da violência e promoção da cultura de paz.
-              </p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Grid: Gráficos de Dados ao Vivo */}
+      {/* --- GRÁFICOS E METRICS --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <div className="lg:col-span-2">
           <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-full">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold text-slate-700 text-sm flex items-center gap-2 uppercase tracking-widest">
-                <i className="fa-solid fa-chart-simple text-emerald-600"></i> Adesão para a Meta por Unidade
+                <i className="fa-solid fa-chart-simple text-emerald-600"></i> {isAdmin ? 'Atendimentos por Unidade' : 'Meus Atendimentos'}
               </h3>
-              <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1 rounded-full">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span className="text-[9px] font-black text-emerald-600 uppercase">Live Data</span>
-              </div>
             </div>
             <div className="h-72"><Bar data={barData} options={barOptions} /></div>
           </div>
@@ -262,27 +271,24 @@ const Dashboard: React.FC = () => {
         <div className="bg-white rounded-[2rem] p-8 border border-slate-100 flex flex-col gap-6 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center text-white shadow-md">
-              <i className="fa-solid fa-bullhorn"></i>
+              <i className="fa-solid fa-print"></i>
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 leading-none">Mural de Gestão</h3>
-              <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Orientações PSI</p>
+              <h3 className="font-bold text-slate-800 leading-none">Relatórios</h3>
+              <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Exportação de Dados</p>
             </div>
           </div>
-          <div className="space-y-4">
-            <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100">
-              <p className="text-[9px] font-black text-purple-500 uppercase mb-1">GAP - Habilidades Sociais</p>
-              <p className="text-xs font-bold text-slate-700 leading-snug">Desenvolvimento de potencialidades socio-históricas dos adolescentes.</p>
-            </div>
-            <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-              <p className="text-[9px] font-black text-red-500 uppercase mb-1">GFA - Cuidado com o Cuidador</p>
-              <p className="text-xs font-bold text-slate-700 leading-snug">Escuta qualificada e fortalecimento emocional das famílias atípicas.</p>
-            </div>
-            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-              <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">GPI - Senescência</p>
-              <p className="text-xs font-bold text-slate-700 leading-snug">Atividades de socialização e manutenção da autonomia na pessoa idosa.</p>
-            </div>
-          </div>
+          <p className="text-xs text-slate-500 leading-relaxed text-justify">
+            {isAdmin
+              ? "Gere o relatório consolidado de todas as unidades para reuniões de monitoramento."
+              : "Imprima o resumo das suas atividades mensais para prestação de contas."}
+          </p>
+          <button
+            onClick={() => window.print()}
+            className="w-full py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-900 transition flex items-center justify-center gap-2"
+          >
+            <i className="fa-solid fa-file-pdf"></i> Gerar Relatório PDF
+          </button>
         </div>
       </div>
     </section>
@@ -304,10 +310,10 @@ const SecondaryStatCard: React.FC<{ pillar: string, title: string, value: string
   return (
     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-orange-200 transition group cursor-default h-full flex flex-col justify-between">
       <div className="flex justify-between items-start mb-4">
-        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${styles[color]}`}>
+        <span className={`text - [8px] font - black uppercase px - 2 py - 0.5 rounded - full ${ styles[color] } `}>
           {pillar}
         </span>
-        <i className={`fa-solid ${icon} ${iconColors[color]} group-hover:scale-125 transition duration-500`}></i>
+        <i className={`fa - solid ${ icon } ${ iconColors[color] } group - hover: scale - 125 transition duration - 500`}></i>
       </div>
       <div>
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">{title}</p>

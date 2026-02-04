@@ -108,9 +108,9 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <div className="col-span-1 p-2 flex items-center justify-center">Data/<br />Horário</div>
                                 <div className="col-span-2 p-2 flex items-center justify-center">Atividade</div>
                                 <div className="col-span-4 p-2 flex items-center justify-center">Metodologia</div>
-                                <div className="col-span-2 p-2 flex items-center justify-center">Recursos</div>
-                                <div className="col-span-2 p-2 flex items-center justify-center">Público Alvo</div>
-                                <div className="col-span-1 p-2 flex items-center justify-center">Profissional</div>
+                                <div className="col-span-1 p-2 flex items-center justify-center">Recursos</div>
+                                <div className="col-span-1 p-2 flex items-center justify-center">Público Alvo</div>
+                                <div className="col-span-3 p-2 flex items-center justify-center">Profissional</div>
                             </div>
 
                             {/* Linha 1 (Editável) */}
@@ -124,14 +124,14 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <div className="col-span-4 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular a socialização e memória afetiva.\n\nA atividade terá início com roda de conversa sobre o significado do Carnaval. Na sequência, construção coletiva de painel temático com desenhos e colagens."}></textarea>
                                 </div>
-                                <div className="col-span-2 p-0">
+                                <div className="col-span-1 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] bg-transparent" defaultValue="Cartolina, tesoura, cola, lápis de cor."></textarea>
                                 </div>
-                                <div className="col-span-2 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GRUPO DA PESSOA IDOSA (GPI)"></textarea>
-                                </div>
                                 <div className="col-span-1 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" defaultValue={signatureText}></textarea>
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GPI"></textarea>
+                                </div>
+                                <div className="col-span-3 p-0 flex items-center justify-center">
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent flex items-center justify-center" defaultValue={signatureText}></textarea>
                                 </div>
                             </div>
 
@@ -146,13 +146,13 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <div className="col-span-4 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular memória e raciocínio lógico.\n\nIdosos organizados em círculo. Cada um recebe um cartão na testa e deve adivinhar sua identidade fazendo perguntas de \"sim\" ou \"não\"."}></textarea>
                                 </div>
-                                <div className="col-span-2 p-0">
+                                <div className="col-span-1 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] bg-transparent" defaultValue="Cartões com imagens impressas."></textarea>
                                 </div>
-                                <div className="col-span-2 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GRUPO DA PESSOA IDOSA (GPI)"></textarea>
-                                </div>
                                 <div className="col-span-1 p-0">
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GPI"></textarea>
+                                </div>
+                                <div className="col-span-3 p-0 flex items-center justify-center">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" defaultValue={signatureText}></textarea>
                                 </div>
                             </div>
@@ -162,9 +162,9 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent" placeholder="Data"></textarea></div>
                                 <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none font-bold bg-transparent" placeholder="Atividade"></textarea></div>
                                 <div className="col-span-4 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent" placeholder="Descreva a metodologia..."></textarea></div>
-                                <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-[11px] bg-transparent" placeholder="Recursos"></textarea></div>
-                                <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" placeholder="Público Alvo"></textarea></div>
-                                <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" placeholder="Resp."></textarea></div>
+                                <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-[11px] bg-transparent" placeholder="Recursos"></textarea></div>
+                                <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" placeholder="Público"></textarea></div>
+                                <div className="col-span-3 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" placeholder="Profissional Responsável"></textarea></div>
                             </div>
                         </div>
 
@@ -452,7 +452,7 @@ const SPSFooter: React.FC<{ unit: { name: string; address: string; email: string
     <footer className="mt-auto pt-2 border-t-[3px] border-black text-sm print:fixed print:bottom-0 print:left-0 print:w-full print:bg-white print:px-8 print:pb-8">
         <p className="font-bold">{unit.name}</p>
         <p>Endereço: {unit.address}</p>
-        <p>E-mail: {unit.email}</p>
+        <p>E-mail: celuladegestao@sps.ce.gov.br</p>
         <button className="print:hidden mt-4 bg-teal-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-teal-700 shadow-lg transition transform hover:-translate-y-1" onClick={() => window.print()}>
             <i className="fa-solid fa-print"></i> Imprimir Documento
         </button>

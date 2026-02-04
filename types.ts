@@ -3,11 +3,32 @@ export type Section = 'dashboard' | 'diario' | 'grupos' | 'eventos' | 'rede' | '
 
 export interface UserProfile {
     name: string;
-    role: string;
+    role: 'admin' | 'tecnico' | 'Psicólogo Social' | string;
     crp: string;
     qualificacoes: string[];
     unit?: string;
     avatar?: string;
+}
+
+export interface Unidade {
+    id: number;
+    nome: string;
+    full_name?: string;
+    tipo: 'CSMI' | 'Espaço Social';
+    bairro: string;
+    address?: string; // Endereço completo
+    email?: string;   // E-mail da unidade
+    last_activity_date?: string; // Para o alerta de inatividade
+}
+
+export interface Atendimento {
+    id: number;
+    unidade_id: number;
+    psicologo_id: string; // CRP ou ID do user
+    tipo_grupo: 'GAP' | 'GPI' | 'ACT' | 'GFA' | 'Individual';
+    data_atendimento: string;
+    presenca_count: number;
+    encaminhamento_tipo?: string;
 }
 
 export interface RedeItem {

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Beneficiario } from '../types';
+import { RelatorioService } from '../src/services/RelatorioService';
 
 interface DiarioProps {
     beneficiarios?: Beneficiario[];
@@ -11,7 +12,44 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
     const [selectedImages, setSelectedImages] = useState<string[]>([]);
     const [attendance, setAttendance] = useState<number[]>([]);
     const [groupFilter, setGroupFilter] = useState<string>('todos');
+    const [observacoes, setObservacoes] = useState<string>(''); // Added observations state
+    const [compazType, setCompazType] = useState<string>(''); // Added Compaz state
+    const [actSessao, setActSessao] = useState<number | null>(null); // Added ACT state
+    const [qtdParticipantesNum, setQtdParticipantesNum] = useState<number>(0); // Added manual count state
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Find participants objects
+        const participantes = beneficiarios.filter(b => attendance.includes(b.id));
+
+        const dataToSave = {
+            unidade: "CSMI Cristo Redentor", // TODO: Get from user context
+            tipo_acao: tipoAcao,
+            atividade_especifica: atividade,
+            data_registro: new Date().toISOString().split('T')[0],
+            qtd_participantes: participantes.length || qtdParticipantesNum,
+            act_sessao: actSessao,
+            compaz_metodologia: compazType,
+            fotos_urls: selectedImages,
+            observacoes: observacoes
+        };
+
+        const result = await RelatorioService.saveAtendimento(dataToSave, participantes);
+
+        if (result.success) {
+            alert("Atividade salva com sucesso! ✅");
+            // Reset form could go here
+            setAtividade('');
+            setAttendance([]);
+            setSelectedImages([]);
+            setObservacoes('');
+        } else {
+            alert("Erro ao salvar. Verifique o console.");
+        }
+    };
 
     const unidades = [
         { label: '-- Complexos Sociais --', disabled: true },
