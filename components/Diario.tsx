@@ -100,13 +100,7 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
         groupFilter === 'todos' || b.grupo === groupFilter
     );
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        alert(`Registro Salvo com Sucesso!\n${attendance.length} beneficiários registrados no Tempo de Brincar.`);
-        setSelectedImages([]);
-        setAttendance([]);
-        setAtividade('');
-    };
+
 
     // Helper to render custom radio button
     const CustomRadio = ({ checked, colorClass }: { checked: boolean, colorClass: string }) => (
