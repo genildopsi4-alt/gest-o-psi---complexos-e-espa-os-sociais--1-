@@ -20,6 +20,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     const [regCrp, setRegCrp] = useState('');
     const [regUnit, setRegUnit] = useState('');
     const [regRole, setRegRole] = useState<'admin' | 'tecnico'>('tecnico'); // New State
+    const [regPassword, setRegPassword] = useState(''); // Personal Password
+    const [accessKey, setAccessKey] = useState(''); // Manager Access Key
     const [selectedAvatar, setSelectedAvatar] = useState<string>('');
     const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
@@ -90,6 +92,13 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
 
     const handleRegisterSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validation for Manager Role
+        if (regRole === 'admin' && accessKey !== 'gestor') {
+            alert('Chave de acesso incorreta para perfil de Gestor.');
+            return;
+        }
+
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
@@ -217,6 +226,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
                                     />
                                 </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Crie sua Senha</label>
+                                    <input
+                                        type="password" required value={regPassword} onChange={e => setRegPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
+                                    />
+                                </div>
                             </div>
 
                             <div className="mb-4">
@@ -264,6 +281,27 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                             <option key={idx} value={unit}>{unit}</option>
                                         ))}
                                     </select>
+                                </div>
+                            )}
+
+                            {/* ACCESS KEY FOR ADMIN */}
+                            {regRole === 'admin' && (
+                                <div className="mb-4 animate-fade-in-down">
+                                    <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 text-orange-500">
+                                        <i className="fa-solid fa-lock mr-1"></i>
+                                        Senha do Gestor
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={accessKey}
+                                        onChange={(e) => setAccessKey(e.target.value)}
+                                        placeholder="Digite a senha de administrador..."
+                                        className="w-full px-4 py-3 rounded-xl bg-orange-50 border-2 border-orange-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition font-bold text-orange-800 text-sm"
+                                    />
+                                    <p className="text-[10px] text-orange-400 mt-1 font-bold ml-1">
+                                        * Senha necessária para perfil de Gestão.
+                                    </p>
                                 </div>
                             )}
 
