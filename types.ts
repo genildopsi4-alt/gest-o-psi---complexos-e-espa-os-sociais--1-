@@ -2,6 +2,7 @@
 export type Section = 'dashboard' | 'diario' | 'grupos' | 'eventos' | 'rede' | 'beneficiarios' | 'planejamento' | 'instrumentais';
 
 export interface UserProfile {
+    id?: string;
     name: string;
     role: 'admin' | 'tecnico' | 'Psicólogo Social' | string;
     crp: string;

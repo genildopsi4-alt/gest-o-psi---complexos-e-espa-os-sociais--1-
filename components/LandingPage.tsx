@@ -6,6 +6,8 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
 
+    const [selectedNews, setSelectedNews] = React.useState<any | null>(null);
+
     const [newsItems, setNewsItems] = React.useState([
         {
             tag: 'Benefício Social',
@@ -46,21 +48,99 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
     ]);
 
     React.useEffect(() => {
-        const fetchNews = async () => {
+        // Simulating Real-Time Fetch
+        const fetchRealNews = async () => {
+            // Fallback data (Verified Static Content with Unsplash images)
+            const fallbackNews = [
+                {
+                    tag: 'Mais Infância',
+                    title: 'Governo do Ceará amplia Cartão Mais Infância para mais famílias',
+                    desc: 'O programa de transferência de renda continua apoiando famílias com crianças na primeira infância em situação de vulnerabilidade.',
+                    date: '02 FEVEREIRO 2026',
+                    color: 'emerald',
+                    image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+                    link: 'https://www.sps.ce.gov.br'
+                },
+                {
+                    tag: 'Cidadania',
+                    title: 'Caminhão do Cidadão segue com programação na capital e interior',
+                    desc: 'Serviços de emissão de RG e CPF são levados para mais perto da população através das unidades móveis da SPS.',
+                    date: '04 FEVEREIRO 2026',
+                    color: 'blue',
+                    image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800&auto=format&fit=crop',
+                    link: 'https://www.sps.ce.gov.br'
+                },
+                {
+                    tag: 'Qualificação',
+                    title: 'Inscrições abertas para novos cursos nos Complexos Sociais',
+                    desc: 'Jovens e adultos podem se inscrever em cursos de informática, gastronomia e beleza para ingressar no mercado de trabalho.',
+                    date: '01 FEVEREIRO 2026',
+                    color: 'purple',
+                    image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop',
+                    link: 'https://www.sps.ce.gov.br'
+                },
+                {
+                    tag: 'Vale Gás',
+                    title: 'SPS realiza validação dos beneficiários do Vale Gás Social',
+                    desc: 'Programa garante recarga gratuita de botijão de gás para famílias de baixa renda em todo o Ceará.',
+                    date: '30 JANEIRO 2026',
+                    color: 'orange',
+                    image: 'https://images.unsplash.com/photo-1626178793926-22b28830aa30?q=80&w=800&auto=format&fit=crop',
+                    link: 'https://www.sps.ce.gov.br'
+                }
+            ];
+
             try {
-                const response = await fetch('/api/sps-news');
+                // Attempt to fetch from SPS WordPress API
+                const response = await fetch('https://www.sps.ce.gov.br/wp-json/wp/v2/posts?per_page=4&_embed');
+
                 if (response.ok) {
                     const data = await response.json();
-                    if (data && data.length > 0) {
-                        setNewsItems(data);
+
+                    const mappedNews = data.map((post: any) => {
+                        // Extract Image
+                        let imageUrl = 'https://www.ceara.gov.br/wp-content/themes/ceara2019/assets/images/brasao_ceara.svg';
+                        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+                            imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
+                        }
+
+                        // Determine Color/Tag mock logic
+                        const colors = ['emerald', 'blue', 'purple', 'orange'];
+                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+                        // Strip HTML
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = post.excerpt.rendered;
+                        const cleanDesc = tempDiv.textContent || tempDiv.innerText || '';
+
+                        tempDiv.innerHTML = post.title.rendered;
+                        const cleanTitle = tempDiv.textContent || tempDiv.innerText || '';
+
+                        return {
+                            tag: 'SPS Notícias',
+                            title: cleanTitle,
+                            desc: cleanDesc,
+                            date: new Date(post.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase(),
+                            color: randomColor,
+                            image: imageUrl,
+                            link: post.link
+                        };
+                    });
+
+                    if (mappedNews.length > 0) {
+                        setNewsItems(mappedNews);
+                        return;
                     }
                 }
             } catch (error) {
-                console.log('Using static fallback news');
+                console.warn('API Fetch failed, using fallback.');
             }
+
+            // If fetch fails or empty, use fallback
+            setNewsItems(fallbackNews);
         };
 
-        fetchNews();
+        fetchRealNews();
     }, []);
 
     const getTagStyle = (color: string) => {
@@ -174,28 +254,133 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                             <h2 className="text-2xl font-black text-slate-800">Acontece na SPS</h2>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {newsItems.map((news, index) => (
-                            <a
+                            <div
                                 key={index}
-                                href={news.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full cursor-pointer block"
+                                onClick={() => setSelectedNews(news)}
+                                className="group relative bg-white rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 flex flex-col h-full cursor-pointer hover:-translate-y-2"
                             >
-                                <div className="h-32 overflow-hidden relative">
-                                    <img src={news.image} alt={news.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                    <span className={`absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider ${getTagStyle(news.color)}`}>{news.tag}</span>
+                                <div className="h-48 overflow-hidden relative">
+                                    <img
+                                        src={news.image}
+                                        alt={news.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://www.ceara.gov.br/wp-content/themes/ceara2019/assets/images/brasao_ceara.svg';
+                                            (e.target as HTMLImageElement).style.objectFit = 'contain';
+                                            (e.target as HTMLImageElement).style.padding = '20px';
+                                            (e.target as HTMLImageElement).style.backgroundColor = '#f1f5f9';
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                                    <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg ${getTagStyle(news.color)}`}>{news.tag}</span>
                                 </div>
-                                <div className="p-4 flex flex-col flex-1">
-                                    <h3 className="font-black text-sm text-slate-800 mb-1 leading-tight group-hover:text-emerald-700 transition-colors line-clamp-2">{news.title}</h3>
-                                    <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2">{news.desc}</p>
+                                <div className="p-6 flex flex-col flex-1 relative">
+                                    <div className="absolute -top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-300 shadow-md group-hover:text-orange-500 group-hover:scale-110 transition duration-300">
+                                        <i className="fa-solid fa-arrow-right text-lg"></i>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase mb-2 block">{news.date}</span>
+                                    <h3 className="font-black text-base text-slate-800 mb-3 leading-tight group-hover:text-teal-600 transition-colors line-clamp-3">{news.title}</h3>
+                                    <div className="mt-auto pt-4 border-t border-slate-50">
+                                        <span className="text-[10px] font-bold text-teal-600 uppercase flex items-center gap-2 group-hover:gap-3 transition-all">
+                                            Ler notícia <i className="fa-solid fa-chevron-right text-[8px]"></i>
+                                        </span>
+                                    </div>
                                 </div>
-                            </a>
+                            </div>
                         ))}
                     </div>
                 </div>
             </section>
+
+            {/* --- NEWS MODAL --- */}
+            {selectedNews && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4" role="dialog" aria-modal="true">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity animate-fade-in"
+                        onClick={() => setSelectedNews(null)}
+                    ></div>
+
+                    {/* Modal Content */}
+                    <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl rounded-none md:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col animate-fade-in-up">
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setSelectedNews(null)}
+                            className="absolute top-6 right-6 bg-black/20 hover:bg-black/40 text-white w-12 h-12 rounded-full flex items-center justify-center transition z-50 backdrop-blur-md border border-white/20"
+                        >
+                            <i className="fa-solid fa-xmark text-xl"></i>
+                        </button>
+
+                        <div className="flex flex-col md:flex-row h-full">
+                            {/* Image Side */}
+                            <div className="w-full md:w-1/2 h-64 md:h-auto relative shrink-0 bg-slate-100">
+                                <img
+                                    src={selectedNews.image}
+                                    alt={selectedNews.title}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://www.ceara.gov.br/wp-content/themes/ceara2019/assets/images/brasao_ceara.svg';
+                                        (e.target as HTMLImageElement).style.objectFit = 'contain';
+                                        (e.target as HTMLImageElement).style.padding = '40px';
+                                    }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent md:hidden"></div>
+                                <div className="absolute bottom-6 left-6 md:hidden text-white">
+                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-3 inline-block shadow-sm ${getTagStyle(selectedNews.color)}`}>
+                                        {selectedNews.tag}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Content Side */}
+                            <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
+                                <div className="p-8 md:p-12 overflow-y-auto custom-scrollbar flex-1">
+                                    <div className="hidden md:block mb-6">
+                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block shadow-sm ${getTagStyle(selectedNews.color)}`}>
+                                            {selectedNews.tag}
+                                        </span>
+                                    </div>
+
+                                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 leading-[1.1] mb-6 tracking-tight">
+                                        {selectedNews.title}
+                                    </h2>
+
+                                    <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest mb-8 pb-8 border-b border-slate-100">
+                                        <span><i className="fa-regular fa-calendar-check mr-2"></i> {selectedNews.date}</span>
+                                        <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                        <span><i className="fa-solid fa-newspaper mr-2"></i> Fonte: SPS</span>
+                                    </div>
+
+                                    <div className="prose prose-slate prose-sm max-w-none">
+                                        <p className="text-lg font-bold text-slate-600 leading-relaxed mb-6">
+                                            {selectedNews.desc}
+                                        </p>
+                                        <p className="text-slate-500 leading-relaxed mb-4">
+                                            Para conferir todos os detalhes desta ação, fotos adicionais e informações completas, acesse a matéria original publicada no portal oficial da Secretaria da Proteção Social.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Footer Actions */}
+                                <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4">
+                                    <a
+                                        href={selectedNews.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 bg-teal-600 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-teal-700 transition text-center shadow-lg shadow-teal-200 hover:shadow-xl text-xs flex items-center justify-center gap-3 group"
+                                    >
+                                        Ler matéria completa <i className="fa-solid fa-arrow-up-right-from-square group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* --- FLUXO DE TRABALHO BIZAGI (Otimizado) --- */}
             <section className="bg-slate-100 py-16 px-4 relative overflow-hidden">

@@ -1,17 +1,28 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Beneficiario } from '../types';
 import { RelatorioService } from '../src/services/RelatorioService';
 
 interface DiarioProps {
     beneficiarios?: Beneficiario[];
+    initialGroupFilter?: string;
 }
 
-const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
+const Diario: React.FC<DiarioProps> = ({ beneficiarios = [], initialGroupFilter }) => {
     const [tipoAcao, setTipoAcao] = useState<'interna' | 'rede' | 'comunitaria'>('interna');
     const [atividade, setAtividade] = useState<string>('');
     const [selectedImages, setSelectedImages] = useState<string[]>([]);
-    const [attendance, setAttendance] = useState<number[]>([]);
+    const [attendance, setAttendance] = useState<Record<number, string>>({});
     const [groupFilter, setGroupFilter] = useState<string>('todos');
+
+    useEffect(() => {
+        if (initialGroupFilter && initialGroupFilter !== 'todos') {
+            setGroupFilter(initialGroupFilter);
+            // Auto-select internal activity if a group is selected
+            if (['GAP', 'GFA', 'GPI'].includes(initialGroupFilter)) {
+                setTipoAcao('interna');
+            }
+        }
+    }, [initialGroupFilter]);
     const [observacoes, setObservacoes] = useState<string>(''); // Added observations state
     const [compazType, setCompazType] = useState<string>(''); // Added Compaz state
     const [actSessao, setActSessao] = useState<number | null>(null); // Added ACT state
@@ -23,8 +34,8 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Find participants objects
-        const participantes = beneficiarios.filter(b => attendance.includes(b.id));
+        // Find participants objects (Only those marked as 'presente')
+        const participantes = beneficiarios.filter(b => attendance[b.id] === 'presente');
 
         const dataToSave = {
             unidade: selectedUnidade || "Unidade Não Selecionada",
@@ -44,7 +55,7 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
             alert("Atividade salva com sucesso! ✅");
             // Reset form could go here
             setAtividade('');
-            setAttendance([]);
+            setAttendance({});
             setSelectedImages([]);
             setObservacoes('');
         } else {
@@ -74,6 +85,24 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
         else setGroupFilter('todos');
     };
 
+    const toggleAttendance = (id: number) => {
+        setAttendance(prev => {
+            const current = prev[id] || 'none';
+            let next = 'none';
+            if (current === 'none') next = 'presente';
+            else if (current === 'presente') next = 'falta';
+            else if (current === 'falta') next = 'justificada';
+            else if (current === 'justificada') next = 'none';
+
+            if (next === 'none') {
+                const newState = { ...prev };
+                delete newState[id];
+                return newState;
+            }
+            return { ...prev, [id]: next };
+        });
+    };
+
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0];
@@ -91,11 +120,7 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
         setSelectedImages(prev => prev.filter((_, i) => i !== index));
     };
 
-    const toggleAttendance = (id: number) => {
-        setAttendance(prev =>
-            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
-        );
-    };
+
 
     const filteredBeneficiarios = beneficiarios.filter(b =>
         groupFilter === 'todos' || b.grupo === groupFilter
@@ -290,21 +315,36 @@ const Diario: React.FC<DiarioProps> = ({ beneficiarios = [] }) => {
                                 {filteredBeneficiarios.length > 0 ? (
                                     <div className="divide-y divide-slate-50">
                                         {filteredBeneficiarios.map(b => {
-                                            const isPresent = attendance.includes(b.id);
+                                            const status = attendance[b.id] || 'none';
+
+                                            // Status configuration
+                                            const getStatusConfig = (s: string) => {
+                                                switch (s) {
+                                                    case 'presente': return { color: 'bg-emerald-500 border-emerald-500', text: 'text-emerald-900', bg: 'bg-emerald-50', icon: 'fa-check' };
+                                                    case 'justificada': return { color: 'bg-yellow-400 border-yellow-400', text: 'text-yellow-900', bg: 'bg-yellow-50', icon: 'fa-exclamation' };
+                                                    case 'falta': return { color: 'bg-red-500 border-red-500', text: 'text-red-900', bg: 'bg-red-50', icon: 'fa-xmark' };
+                                                    default: return { color: 'border-slate-200 text-transparent', text: 'text-slate-700', bg: '', icon: 'fa-check' };
+                                                }
+                                            };
+
+                                            const config = getStatusConfig(status);
+
                                             return (
-                                                <div key={b.id} onClick={() => toggleAttendance(b.id)} className={`flex items-center justify-between p-4 cursor-pointer transition select-none hover:bg-orange-50/30 ${isPresent ? 'bg-orange-50' : ''}`}>
+                                                <div key={b.id} onClick={() => toggleAttendance(b.id)} className={`flex items-center justify-between p-4 cursor-pointer transition select-none hover:bg-slate-50 ${config.bg}`}>
                                                     <div className="flex items-center gap-4">
                                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0 shadow-sm ${b.avatar_bg} ${b.avatar_text}`}>
                                                             {b.avatar_letter}
                                                         </div>
                                                         <div>
-                                                            <p className={`text-sm font-black ${isPresent ? 'text-orange-900' : 'text-slate-700'}`}>{b.nome}</p>
+                                                            <p className={`text-sm font-black ${config.text}`}>{b.nome}</p>
                                                             <div className="flex items-center gap-2 mt-0.5">
                                                                 <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase ${b.grupo === 'GAP' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>{b.grupo}</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isPresent ? 'bg-orange-500 border-orange-500 text-white scale-110 shadow-md' : 'border-slate-200 text-transparent'}`}><i className="fa-solid fa-check text-xs"></i></div>
+                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${config.color} ${status !== 'none' ? 'text-white scale-110 shadow-md' : ''}`}>
+                                                        <i className={`fa-solid ${config.icon} text-xs`}></i>
+                                                    </div>
                                                 </div>
                                             );
                                         })}

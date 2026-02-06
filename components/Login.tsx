@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
+import { AuthService } from '../src/services/AuthService';
+
+import avatar01 from '../src/assets/avatars/avatar_01.png';
+import avatar02 from '../src/assets/avatars/avatar_02.png';
+import avatar03 from '../src/assets/avatars/avatar_03.png';
+import avatar04 from '../src/assets/avatars/avatar_04.png';
+import avatar05 from '../src/assets/avatars/avatar_05.png';
+import avatar06 from '../src/assets/avatars/avatar_06.png';
 
 interface LoginProps {
     onLogin: (user: UserProfile) => void;
@@ -9,6 +17,7 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     const [isRegistering, setIsRegistering] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Login State
     const [cpf, setCpf] = useState('');
@@ -19,9 +28,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     const [regCpf, setRegCpf] = useState('');
     const [regCrp, setRegCrp] = useState('');
     const [regUnit, setRegUnit] = useState('');
-    const [regRole, setRegRole] = useState<'admin' | 'tecnico'>('tecnico'); // New State
-    const [regPassword, setRegPassword] = useState(''); // Personal Password
-    const [accessKey, setAccessKey] = useState(''); // Manager Access Key
+    const [regRole, setRegRole] = useState<'admin' | 'tecnico'>('tecnico');
+    const [regPassword, setRegPassword] = useState('');
+    const [accessKey, setAccessKey] = useState('');
     const [selectedAvatar, setSelectedAvatar] = useState<string>('');
     const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
@@ -36,11 +45,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     ];
 
     const avatarList = [
-        "/avatars/avatar_01.png",
-        "/avatars/avatar_02.png",
-        "/avatars/avatar_03.png",
-        "/avatars/avatar_04.png",
-        "/avatars/avatar_05.png"
+        avatar01, avatar02, avatar03, avatar04, avatar05, avatar06
     ];
 
     const availableCourses = [
@@ -58,59 +63,56 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
         );
     };
 
-    const handleLoginSubmit = (e: React.FormEvent) => {
+    const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError(null);
 
-        // Simulação de autenticação via CPF
-        setTimeout(() => {
+        const { user, error } = await AuthService.login(cpf, password);
+
+        if (error) {
+            setError(error);
             setLoading(false);
-
-            // Lógica para identificar Admin pelo CPF
-            if (cpf === '000.000.000-00') {
-                onLogin({
-                    name: 'Genildo Barbosa',
-                    role: 'admin',
-                    crp: '11/04982',
-                    unit: 'CSMI Cristo Redentor',
-                    avatar: '/avatars/avatar_01.png',
-                    qualificacoes: ["ACT - Parentalidade Positiva", "Círculo de Construção de Paz"]
-                });
-            } else {
-                // Login genérico de técnico
-                onLogin({
-                    name: 'Técnico de Unidade',
-                    role: 'tecnico',
-                    crp: '00/00000',
-                    unit: 'CSMI João XXIII', // Default para teste se não for admin
-                    avatar: '/avatars/avatar_02.png',
-                    qualificacoes: []
-                });
-            }
-        }, 1000);
+        } else if (user) {
+            onLogin(user);
+        }
     };
 
-    const handleRegisterSubmit = (e: React.FormEvent) => {
+    const handleRegisterSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setError(null);
 
-        // Validation for Manager Role
+        // Validation for Manager Role - Optional: Keep the secret key if desired, but SQL handles logic too
         if (regRole === 'admin' && accessKey !== 'gestor') {
             alert('Chave de acesso incorreta para perfil de Gestor.');
+            setLoading(false);
             return;
         }
 
-        setLoading(true);
-        setTimeout(() => {
+        const result = await AuthService.register({
+            nome: regName,
+            cpf: regCpf,
+            crp: regCrp,
+            unidade: regRole === 'tecnico' ? (regUnit || 'Não informada') : 'Gestão Central',
+            senha: regPassword,
+            avatar: selectedAvatar || '/avatars/avatar_01.png',
+            role: regRole,
+            qualificacoes: selectedCourses
+        });
+
+        if (result.success) {
+            alert('Cadastro realizado com sucesso! Faça login para continuar.');
+            setIsRegistering(false);
             setLoading(false);
-            onLogin({
-                name: regName || 'Novo Usuário',
-                role: regRole,
-                crp: regCrp || '00/00000',
-                unit: regRole === 'tecnico' ? (regUnit || 'Não informada') : 'Gestão Central',
-                avatar: selectedAvatar || '/avatars/avatar_01.png',
-                qualificacoes: selectedCourses
-            });
-        }, 1000);
+            // Pre-fill login
+            setCpf(regCpf);
+            setPassword(regPassword);
+        } else {
+            setError(result.error);
+            alert(result.error);
+            setLoading(false);
+        }
     }
 
     return (
@@ -147,6 +149,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                             </p>
                         </div>
                     </div>
+
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-xl text-xs font-bold text-center">
+                            {error}
+                        </div>
+                    )}
 
                     {!isRegistering ? (
                         // --- TELA DE LOGIN ---
