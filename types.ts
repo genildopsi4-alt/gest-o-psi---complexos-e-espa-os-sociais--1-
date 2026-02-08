@@ -67,11 +67,15 @@ export interface Evento {
 
 export interface AtividadePlanejada {
     id: number;
-    tipo: 'rede' | 'interna' | 'comunitaria';
+    tipo: 'rede' | 'interna' | 'comunitaria' | 'atendimento_crise'; // Updated for SGE-MI
     tipoLabel: string;
-    data: string;
+    data: string; // "DD/MM" or full date string
+    dia?: number; // Day of the month for calendar
     titulo: string;
     descricao: string;
     responsavel: string;
-    color: 'blue' | 'emerald' | 'purple';
+    color: 'blue' | 'emerald' | 'amber' | 'red' | 'purple'; // Expanded colors
+    publicoEstimado?: number; // New field
+    status?: 'planejado' | 'realizado' | 'cancelado'; // New field
+    unidade?: string; // New field
 }

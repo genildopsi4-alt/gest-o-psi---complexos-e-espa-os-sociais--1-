@@ -1,219 +1,303 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AtividadePlanejada } from '../types';
 
 const Planejamento: React.FC = () => {
-    // Dados originais mantidos
+    const [selectedActivity, setSelectedActivity] = useState<AtividadePlanejada | null>(null);
+
+    // Initial Data with SGE-MI Structure
     const atividades: AtividadePlanejada[] = [
         {
             id: 1,
             tipo: 'rede',
-            tipoLabel: 'Ação em Rede',
-            data: '16/01',
-            titulo: 'Visita TEAcolhe',
-            descricao: 'Orientações sobre autismo para famílias atípicas.',
-            responsavel: 'Sarah / Equipe Externa',
-            color: 'blue'
+            tipoLabel: 'Gestão/Rede',
+            data: '16/02',
+            dia: 16,
+            titulo: 'Reunião de Rede Socioassistencial',
+            descricao: 'Planejamento integrado com CRAS e CREAS.',
+            responsavel: 'Coordenação',
+            color: 'amber', // Yellow for Management/Network
+            publicoEstimado: 15,
+            status: 'planejado',
+            unidade: 'CSMI João XXIII'
         },
         {
             id: 2,
             tipo: 'interna',
-            tipoLabel: 'Interna (GAP)',
-            data: '06/01',
-            titulo: 'Roda do Equilíbrio',
-            descricao: 'Autoavaliação emocional com adolescentes.',
-            responsavel: 'Sarah / Nelma',
-            color: 'emerald'
+            tipoLabel: 'Grupo GAP',
+            data: '06/02',
+            dia: 6,
+            titulo: 'Roda de Conversa: Identidade',
+            descricao: 'Dinâmica de grupo com adolescentes sobre autoimagem.',
+            responsavel: 'Genildo Barbosa',
+            color: 'emerald', // Green for Groups
+            publicoEstimado: 25,
+            status: 'realizado',
+            unidade: 'CSMI João XXIII'
         },
         {
             id: 3,
             tipo: 'comunitaria',
-            tipoLabel: 'Comunitária',
-            data: '30/01',
-            titulo: 'Dia D - Intergeracional',
-            descricao: 'Brincadeiras misturando GAP, GPI e Crianças.',
+            tipoLabel: 'Ação Comunitária',
+            data: '20/02',
+            dia: 20,
+            titulo: 'Ação Mais Infância na Praça',
+            descricao: 'Atividades lúdicas e atendimento psicossocial móvel.',
             responsavel: 'Equipe Técnica',
-            color: 'purple'
+            color: 'blue', // Blue for Events
+            publicoEstimado: 100,
+            status: 'planejado',
+            unidade: 'CSMI João XXIII'
+        },
+        {
+            id: 4,
+            tipo: 'atendimento_crise',
+            tipoLabel: 'Atendimento Individual',
+            data: '10/02',
+            dia: 10,
+            titulo: 'Plantão Psicológico',
+            descricao: 'Atendimento de demandas espontâneas e encaminhamentos.',
+            responsavel: 'Plantão',
+            color: 'red', // Red for Individual/Crisis
+            publicoEstimado: 5,
+            status: 'realizado',
+            unidade: 'CSMI João XXIII'
+        },
+        {
+            id: 5,
+            tipo: 'interna',
+            tipoLabel: 'Grupo ACT',
+            data: '27/02',
+            dia: 27,
+            titulo: 'Sessão 3: Estilos Parentais',
+            descricao: 'Aplicação do currículo ACT com cuidadores.',
+            responsavel: 'Sarah Araújo',
+            color: 'emerald',
+            publicoEstimado: 12,
+            status: 'planejado',
+            unidade: 'CSMI João XXIII'
         }
     ];
 
     const getColorClasses = (color: string) => {
-        switch(color) {
-            case 'blue': return 'bg-blue-50 border-blue-200';
-            case 'emerald': return 'bg-emerald-50 border-emerald-200';
-            case 'purple': return 'bg-purple-50 border-purple-200';
+        switch (color) {
+            case 'blue': return 'bg-blue-50 border-blue-200 hover:bg-blue-100';
+            case 'emerald': return 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100';
+            case 'purple': return 'bg-purple-50 border-purple-200 hover:bg-purple-100';
+            case 'amber': return 'bg-amber-50 border-amber-200 hover:bg-amber-100';
+            case 'red': return 'bg-red-50 border-red-200 hover:bg-red-100';
             default: return 'bg-gray-50 border-gray-200';
         }
     };
 
-    const getBadgeClasses = (color: string) => {
-        switch(color) {
-            case 'blue': return 'text-blue-600 border-blue-200';
-            case 'emerald': return 'text-emerald-600 border-emerald-200';
-            case 'purple': return 'text-purple-600 border-purple-200';
-            default: return 'text-gray-600 border-gray-200';
+    const getBadgeStyle = (color: string) => {
+        switch (color) {
+            case 'blue': return 'bg-blue-100 text-blue-800';
+            case 'emerald': return 'bg-emerald-100 text-emerald-800';
+            case 'purple': return 'bg-purple-100 text-purple-800';
+            case 'amber': return 'bg-amber-100 text-amber-800';
+            case 'red': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
         }
-    }
+    };
 
-    // Lógica para o Calendário (Janeiro 2026 começa na Quinta-feira)
-    const daysInMonth = 31;
-    const startDay = 4; // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui
+    const getCalendarEventStyle = (color: string) => {
+        switch (color) {
+            case 'blue': return 'bg-blue-500 text-white';
+            case 'emerald': return 'bg-emerald-600 text-white';
+            case 'purple': return 'bg-purple-500 text-white';
+            case 'amber': return 'bg-amber-400 text-amber-900';
+            case 'red': return 'bg-red-500 text-white';
+            default: return 'bg-gray-400 text-white';
+        }
+    };
+
+    // Calendar Logic (February 2026 starts on Sunday)
+    const daysInMonth = 28;
+    const startDay = 0; // Sunday
     const calendarDays = [];
-    
-    // Dias vazios antes do início do mês
-    for (let i = 0; i < startDay; i++) {
-        calendarDays.push(null);
-    }
-    
-    // Dias do mês
-    for (let i = 1; i <= daysInMonth; i++) {
-        calendarDays.push(i);
-    }
+
+    for (let i = 0; i < startDay; i++) calendarDays.push(null);
+    for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
 
     const renderCalendarEvent = (day: number) => {
-        if (day === 15) return <div className="mt-2 bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded shadow-sm truncate">Dia D - Ação Comunitária</div>;
-        if (day === 22) return <div className="mt-2 bg-purple-500 text-white text-[9px] font-bold px-2 py-1 rounded shadow-sm truncate">Fórum de Rede Local</div>;
-        if (day === 28) return <div className="mt-2 bg-emerald-600 text-white text-[9px] font-bold px-2 py-1 rounded shadow-sm truncate">Oficina Temática: Vínculos</div>;
-        if (day === 29) return <div className="absolute top-2 right-2 bg-emerald-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md">29</div>;
-        return null;
+        const events = atividades.filter(a => a.dia === day);
+        if (events.length === 0) return null;
+
+        return (
+            <div className="flex flex-col gap-1 mt-1">
+                {events.map((ev) => (
+                    <div
+                        key={ev.id}
+                        onClick={(e) => { e.stopPropagation(); setSelectedActivity(ev); }}
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm truncate cursor-pointer transition hover:scale-105 ${getCalendarEventStyle(ev.color)}`}
+                    >
+                        {ev.tipoLabel}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    const handlePrint = () => {
+        window.print();
     };
 
     return (
-    <section className="p-6 md:p-8 animate-fade-in space-y-8">
-      
-      {/* --- HEADER SUPERIOR --- */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-4">
-            <button className="w-8 h-8 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-500 transition">
-                <i className="fa-solid fa-chevron-left"></i>
-            </button>
-            <div>
-                <h2 className="text-2xl font-bold text-slate-800 leading-none">Planejamento Estratégico Mensal</h2>
-                <p className="text-sm font-bold text-gray-500 mt-1 uppercase tracking-wide">Janeiro 2026</p>
-            </div>
-            <button className="w-8 h-8 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-500 transition">
-                <i className="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
-        <button className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg font-bold text-sm border border-emerald-200 hover:bg-emerald-100 transition shadow-sm flex items-center gap-2">
-            <i className="fa-solid fa-download"></i> Exportar
-        </button>
-      </div>
+        <section className="p-6 md:p-8 animate-fade-in space-y-8 pb-32">
 
-      {/* --- GRID DO CALENDÁRIO E SIDEBAR --- */}
-      <div className="flex flex-col xl:flex-row gap-6">
-        
-        {/* CALENDÁRIO */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            {/* Dias da Semana */}
-            <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50/50">
-                {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map(day => (
-                    <div key={day} className="py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">{day}</div>
-                ))}
-            </div>
-            {/* Dias */}
-            <div className="grid grid-cols-7 auto-rows-[100px] text-sm">
-                {calendarDays.map((day, index) => (
-                    <div key={index} className={`border-r border-b border-gray-100 p-2 relative hover:bg-gray-50 transition group ${!day ? 'bg-gray-50/30' : ''}`}>
-                        {day && (
-                            <>
-                                <span className={`font-bold ${day === 29 ? 'text-transparent' : 'text-gray-400 group-hover:text-gray-600'}`}>{day}</span>
-                                {renderCalendarEvent(day)}
-                            </>
-                        )}
+            {/* HEADER */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+                <div>
+                    <h2 className="text-3xl font-black text-slate-800 leading-none tracking-tight">Relatório Estratégico Mensal</h2>
+                    <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">Fevereiro 2026 • SGE-MI Integrado</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex -space-x-2 mr-4">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500 shadow-sm">
+                                <i className="fa-solid fa-user"></i>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                    <button onClick={handlePrint} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition flex items-center gap-2 uppercase tracking-wide">
+                        <i className="fa-solid fa-file-export"></i> Gerar PDF
+                    </button>
+                </div>
             </div>
-        </div>
 
-        {/* SIDEBAR DE DESTAQUES */}
-        <div className="w-full xl:w-96 flex flex-col gap-6">
-            
-            {/* Lista de Atividades em Destaque */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                    <i className="fa-solid fa-star text-amber-400"></i> ATIVIDADES EM DESTAQUE
-                </h3>
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3 bg-red-50 p-3 rounded-lg border-l-4 border-red-500 hover:shadow-md transition cursor-pointer">
-                        <div className="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
-                            <i className="fa-solid fa-star"></i>
+            {/* CALENDAR & LEGEND */}
+            <div className="flex flex-col xl:flex-row gap-8">
+
+                {/* MAIN CALENDAR */}
+                <div className="flex-1 bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden relative">
+                    <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                        <h3 className="font-black text-slate-700 text-lg flex items-center gap-2">
+                            <i className="fa-regular fa-calendar text-slate-400"></i> FEVEREIRO
+                        </h3>
+                        <div className="flex gap-2">
+                            <span className="w-3 h-3 rounded-full bg-blue-500" title="Ação Comunitária"></span>
+                            <span className="w-3 h-3 rounded-full bg-emerald-500" title="Grupos"></span>
+                            <span className="w-3 h-3 rounded-full bg-amber-400" title="Gestão/Rede"></span>
+                            <span className="w-3 h-3 rounded-full bg-red-500" title="Individual/Crise"></span>
                         </div>
-                        <div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase block">Dia 15</span>
-                            <h4 className="font-bold text-gray-800 text-sm">Dia D - Ação Comunitária</h4>
-                        </div>
-                        <i className="fa-solid fa-chevron-right ml-auto text-gray-300 text-xs"></i>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-purple-50 p-3 rounded-lg border-l-4 border-purple-500 hover:shadow-md transition cursor-pointer">
-                        <div className="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0">
-                            <i className="fa-solid fa-handshake"></i>
-                        </div>
-                        <div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase block">Dia 22</span>
-                            <h4 className="font-bold text-gray-800 text-sm">Fórum de Rede Local</h4>
-                        </div>
-                        <i className="fa-solid fa-chevron-right ml-auto text-gray-300 text-xs"></i>
+                    <div className="grid grid-cols-7 border-b border-gray-100 bg-slate-50">
+                        {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map(day => (
+                            <div key={day} className="py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">{day}</div>
+                        ))}
                     </div>
 
-                    <div className="flex items-center gap-3 bg-emerald-50 p-3 rounded-lg border-l-4 border-emerald-500 hover:shadow-md transition cursor-pointer">
-                        <div className="w-8 h-8 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                            <i className="fa-solid fa-heart"></i>
-                        </div>
-                        <div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase block">Dia 28</span>
-                            <h4 className="font-bold text-gray-800 text-sm">Oficina Temática: Vínculos</h4>
-                        </div>
-                        <i className="fa-solid fa-chevron-right ml-auto text-gray-300 text-xs"></i>
+                    <div className="grid grid-cols-7 auto-rows-[120px]">
+                        {calendarDays.map((day, index) => (
+                            <div key={index} className={`border-r border-b border-slate-50 p-2 relative hover:bg-slate-50/50 transition group ${!day ? 'bg-slate-50/30' : ''}`}>
+                                {day && (
+                                    <>
+                                        <span className={`text-sm font-bold block mb-1 ${day === 29 ? 'text-transparent' : 'text-slate-300 group-hover:text-slate-500'}`}>{day}</span>
+                                        {renderCalendarEvent(day)}
+                                    </>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
 
-            {/* Card Tema do Mês */}
-            <div className="bg-gradient-to-br from-emerald-900 to-emerald-800 rounded-xl p-6 shadow-lg text-white relative overflow-hidden">
-                <div className="relative z-10">
-                    <p className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2">TEMA DO MÊS</p>
-                    <h3 className="text-xl font-black mb-2 leading-tight">Fortalecimento de Vínculos e Parentalidade</h3>
-                    <p className="text-xs text-emerald-100 opacity-80 leading-relaxed">Foco em consolidar as redes de apoio familiar através das metodologias ACT e GFA.</p>
-                </div>
-                {/* Decorative Circles */}
-                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-5 rounded-full blur-xl"></div>
-                <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-emerald-400 opacity-10 rounded-full blur-2xl"></div>
-            </div>
-        </div>
-      </div>
+            {/* PRINTABLE LIST (Visible only on Print) */}
+            <div className="hidden print:block mt-8">
+                <h2 className="text-xl font-bold border-b-2 border-black mb-4 pb-2 uppercase">Detalhamento das Atividades - Fevereiro 2026</h2>
+                <table className="w-full text-xs text-left">
+                    <thead>
+                        <tr className="bg-gray-100 border-b border-black">
+                            <th className="p-2 font-bold uppercase">Data</th>
+                            <th className="p-2 font-bold uppercase">Atividade</th>
+                            <th className="p-2 font-bold uppercase">Tipo</th>
+                            <th className="p-2 font-bold uppercase">Público Est.</th>
+                            <th className="p-2 font-bold uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {atividades.map(atv => (
+                            <tr key={atv.id} className="border-b border-gray-300">
+                                <td className="p-2 font-mono">{atv.data}</td>
+                                <td className="p-2">
+                                    <div className="font-bold">{atv.titulo}</div>
+                                    <div className="text-[10px] italic">{atv.descricao}</div>
+                                </td>
+                                <td className="p-2 uppercase font-bold text-[10px]">{atv.tipoLabel}</td>
+                                <td className="p-2 text-center">{atv.publicoEstimado}</td>
+                                <td className="p-2 text-center uppercase font-bold text-[10px]">{atv.status}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
 
-      {/* --- LISTA DETALHADA EXISTENTE --- */}
-      <div className="mt-8 pt-8 border-t border-gray-200">
-        <h3 className="text-xl font-bold text-gray-700 mb-6">Detalhamento das Atividades</h3>
-        <div className="bg-white rounded-xl shadow p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4 border-b pb-2">
-            <h3 className="font-bold text-lg text-emerald-800">Destaques (Modelo Curió)</h3>
-            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">Referência Técnica</span>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {atividades.map((atv) => (
-                    <div key={atv.id} className={`border rounded-lg p-4 hover:shadow-md transition cursor-pointer hover:-translate-y-1 ${getColorClasses(atv.color)}`}>
-                    <div className="flex justify-between items-start">
-                    <span className={`text-xs font-bold bg-white px-2 py-0.5 rounded border ${getBadgeClasses(atv.color)}`}>
-                            {atv.tipoLabel}
-                    </span>
-                    <span className="text-xs text-gray-500 font-mono">{atv.data}</span>
+                <div className="mt-12 pt-8 border-t border-black grid grid-cols-2 gap-20">
+                    <div className="text-center">
+                        <p className="font-bold uppercase text-xs">Genildo Barbosa</p>
+                        <p className="text-[10px]">Técnico Responsável - CRP 11/12345</p>
                     </div>
-                    <h4 className="font-bold text-gray-800 mt-2">{atv.titulo}</h4>
-                    <p className="text-sm text-gray-600 mt-1 leading-snug">{atv.descricao}</p>
-                    <p className="text-xs text-gray-500 mt-3 flex items-center pt-2 border-t border-black/5">
-                        <i className="fa-solid fa-user-check mr-1.5 opacity-70"></i> 
-                        {atv.responsavel}
-                    </p>
+                    <div className="text-center">
+                        <p className="font-bold uppercase text-xs">Coordenação CSMI</p>
+                        <p className="text-[10px]">Visto da Gestão</p>
+                    </div>
                 </div>
-                ))}
             </div>
-        </div>
-      </div>
-    </section>
-  );
+
+            {/* ACTIVITY MODAL */}
+            {selectedActivity && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedActivity(null)}>
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
+                        <div className={`h-32 ${getCalendarEventStyle(selectedActivity.color)} p-6 relative flex flex-col justify-end`}>
+                            <button onClick={() => setSelectedActivity(null)} className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/40 transition">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                            <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest w-fit mb-2">
+                                {selectedActivity.unidade}
+                            </span>
+                            <h2 className="text-2xl font-black text-white leading-none">{selectedActivity.titulo}</h2>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="flex items-center gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-regular fa-calendar"></i>
+                                    <span className="font-bold">{selectedActivity.data}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-solid fa-users"></i>
+                                    <span className="font-bold">{selectedActivity.publicoEstimado} Pessoas</span>
+                                </div>
+                            </div>
+
+                            <p className="text-slate-600 leading-relaxed font-medium">
+                                {selectedActivity.descricao}
+                            </p>
+
+                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                                    <i className="fa-solid fa-user-tie"></i>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase">Responsável Técnico</p>
+                                    <p className="font-bold text-slate-800">{selectedActivity.responsavel}</p>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button className="flex-1 py-3 rounded-xl font-bold uppercase text-xs bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 transition">
+                                    <i className="fa-solid fa-pen-to-square mr-2"></i> Editar
+                                </button>
+                                <button className={`flex-1 py-3 rounded-xl font-bold uppercase text-xs border transition ${selectedActivity.status === 'realizado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                                    {selectedActivity.status === 'realizado' ? 'Realizado' : 'Marcar Realizado'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        </section>
+    );
 };
 
 export default Planejamento;

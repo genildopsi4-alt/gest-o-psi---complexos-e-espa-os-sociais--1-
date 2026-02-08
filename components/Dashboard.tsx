@@ -201,8 +201,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
         {/* --- HEADER DO DASHBOARD --- */}
         <div className="mb-8">
-          <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 rounded-[2rem] p-1 shadow-xl">
+          <div className={`bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 rounded-[2rem] p-1 shadow-xl transition-all duration-1000 ${true ? 'shadow-[0_0_30px_rgba(34,197,94,0.6)] animate-pulse border-4 border-emerald-400' : ''}`}>
             <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
+
+              {/* STATUS INDICATOR (NEW) */}
+              <div className="absolute top-6 right-6 z-20 flex flex-col items-end animate-bounce">
+                <span className="bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg border-2 border-white">
+                  Em Atividade
+                </span>
+                <span className="text-[9px] font-bold text-emerald-600 mt-1 bg-white/80 px-2 rounded backdrop-blur-sm">
+                  Roda de Conversa: Identidade
+                </span>
+              </div>
+
               <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-orange-50 rounded-full opacity-40 z-0"></div>
 
               <div className="flex-1 z-10 text-center lg:text-left">
