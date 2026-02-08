@@ -191,6 +191,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                 {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Acessar Sistema'}
                             </button>
 
+
                             <div className="pt-4 text-center border-t border-slate-100 mt-4">
                                 <p className="text-xs text-slate-500 font-medium mb-2">Primeiro acesso?</p>
                                 <button
@@ -200,6 +201,18 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                 >
                                     Criar Cadastro Profissional
                                 </button>
+
+                                {/* Botão de Download do APK */}
+                                <div className="mt-6">
+                                    <a
+                                        href="/app-release.apk"
+                                        download="GestaoPSI.apk"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-black uppercase text-emerald-800 hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
+                                    >
+                                        <i className="fa-brands fa-android text-base text-emerald-600 group-hover:scale-110 transition-transform"></i>
+                                        <span>Baixar App Android</span>
+                                    </a>
+                                </div>
                             </div>
                         </form>
                     ) : (

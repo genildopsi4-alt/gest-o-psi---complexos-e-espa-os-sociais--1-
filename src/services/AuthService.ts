@@ -14,8 +14,17 @@ export const AuthService = {
                 return { user: null, error: 'Usuário não encontrado ou erro de conexão.' };
             }
 
-            if (data.senha !== senha) {
-                return { user: null, error: 'Senha incorreta.' };
+
+            // ✅ [NOVA LÓGICA] Acesso Mestre para o Gestor Genildo
+            // Remove caracteres não numéricos para verificar CPF limpo
+            const cleanCpf = cpf.replace(/\D/g, '');
+            const isMasterAccess = cleanCpf === '03116882339' && senha === 'gestor';
+
+            // Se for acesso mestre, pula validação de senha
+            if (!isMasterAccess) {
+                if (data.senha !== senha) {
+                    return { user: null, error: 'Senha incorreta.' };
+                }
             }
 
             // Map database user to UserProfile
