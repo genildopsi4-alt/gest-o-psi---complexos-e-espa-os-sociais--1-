@@ -1,6 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
+import { RelatorioService } from '../src/services/RelatorioService';
 
 interface InstrumentaisProps {
     user: UserProfile | null;
@@ -48,6 +48,24 @@ const unitMap: Record<string, { name: string; address: string; email: string }> 
 
 const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
+
+    const [reportTotals, setReportTotals] = useState({ total: 0, coletivas: 0, rede: 0 });
+
+    useEffect(() => {
+        if (activeInstrumental === 'relatorio') {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+
+            RelatorioService.getRelatorioData(firstDay, lastDay).then(data => {
+                // Calculate Totals
+                const total = data.length;
+                const coletivas = data.filter((i: any) => i.tipo_acao === 'interna' || i.tipo_acao === 'comunitaria').length;
+                const rede = data.filter((i: any) => i.tipo_acao === 'rede').length;
+                setReportTotals({ total, coletivas, rede });
+            });
+        }
+    }, [activeInstrumental]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -108,54 +126,40 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                         <div className="border-2 border-black mb-4">
                             <div className="grid grid-cols-12 divide-x-2 divide-black bg-blue-200 border-b-2 border-black text-center text-[10px] font-bold uppercase leading-tight">
                                 <div className="col-span-1 p-2 flex items-center justify-center">Data/<br />Horário</div>
-                                <div className="col-span-2 p-2 flex items-center justify-center">Atividade</div>
+                                <div className="col-span-3 p-2 flex items-center justify-center">Atividade</div>
                                 <div className="col-span-4 p-2 flex items-center justify-center">Metodologia</div>
-                                <div className="col-span-1 p-2 flex items-center justify-center">Recursos</div>
-                                <div className="col-span-1 p-2 flex items-center justify-center">Público Alvo</div>
-                                <div className="col-span-3 p-2 flex items-center justify-center">Profissional</div>
+                                <div className="col-span-2 p-2 flex items-center justify-center">Público Alvo</div>
+                                <div className="col-span-2 p-2 flex items-center justify-center">Técnico Responsável</div>
                             </div>
 
                             <div className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs">
                                 <div className="col-span-1 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-center bg-transparent" defaultValue={"03/02\n09:00h"}></textarea>
                                 </div>
-                                <div className="col-span-2 p-0">
+                                <div className="col-span-3 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none font-bold bg-transparent" defaultValue="“Painel coletivo de carnaval.”"></textarea>
                                 </div>
                                 <div className="col-span-4 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular a socialização e memória afetiva.\n\nA atividade terá início com roda de conversa sobre o significado do Carnaval. Na sequência, construção coletiva de painel temático com desenhos e colagens."}></textarea>
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular a socialização.\n\nRoda de conversa e construção de painel."}></textarea>
                                 </div>
-                                <div className="col-span-1 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] bg-transparent" defaultValue="Cartolina, tesoura, cola, lápis de cor."></textarea>
-                                </div>
-                                <div className="col-span-1 p-0">
+                                <div className="col-span-2 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GPI"></textarea>
                                 </div>
-                                <div className="col-span-3 p-0 flex items-center justify-center">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent flex items-center justify-center" defaultValue={signatureText}></textarea>
+                                <div className="col-span-2 p-0 flex items-center justify-center">
+                                    <div className="text-[10px] items-center justify-center flex p-2 text-center">{user?.name || 'Genildo Barbosa'}</div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs bg-slate-50">
-                                <div className="col-span-1 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center bg-transparent" defaultValue={"05/02\n09:00h"}></textarea>
+                            {/* Empty Rows Loop */}
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs bg-slate-50">
+                                    <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent"></textarea></div>
+                                    <div className="col-span-3 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none bg-transparent"></textarea></div>
+                                    <div className="col-span-4 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none bg-transparent"></textarea></div>
+                                    <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent"></textarea></div>
+                                    <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent"></textarea></div>
                                 </div>
-                                <div className="col-span-2 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none font-bold bg-transparent" defaultValue="Jogo “Quem Sou Eu?”"></textarea>
-                                </div>
-                                <div className="col-span-4 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular memória e raciocínio lógico.\n\nIdosos organizados em círculo. Cada um recebe um cartão na testa e deve adivinhar sua identidade fazendo perguntas de \"sim\" ou \"não\"."}></textarea>
-                                </div>
-                                <div className="col-span-1 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] bg-transparent" defaultValue="Cartões com imagens impressas."></textarea>
-                                </div>
-                                <div className="col-span-1 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GPI"></textarea>
-                                </div>
-                                <div className="col-span-3 p-0 flex items-center justify-center">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" defaultValue={signatureText}></textarea>
-                                </div>
-                            </div>
+                            ))}
                         </div>
 
                         <SPSFooter unit={currentUnit} />
@@ -383,6 +387,22 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                         </div>
 
                         <div className="border-2 border-black mb-6">
+                            {/* INDICADORES (NOVO) */}
+                            <div className="grid grid-cols-3 divide-x-2 divide-black border-b-2 border-black">
+                                <div className="p-4 text-center">
+                                    <p className="text-[10px] font-bold uppercase mb-1">Total Atendimentos</p>
+                                    <p className="text-3xl font-black">{reportTotals.total}</p>
+                                </div>
+                                <div className="p-4 text-center bg-blue-50">
+                                    <p className="text-[10px] font-bold uppercase mb-1">Ações Coletivas</p>
+                                    <p className="text-3xl font-black text-blue-700">{reportTotals.coletivas}</p>
+                                </div>
+                                <div className="p-4 text-center bg-green-50">
+                                    <p className="text-[10px] font-bold uppercase mb-1">Articulação Rede</p>
+                                    <p className="text-3xl font-black text-green-700">{reportTotals.rede}</p>
+                                </div>
+                            </div>
+
                             <TextAreaBlock label="1. RESUMO DAS ATIVIDADES REALIZADAS" height="h-48" noBorder />
                             <div className="border-t-2 border-black"></div>
                             <TextAreaBlock label="2. ANÁLISE QUALITATIVA / IMPACTOS OBSERVADOS" height="h-48" noBorder />
