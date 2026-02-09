@@ -49,6 +49,14 @@ const unitMap: Record<string, { name: string; address: string; email: string }> 
 const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
 
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            // Simulate Upload Process
+            alert(`📸 Iniciando digitalização de: ${file.name}\n\nO arquivo será enviado automaticamente para a pasta 'Relatórios 2026' no Google Drive.`);
+        }
+    };
+
     const defaultUnit = unitMap["CSMI Cristo Redentor"];
     const currentUnit = user?.unit && unitMap[user.unit] ? unitMap[user.unit] : defaultUnit;
 
@@ -474,7 +482,14 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
     return (
         <section className="p-4 md:p-8 animate-fade-in bg-orange-50/50 min-h-full">
-            <div className="mb-4 text-slate-500 font-bold uppercase text-xs tracking-widest pl-2 print:hidden">Menu de Instrumentais</div>
+            <div className="mb-4 flex justify-between items-center px-2 print:hidden">
+                <span className="text-slate-500 font-bold uppercase text-xs tracking-widest">Menu de Instrumentais</span>
+                <label className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-xl transition transform active:scale-95">
+                    <i className="fa-solid fa-camera animate-pulse sm:animate-none"></i>
+                    <span className="font-bold text-[10px] uppercase tracking-wider">Digitalizar (Drive)</span>
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
+                </label>
+            </div>
             <div className="mb-8 border-b-2 border-orange-200 pb-4 overflow-x-auto print:hidden">
                 <div className="flex bg-white p-2 rounded-2xl border border-orange-100 shadow-sm min-w-max gap-2 items-center">
 

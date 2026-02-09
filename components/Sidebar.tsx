@@ -9,11 +9,34 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLogout }) => {
   const [time, setTime] = useState(new Date());
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+        setDeferredPrompt(null);
+      }
+    }
+  };
 
   const menuItems: { id: Section; label: string; icon: string; badge?: number }[] = [
     { id: 'dashboard', label: 'Painel de Controle', icon: 'fa-grip-vertical' },
@@ -51,6 +74,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
           {time.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' })}
         </p>
       </div>
+
+      {/* --- PWA INSTALL BUTTON --- */}
+      {deferredPrompt && (
+        <div className="px-4 pt-4 pb-0">
+          <button
+            onClick={handleInstallClick}
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 group"
+          >
+            <i className="fa-solid fa-download animate-bounce"></i>
+            <span className="text-xs font-black uppercase tracking-wider">Instalar App</span>
+          </button>
+        </div>
+      )}
 
       {/* --- NAVIGATION --- */}
       <nav className="flex-1 py-4 px-4 space-y-2 overflow-y-auto custom-scrollbar">

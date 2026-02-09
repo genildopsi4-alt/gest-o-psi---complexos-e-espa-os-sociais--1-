@@ -11,6 +11,7 @@ import Rede from './components/Rede';
 import Beneficiarios from './components/Beneficiarios';
 import Planejamento from './components/Planejamento';
 import Instrumentais from './components/Instrumentais';
+import BottomNav from './components/BottomNav';
 import { Section, Beneficiario, UserProfile } from './types';
 
 type AppView = 'landing' | 'login' | 'app';
@@ -170,8 +171,8 @@ const App: React.FC = () => {
   // App View
   return (
     <div className="flex h-screen bg-[#FFFBEB] font-sans overflow-hidden">
-      {/* Sidebar on the left */}
-      <div className="print:hidden h-full">
+      {/* Sidebar on the left (Desktop) */}
+      <div className="print:hidden h-full hidden md:block">
         <Sidebar
           activeSection={activeSection}
           setActiveSection={setActiveSection}
@@ -179,8 +180,11 @@ const App: React.FC = () => {
         />
       </div>
 
+      {/* Bottom Nav (Mobile) */}
+      <BottomNav activeSection={activeSection} setActiveSection={setActiveSection} />
+
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative z-10 print:overflow-visible print:h-auto print:block">
+      <main className="flex-1 flex flex-col overflow-hidden relative z-10 print:overflow-visible print:h-auto print:block pb-20 md:pb-0">
         <div className="print:hidden">
           <Header
             title={getHeaderTitle(activeSection)}

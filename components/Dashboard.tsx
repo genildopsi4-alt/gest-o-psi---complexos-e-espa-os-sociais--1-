@@ -208,20 +208,46 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
         {/* --- HEADER DO DASHBOARD --- */}
         <div className="mb-8">
-          {/* NEON EFFECT LOGIC: Checks if activity is happening now (Simulated) */}
-          <div className={`bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 rounded-[2rem] p-1 shadow-xl transition-all duration-1000 ${true ? 'shadow-[0_0_30px_rgba(34,197,94,0.6)] animate-pulse border-4 border-emerald-400' : ''}`}>
-            <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
+          <div className="space-y-6 animate-fade-in pb-24 md:pb-0">
 
-              {/* STATUS INDICATOR (AO VIVO) */}
-              <div className="absolute top-6 right-6 z-20 flex flex-col items-end animate-bounce">
-                <span className="bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg border-2 border-white flex items-center gap-2">
-                  <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
-                  Em Atividade Agora
-                </span>
-                <span className="text-[9px] font-bold text-emerald-600 mt-1 bg-white/90 px-2 py-0.5 rounded backdrop-blur-sm shadow-sm border border-emerald-100">
-                  Grupo GAP • Roda de Conversa
+            {/* --- CABEÇALHO SIMPLIFICADO --- */}
+            <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <h2 className="text-xl font-black text-slate-700 tracking-tight">Monitoramento em Tempo Real</h2>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wide">
+                  {user?.role === 'admin' ? 'Visão Geral do Sistema' : user?.unit}
+                </p>
+              </div>
+
+              {/* SELETOR DE UNIDADE (VISÍVEL APENAS PARA ADMIN) */}
+              {user?.role === 'admin' && (
+                <div className="relative group">
+                  <select
+                    value={selectedUnit}
+                    onChange={(e) => setSelectedUnit(e.target.value)}
+                    className="appearance-none bg-indigo-50 text-indigo-700 font-bold text-xs uppercase py-2 pl-4 pr-10 rounded-xl outline-none focus:ring-2 focus:ring-indigo-200 border border-indigo-100 cursor-pointer"
+                  >
+                    {units.map(u => <option key={u} value={u}>{u}</option>)}
+                  </select>
+                  <i className="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 text-xs pointer-events-none"></i>
+                </div>
+              )}
+
+              {/* BOTÃO DE SINCRONIZAÇÃO (GOOGLE) */}
+              {user?.role === 'admin' && <GoogleAuthButton />}
+            </div>
+
+            {/* --- ATIVIDADE AGORA (NEON) --- */}
+            {/* Apenas exibe se houver atividade real para não poluir */}
+            {recentGenerations.length > 0 && (
+              <div className="w-full bg-emerald-900 rounded-xl p-1 flex items-center justify-center shadow-lg shadow-emerald-200/50 animate-pulse">
+                <span className="text-[10px] font-black text-emerald-100 uppercase tracking-widest flex items-center gap-2">
+                  <i className="fa-solid fa-satellite-dish animate-pulse"></i>
+                  Atividade Registrada: {recentGenerations[0].title}
                 </span>
               </div>
+            )}
+            <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
 
               <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-orange-50 rounded-full opacity-40 z-0"></div>
 
