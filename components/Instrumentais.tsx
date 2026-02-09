@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { RelatorioService } from '../src/services/RelatorioService';
+import TimeSlider from './TimeSlider';
+import ProfileFilter, { mockProfessionals } from './ProfileFilter';
 
 interface InstrumentaisProps {
     user: UserProfile | null;
@@ -48,17 +50,19 @@ const unitMap: Record<string, { name: string; address: string; email: string }> 
 
 const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedProfessional, setSelectedProfessional] = useState<string | null>(null);
 
     const [reportTotals, setReportTotals] = useState({ total: 0, coletivas: 0, rede: 0 });
     const [reportData, setReportData] = useState<any[]>([]);
 
     useEffect(() => {
         if (activeInstrumental === 'relatorio') {
-            const today = new Date();
+            const today = currentDate;
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 
-            RelatorioService.getRelatorioData(firstDay, lastDay).then(data => {
+            RelatorioService.getRelatorioData(firstDay, lastDay, undefined, selectedProfessional || undefined).then(data => {
                 setReportData(data);
                 // Calculate Totals
                 const total = data.length;
@@ -87,24 +91,39 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
     const signatureText = getSignatureText();
 
-    const ProfessionalSignatureBlock = () => (
-        <div className="text-center">
-            <div className="h-8"></div>
-            <div className="border-t border-black w-3/4 mx-auto mb-1"></div>
-            <div className="text-[10px] uppercase font-bold leading-tight text-black">
-                {user ? (
-                    <>
-                        <p>{user.name}</p>
-                        <p>{user.role}</p>
-                        <p>CRP: {user.crp}</p>
-                        <p className="mt-1">Fortaleza - Ceará</p>
-                    </>
-                ) : (
-                    <p>PSICÓLOGO(A) RESPONSÁVEL</p>
-                )}
+    const ProfessionalSignatureBlock = () => {
+        let name = user?.name;
+        let role = user?.role;
+        let crp = user?.crp;
+
+        if (selectedProfessional) {
+            const prof = mockProfessionals.find(p => p.id === selectedProfessional);
+            if (prof) {
+                name = prof.name;
+                role = prof.role;
+                crp = prof.crp;
+            }
+        }
+
+        return (
+            <div className="text-center">
+                <div className="h-8"></div>
+                <div className="border-t border-black w-3/4 mx-auto mb-1"></div>
+                <div className="text-[10px] uppercase font-bold leading-tight text-black">
+                    {name ? (
+                        <>
+                            <p>{name}</p>
+                            <p>{role}</p>
+                            <p>CRP: {crp}</p>
+                            <p className="mt-1">Fortaleza - Ceará</p>
+                        </>
+                    ) : (
+                        <p>PSICÓLOGO(A) RESPONSÁVEL</p>
+                    )}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderInstrumental = () => {
         switch (activeInstrumental) {
@@ -122,7 +141,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <TableRow label="Unidade/Equipamento:" content={currentUnit.name} contentInput />
                             <TableRow label="Endereço:" content={currentUnit.address} contentInput />
                             <TableRow label="OSC Executora:" content="Centro de Formação e Inclusão Social Nossa Senhora de Fátima" contentInput />
-                            <TableRow label="Mês/Ano:" content="FEVEREIRO/2026" contentInput />
+                            <TableRow label="Mês/Ano:" content={`${currentDate.toLocaleDateString('pt-BR', { month: 'long' }).toUpperCase()}/${currentDate.getFullYear()}`} contentInput />
                         </div>
 
                         <div className="border-2 border-black mb-4">
@@ -561,6 +580,11 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
     return (
         <section className="p-4 md:p-8 animate-fade-in bg-orange-50/50 min-h-full">
+            {/* GLOBAL FILTERS */}
+            <div className="mb-8 print:hidden space-y-4">
+                <TimeSlider currentDate={currentDate} onDateChange={setCurrentDate} />
+                <ProfileFilter selectedProfessionalId={selectedProfessional} onSelectProfessional={setSelectedProfessional} />
+            </div>
             <div className="mb-4 flex justify-between items-center px-2 print:hidden">
                 <span className="text-slate-500 font-bold uppercase text-xs tracking-widest">Menu de Instrumentais</span>
                 <label className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-xl transition transform active:scale-95">

@@ -96,47 +96,35 @@ export const RelatorioService = {
                 .gte('data_registro', startDate)
                 .lte('data_registro', endDate)
                 .order('data_registro', { ascending: true });
+    async getRelatorioData(startDate: string, endDate: string, unidade ?: string, profissional ?: string) {
+                try {
+                    // Simulate API Call delay
+                    await new Promise(resolve => setTimeout(resolve, 500));
 
-            if (unidadeFilter && unidadeFilter !== 'todas') {
-                query = query.eq('unidade', unidadeFilter);
-            }
+                    // Load from LocalStorage
+                    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                    let data = storedData ? JSON.parse(storedData) : [];
 
-            const { data, error } = await query;
-            if (!error && data) supabaseData = data;
-        } catch (e) {
-            console.error("Erro Supabase fetch:", e);
-        }
-
-        // B. Buscar LocalStorage
-        try {
-            const existing = localStorage.getItem(LOCAL_STORAGE_KEY);
-            const allLocal = existing ? JSON.parse(existing) : [];
-
-            localData = allLocal.filter((item: any) => {
-                const itemDate = item.data_registro;
-                const matchesDate = itemDate >= startDate && itemDate <= endDate;
-                const matchesUnidade = !unidadeFilter || unidadeFilter === 'todas' || item.unidade === unidadeFilter;
-                // Evitar duplicatas se já veio do Supabase (por ID ou criado recentemente)
-                // Mas IDs locais são timestamp, IDs supabase são UUID ou number.
-                return matchesDate && matchesUnidade;
-            });
-        } catch (e) {
-            console.error("Erro LocalStorage fetch:", e);
-        }
-
-        // Merge simples (prioriza Supabase, mas adiciona locais que não estão lá - difícil verificar sem IDs compatíveis, vamos concatenar por enquanto marcando a fonte)
-        return [...supabaseData, ...localData];
-    },
+                    // Filter by Date Range
+                    data = data.filter((item: any) => {
+                        const itemDate = new Date(item.data_registro);
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        return itemDate >= start && itemDate <= end;
+                    });
+                    // Merge simples (prioriza Supabase, mas adiciona locais que não estão lá - difícil verificar sem IDs compatíveis, vamos concatenar por enquanto marcando a fonte)
+                    return [...supabaseData, ...localData];
+                },
 
     // 3. Buscar Unidades
     async getUnidades() {
-        const { data, error } = await supabase.from('unidades').select('*');
-        if (!error && data) return data;
-        return [
-            { id: 1, nome: 'CSMI João XXIII' },
-            { id: 2, nome: 'CSMI Cristo Redentor' },
-            { id: 3, nome: 'CSMI Curió' },
-            { id: 4, nome: 'CSMI Barbalha' }
-        ];
-    }
-};
+                    const { data, error } = await supabase.from('unidades').select('*');
+                    if (!error && data) return data;
+                    return [
+                        { id: 1, nome: 'CSMI João XXIII' },
+                        { id: 2, nome: 'CSMI Cristo Redentor' },
+                        { id: 3, nome: 'CSMI Curió' },
+                        { id: 4, nome: 'CSMI Barbalha' }
+                    ];
+                }
+            };

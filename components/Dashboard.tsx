@@ -39,6 +39,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [parecerGestao, setParecerGestao] = useState(''); // State for Manager's Review
 
   const isAdmin = user?.role === 'admin' || user?.name === 'Genildo Barbosa'; // Fallback for dev
+  const [viewMode, setViewMode] = useState<'charts' | 'list'>('charts');
+  const [selectedReport, setSelectedReport] = useState<any | null>(null); // For Modal
+  const [selectedUnit, setSelectedUnit] = useState<string>('Todas');
+
+  // Mock data for missing variables
+  const units = ['Todas', 'CSMI João XXIII', 'CSMI Cristo Redentor', 'CSMI Curió', 'CSMI Barbalha'];
+  const recentGenerations = [
+    { id: 1, title: 'Relatório de Frequência - Abril/2026', time: 'há 10 min' },
+    { id: 2, title: 'Planejamento Mensal - Julho/2026', time: 'há 30 min' }
+  ];
 
   const handleGeneratePDF = () => {
     const fullReportData = {
@@ -233,83 +243,153 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 </div>
               )}
 
+              {/* SELETOR DE MODO (NOVO) */}
+              <div className="flex bg-slate-100 p-1 rounded-xl">
+                <button
+                  onClick={() => setViewMode('charts')}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${viewMode === 'charts' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <i className="fa-solid fa-chart-pie mr-2"></i> Painel Neon
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <i className="fa-solid fa-list-check mr-2"></i> Gestão Central
+                </button>
+              </div>
+
               {/* BOTÃO DE SINCRONIZAÇÃO (GOOGLE) */}
               {user?.role === 'admin' && <GoogleAuthButton />}
             </div>
 
-            {/* --- ATIVIDADE AGORA (NEON) --- */}
-            {/* Apenas exibe se houver atividade real para não poluir */}
-            {recentGenerations.length > 0 && (
-              <div className="w-full bg-emerald-900 rounded-xl p-1 flex items-center justify-center shadow-lg shadow-emerald-200/50 animate-pulse">
-                <span className="text-[10px] font-black text-emerald-100 uppercase tracking-widest flex items-center gap-2">
-                  <i className="fa-solid fa-satellite-dish animate-pulse"></i>
-                  Atividade Registrada: {recentGenerations[0].title}
-                </span>
+            {/* --- CONTEÚDO DINÂMICO --- */}
+            {viewMode === 'charts' ? (
+              <>
+                {/* --- ATIVIDADE AGORA (NEON) --- */}
+                {/* Apenas exibe se houver atividade real para não poluir */}
+                {recentGenerations.length > 0 && (
+                  <div className="w-full bg-emerald-900 rounded-xl p-1 flex items-center justify-center shadow-lg shadow-emerald-200/50 animate-pulse">
+                    <span className="text-[10px] font-black text-emerald-100 uppercase tracking-widest flex items-center gap-2">
+                      <i className="fa-solid fa-satellite-dish animate-pulse"></i>
+                      Atividade Registrada: {recentGenerations[0].title}
+                    </span>
+                  </div>
+                )}
+                <div className="bg-slate-900 rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden shadow-2xl shadow-indigo-900/20 border border-slate-800">
+
+                  <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-indigo-500 rounded-full opacity-20 blur-3xl z-0"></div>
+                  <div className="absolute -left-16 -top-16 w-80 h-80 bg-emerald-500 rounded-full opacity-10 blur-3xl z-0"></div>
+
+                  <div className="flex-1 z-10 text-center lg:text-left">
+                    <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
+                      <span className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/50 ${isAdmin ? 'bg-indigo-600' : 'bg-orange-500'}`}>
+                        {isAdmin ? 'PAINEL DO GESTOR' : `PAINEL TÉCNICO • ${user?.unit?.toUpperCase()}`}
+                      </span>
+                    </div>
+
+                    <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter leading-none drop-shadow-lg">
+                      {isAdmin ? 'Visão Consolidada' : 'Minha Performance'}
+                    </h2>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                      {/* CARD 1: TOTAL */}
+                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
+                        <p className="text-[10px] font-black text-orange-400 uppercase mb-1 tracking-wider">Total Geral</p>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
+                            {atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + 45}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* CARD 2: GRUPOS */}
+                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
+                        <p className="text-[10px] font-black text-emerald-400 uppercase mb-1 truncate tracking-wider">Grupos</p>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">
+                            {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.7)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* CARD 3: INDIVIDUAL */}
+                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
+                        <p className="text-[10px] font-black text-blue-400 uppercase mb-1 truncate tracking-wider">Individual</p>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+                            {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.3)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* CARD 4: DOCS */}
+                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
+                        <p className="text-[10px] font-black text-purple-400 uppercase mb-1 truncate tracking-wider">Documentos</p>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">45</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-64 h-64 bg-gradient-to-b from-slate-800 to-slate-900 rounded-full flex items-center justify-center relative z-10 shrink-0 shadow-2xl border-4 border-slate-800 group overflow-hidden">
+                    <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-700 opacity-90" />
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* --- VISÃO GESTÃO CENTRAL (LISTA DETALHADA) --- */
+              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden animate-fade-in">
+                <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                  <h3 className="font-bold text-slate-700 uppercase tracking-widest text-sm">
+                    <i className="fa-solid fa-folder-open mr-2 text-indigo-500"></i>
+                    Central de Relatórios Detalhados
+                  </h3>
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Buscar técnico..." className="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs outline-none focus:border-indigo-500" />
+                    <button className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700">Filtrar</button>
+                  </div>
+                </div>
+
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="text-[10px] uppercase font-black text-slate-400 border-b border-slate-100">
+                      <th className="p-4">Data</th>
+                      <th className="p-4">Unidade</th>
+                      <th className="p-4">Técnico</th>
+                      <th className="p-4">Tipo</th>
+                      <th className="p-4">Atividade</th>
+                      <th className="p-4 text-center">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm text-slate-600">
+                    {/* MOCK DATA FOR LIST VIEW - Should be replaced by real data mapping */}
+                    <tr className="border-b border-slate-50 hover:bg-indigo-50/50 transition cursor-pointer" onClick={() => setSelectedReport(reportData)}>
+                      <td className="p-4 font-bold">12/05/2026</td>
+                      <td className="p-4">{user?.unit || 'CSMI João XXIII'}</td>
+                      <td className="p-4">{user?.name}</td>
+                      <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">Grupo</span></td>
+                      <td className="p-4 font-medium">Roda de Conversa: Fortalecimento de Vínculos</td>
+                      <td className="p-4 text-center">
+                        <button className="text-indigo-600 hover:text-indigo-800"><i className="fa-solid fa-eye"></i></button>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-slate-50 hover:bg-indigo-50/50 transition cursor-pointer">
+                      <td className="p-4 font-bold">15/05/2026</td>
+                      <td className="p-4">CSMI Cristo Redentor</td>
+                      <td className="p-4">Ana Paula</td>
+                      <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">Individual</span></td>
+                      <td className="p-4 font-medium">Escuta Qualificada (Busca Ativa)</td>
+                      <td className="p-4 text-center">
+                        <button className="text-indigo-600 hover:text-indigo-800"><i className="fa-solid fa-eye"></i></button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             )}
-            <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
 
-              <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-orange-50 rounded-full opacity-40 z-0"></div>
-
-              <div className="flex-1 z-10 text-center lg:text-left">
-                <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                  <span className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-sm ${isAdmin ? 'bg-purple-600' : 'bg-orange-500'}`}>
-                    {isAdmin ? 'PAINEL DO GESTOR' : `PAINEL TÉCNICO • ${user?.unit?.toUpperCase()}`}
-                  </span>
-                </div>
-
-                <h2 className="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tighter leading-none">
-                  {isAdmin ? 'Visão Consolidada' : 'Minha Performance'}
-                </h2>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                  {/* CARD 1: TOTAL */}
-                  <div className="bg-orange-50/50 p-3 rounded-2xl border border-orange-100">
-                    <p className="text-[9px] font-black text-orange-400 uppercase mb-1">Total Geral</p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl lg:text-3xl font-black text-orange-600">
-                        {atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + 45} {/* +45 simulados de docs */}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* CARD 2: GRUPOS */}
-                  <div className="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
-                    <p className="text-[9px] font-black text-emerald-500 uppercase mb-1 truncate" title="Diários de Grupo">Diários de Grupo</p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl lg:text-3xl font-black text-emerald-600">
-                        {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.7)}
-                      </span>
-                      <i className="fa-solid fa-users text-emerald-400 text-[10px]"></i>
-                    </div>
-                  </div>
-
-                  {/* CARD 3: INDIVIDUAL */}
-                  <div className="bg-blue-50/50 p-3 rounded-2xl border border-blue-100">
-                    <p className="text-[9px] font-black text-blue-500 uppercase mb-1 truncate" title="Fichas Individuais">Fichas Individuais</p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl lg:text-3xl font-black text-blue-600">
-                        {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.3)}
-                      </span>
-                      <i className="fa-solid fa-user-clock text-blue-400 text-[10px]"></i>
-                    </div>
-                  </div>
-
-                  {/* CARD 4: DOCS (Encaminhamentos + Visitas) */}
-                  <div className="bg-purple-50/50 p-3 rounded-2xl border border-purple-100">
-                    <p className="text-[9px] font-black text-purple-500 uppercase mb-1 truncate" title="Encaminhamentos & Visitas">Encaminhamentos & Visitas</p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl lg:text-3xl font-black text-purple-600">45</span>
-                      <i className="fa-solid fa-file-signature text-purple-400 text-[10px]"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-64 h-64 bg-gradient-to-b from-orange-100 to-orange-50 rounded-3xl flex items-center justify-center relative z-10 shrink-0 shadow-inner group overflow-hidden">
-                <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-700" />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -367,7 +447,73 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           </div>
         </div>
       </div>
-    </section>
+
+
+      {/* MODAL DETALHES (GESTÃO CENTRAL) */}
+      {
+        selectedReport && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedReport(null)}>
+            <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="flex justify-between items-start mb-6 border-b border-gray-200 pb-4">
+                <div>
+                  <h2 className="text-2xl font-black uppercase text-slate-800">Visualização de Relatório</h2>
+                  <p className="text-xs text-slate-500 font-bold uppercase mt-1">Cópia fiel do documento original</p>
+                </div>
+                <button onClick={() => setSelectedReport(null)} className="text-slate-400 hover:text-red-500 transition"><i className="fa-solid fa-xmark text-2xl"></i></button>
+              </div>
+
+              {/* --- SIMULAÇÃO DO DOCUMENTO WORD --- */}
+              <div className="border border-gray-300 p-12 min-h-[800px] shadow-lg bg-white mx-auto max-w-[210mm]">
+                <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-black px-4">
+                  <img src="logo-sps.png" alt="SPS" className="h-12 object-contain" />
+                  <img src="mais-infancia-logo.png" alt="Mais Infância" className="h-14 object-contain" />
+                </div>
+
+                <div className="text-center mb-8">
+                  <h1 className="font-bold text-lg uppercase underline">Relatório Mensal de Atividades - Maio 2026</h1>
+                  <p className="text-sm font-bold">Unidade: {user?.unit || 'Unidade Geral'}</p>
+                </div>
+
+                <div className="mb-4">
+                  <p className="font-bold uppercase text-xs mb-1">1. Introdução</p>
+                  <p className="text-justify text-sm leading-relaxed">
+                    O presente relatório tem como objetivo apresentar o consolidado das atividades desenvolvidas pela equipe psicossocial do {user?.unit} durante o mês de referência. As ações pautaram-se nas diretrizes da Proteção Social Básica.
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <p className="font-bold uppercase text-xs mb-1">2. Desenvolvimento</p>
+                  <p className="text-justify text-sm leading-relaxed mb-2">
+                    Foram realizados <strong>{atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + 45} atendimentos</strong> no total. Destaque para os grupos de convivência que mantiveram alta frequência.
+                  </p>
+                  <p className="text-justify text-sm leading-relaxed">
+                    Atividade em Destaque: {reportData.fotos[0].legenda}. Observou-se grande participação da comunidade.
+                  </p>
+                </div>
+
+                <div className="mb-8">
+                  <p className="font-bold uppercase text-xs mb-1">3. Conclusão</p>
+                  <p className="text-justify text-sm leading-relaxed">
+                    Avalia-se o mês como positivo, com o cumprimento das metas estabelecidas no Planejamento Mensal.
+                  </p>
+                </div>
+
+                <div className="mt-12 text-center">
+                  <div className="border-t border-black w-1/2 mx-auto mb-1"></div>
+                  <p className="text-[10px] uppercase font-bold">{user?.name}</p>
+                  <p className="text-[10px]">CRP: {user?.crp}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2">
+                <button onClick={() => window.print()} className="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold uppercase text-xs hover:bg-black transition"><i className="fa-solid fa-print mr-2"></i> Imprimir PDF Oficial</button>
+                <button onClick={() => setSelectedReport(null)} className="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-bold uppercase text-xs hover:bg-slate-300 transition">Fechar</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    </section >
   );
 };
 
