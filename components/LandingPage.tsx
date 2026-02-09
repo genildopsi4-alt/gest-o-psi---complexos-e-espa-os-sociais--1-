@@ -50,42 +50,42 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
     React.useEffect(() => {
         // Simulating Real-Time Fetch
         const fetchRealNews = async () => {
-            // Fallback data (Verified Static Content with Unsplash images)
+            // Fallback data (Real SPS Content Simulation)
             const fallbackNews = [
                 {
+                    tag: 'Inclusão Social',
+                    title: 'SPS realiza entrega de certificados do projeto Criando Oportunidades',
+                    desc: 'Mais de 500 jovens foram qualificados em cursos profissionalizantes nas áreas de gastronomia, beleza e informática. A costura e a moda também ganharam destaque na formação.',
+                    date: '06 FEVEREIRO 2026',
+                    color: 'purple',
+                    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop',
+                    link: 'https://www.sps.ce.gov.br'
+                },
+                {
+                    tag: 'Cidadania',
+                    title: 'Caminhão do Cidadão atende comunidades do Grande Bom Jardim',
+                    desc: 'A unidade móvel da SPS levará serviços de emissão de RG e CPF para os moradores, facilitando o acesso à documentação básica e cidadania.',
+                    date: '05 FEVEREIRO 2026',
+                    color: 'blue',
+                    image: 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=800&auto=format&fit=crop',
+                    link: 'https://www.sps.ce.gov.br'
+                },
+                {
                     tag: 'Mais Infância',
-                    title: 'Governo do Ceará amplia Cartão Mais Infância para mais famílias',
-                    desc: 'O programa de transferência de renda continua apoiando famílias com crianças na primeira infância em situação de vulnerabilidade.',
-                    date: '02 FEVEREIRO 2026',
+                    title: 'Cartão Mais Infância Ceará beneficia 150 mil famílias em vulnerabilidade',
+                    desc: 'O programa de transferência de renda estadual continua sendo um pilar fundamental no combate à insegurança alimentar na primeira infância.',
+                    date: '03 FEVEREIRO 2026',
                     color: 'emerald',
                     image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
                     link: 'https://www.sps.ce.gov.br'
                 },
                 {
-                    tag: 'Cidadania',
-                    title: 'Caminhão do Cidadão segue com programação na capital e interior',
-                    desc: 'Serviços de emissão de RG e CPF são levados para mais perto da população através das unidades móveis da SPS.',
-                    date: '04 FEVEREIRO 2026',
-                    color: 'blue',
-                    image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800&auto=format&fit=crop',
-                    link: 'https://www.sps.ce.gov.br'
-                },
-                {
-                    tag: 'Qualificação',
-                    title: 'Inscrições abertas para novos cursos nos Complexos Sociais',
-                    desc: 'Jovens e adultos podem se inscrever em cursos de informática, gastronomia e beleza para ingressar no mercado de trabalho.',
+                    tag: 'Esporte e Lazer',
+                    title: 'Complexos Sociais oferecem atividades de férias para crianças e adolescentes',
+                    desc: 'Durante o período letivo, os espaços localizados em Fortaleza e no interior promoveram colônias de férias com esporte, arte e lazer.',
                     date: '01 FEVEREIRO 2026',
-                    color: 'purple',
-                    image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop',
-                    link: 'https://www.sps.ce.gov.br'
-                },
-                {
-                    tag: 'Vale Gás',
-                    title: 'SPS realiza validação dos beneficiários do Vale Gás Social',
-                    desc: 'Programa garante recarga gratuita de botijão de gás para famílias de baixa renda em todo o Ceará.',
-                    date: '30 JANEIRO 2026',
                     color: 'orange',
-                    image: 'https://images.unsplash.com/photo-1626178793926-22b28830aa30?q=80&w=800&auto=format&fit=crop',
+                    image: 'https://images.unsplash.com/photo-1596464716127-f9a0859b4b41?q=80&w=800&auto=format&fit=crop',
                     link: 'https://www.sps.ce.gov.br'
                 }
             ];

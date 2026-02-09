@@ -102,12 +102,12 @@ const Planejamento: React.FC = () => {
 
     const getCalendarEventStyle = (color: string) => {
         switch (color) {
-            case 'blue': return 'bg-blue-500 text-white';
-            case 'emerald': return 'bg-emerald-600 text-white';
-            case 'purple': return 'bg-purple-500 text-white';
-            case 'amber': return 'bg-amber-400 text-amber-900';
-            case 'red': return 'bg-red-500 text-white';
-            default: return 'bg-gray-400 text-white';
+            case 'blue': return 'bg-[#3B82F6] text-white border-blue-600'; // Comunitária
+            case 'emerald': return 'bg-[#10B981] text-white border-emerald-600 shadow-md shadow-emerald-200'; // Grupos (Realizado)
+            case 'amber': return 'bg-[#F59E0B] text-white border-amber-600'; // Gestão
+            case 'red': return 'bg-[#EF4444] text-white border-red-600 shadow-md shadow-red-200'; // Individual/Crise
+            case 'gray': return 'bg-slate-400 text-white border-slate-500'; // Planejado (Genérico)
+            default: return 'bg-slate-400 text-white';
         }
     };
 
@@ -129,7 +129,7 @@ const Planejamento: React.FC = () => {
                     <div
                         key={ev.id}
                         onClick={(e) => { e.stopPropagation(); setSelectedActivity(ev); }}
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm truncate cursor-pointer transition hover:scale-105 ${getCalendarEventStyle(ev.color)}`}
+                        className={`text-[8px] font-black uppercase px-1.5 py-1 rounded shadow-sm truncate cursor-pointer transition hover:scale-105 ${getCalendarEventStyle(ev.color)}`}
                     >
                         {ev.tipoLabel}
                     </div>

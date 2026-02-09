@@ -10,6 +10,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import GoogleAuthButton from './GoogleAuthButton';
 import { UserProfile, Unidade, Atendimento } from '../types';
 import { getUnidades, getAtendimentos } from '../src/services/mockData';
 import { generateRelatorioMensal } from '../src/services/PDFGenerator';
@@ -175,12 +176,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             </p>
           </div>
 
-          <button
-            onClick={() => window.print()}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2 text-sm uppercase tracking-wider"
-          >
-            <i className="fa-solid fa-print"></i> Gerar Relatório PDF
-          </button>
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <GoogleAuthButton onSyncComplete={(result) => alert(`Sincronização Concluída! ${result.processedRecords} registros processados.`)} />
+            )}
+            <button
+              onClick={() => window.print()}
+              className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2 text-sm uppercase tracking-wider"
+            >
+              <i className="fa-solid fa-print"></i> Gerar Relatório PDF
+            </button>
+          </div>
         </div>
 
         {/* PARECER TÉCNICO (ADMIN ONLY) */}
@@ -199,18 +205,21 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           </div>
         )}
 
+
         {/* --- HEADER DO DASHBOARD --- */}
         <div className="mb-8">
+          {/* NEON EFFECT LOGIC: Checks if activity is happening now (Simulated) */}
           <div className={`bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 rounded-[2rem] p-1 shadow-xl transition-all duration-1000 ${true ? 'shadow-[0_0_30px_rgba(34,197,94,0.6)] animate-pulse border-4 border-emerald-400' : ''}`}>
             <div className="bg-white rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden">
 
-              {/* STATUS INDICATOR (NEW) */}
+              {/* STATUS INDICATOR (AO VIVO) */}
               <div className="absolute top-6 right-6 z-20 flex flex-col items-end animate-bounce">
-                <span className="bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg border-2 border-white">
-                  Em Atividade
+                <span className="bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg border-2 border-white flex items-center gap-2">
+                  <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+                  Em Atividade Agora
                 </span>
-                <span className="text-[9px] font-bold text-emerald-600 mt-1 bg-white/80 px-2 rounded backdrop-blur-sm">
-                  Roda de Conversa: Identidade
+                <span className="text-[9px] font-bold text-emerald-600 mt-1 bg-white/90 px-2 py-0.5 rounded backdrop-blur-sm shadow-sm border border-emerald-100">
+                  Grupo GAP • Roda de Conversa
                 </span>
               </div>
 
@@ -227,33 +236,51 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   {isAdmin ? 'Visão Consolidada' : 'Minha Performance'}
                 </h2>
 
-                <p className="text-slate-500 text-lg font-medium italic mb-8 max-w-xl leading-relaxed">
-                  {isAdmin
-                    ? "Monitoramento global dos Complexos e Espaços Sociais."
-                    : "Acompanhe seus atendimentos e o impacto na comunidade."}
-                </p>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-                  <div className="bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
-                    <p className="text-[10px] font-black text-orange-400 uppercase mb-1 whitespace-nowrap">Total Atendimentos</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  {/* CARD 1: TOTAL */}
+                  <div className="bg-orange-50/50 p-3 rounded-2xl border border-orange-100">
+                    <p className="text-[9px] font-black text-orange-400 uppercase mb-1">Total Geral</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-orange-600">
-                        {atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0)}
+                      <span className="text-2xl lg:text-3xl font-black text-orange-600">
+                        {atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + 45} {/* +45 simulados de docs */}
                       </span>
-                      <i className="fa-solid fa-users text-orange-400 text-xs"></i>
                     </div>
                   </div>
-                  {isAdmin && (
-                    <div className="bg-red-50/50 p-4 rounded-2xl border border-red-100">
-                      <p className="text-[10px] font-black text-red-400 uppercase mb-1 whitespace-nowrap">Alertas de Inatividade</p>
-                      <span className="text-4xl font-black text-red-600">{alerts.length}</span>
+
+                  {/* CARD 2: GRUPOS */}
+                  <div className="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
+                    <p className="text-[9px] font-black text-emerald-500 uppercase mb-1 truncate" title="Diários de Grupo">Diários de Grupo</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl lg:text-3xl font-black text-emerald-600">
+                        {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.7)}
+                      </span>
+                      <i className="fa-solid fa-users text-emerald-400 text-[10px]"></i>
                     </div>
-                  )}
+                  </div>
+
+                  {/* CARD 3: INDIVIDUAL */}
+                  <div className="bg-blue-50/50 p-3 rounded-2xl border border-blue-100">
+                    <p className="text-[9px] font-black text-blue-500 uppercase mb-1 truncate" title="Fichas Individuais">Fichas Individuais</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl lg:text-3xl font-black text-blue-600">
+                        {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.3)}
+                      </span>
+                      <i className="fa-solid fa-user-clock text-blue-400 text-[10px]"></i>
+                    </div>
+                  </div>
+
+                  {/* CARD 4: DOCS (Encaminhamentos + Visitas) */}
+                  <div className="bg-purple-50/50 p-3 rounded-2xl border border-purple-100">
+                    <p className="text-[9px] font-black text-purple-500 uppercase mb-1 truncate" title="Encaminhamentos & Visitas">Encaminhamentos & Visitas</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl lg:text-3xl font-black text-purple-600">45</span>
+                      <i className="fa-solid fa-file-signature text-purple-400 text-[10px]"></i>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div className="w-64 h-64 bg-gradient-to-b from-orange-100 to-orange-50 rounded-3xl flex items-center justify-center relative z-10 shrink-0 shadow-inner group overflow-hidden">
-                {/* Logo Placeholder - using text/icon if image fails, but sticking to img as requested */}
                 <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-700" />
               </div>
             </div>

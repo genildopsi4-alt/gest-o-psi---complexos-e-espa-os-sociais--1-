@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
 
@@ -5,7 +6,7 @@ interface InstrumentaisProps {
     user: UserProfile | null;
 }
 
-type InstrumentalType = 'planejamento' | 'escuta' | 'cadastro' | 'frequencia' | 'relatorio' | 'visita_domiciliar' | 'encaminhamento' | 'ci';
+type InstrumentalType = 'planejamento' | 'triagem' | 'escuta' | 'orientacao' | 'cadastro' | 'frequencia' | 'relatorio' | 'visita_domiciliar' | 'encaminhamento' | 'ci';
 
 const unitMap: Record<string, { name: string; address: string; email: string }> = {
     "CSMI João XXIII": {
@@ -51,7 +52,6 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const defaultUnit = unitMap["CSMI Cristo Redentor"];
     const currentUnit = user?.unit && unitMap[user.unit] ? unitMap[user.unit] : defaultUnit;
 
-    // Helper para gerar a assinatura em texto (para tabelas/textareas)
     const getSignatureText = () => {
         if (!user) return "PROFISSIONAL RESPONSÁVEL\n(Assinatura)";
         return `${user.name.toUpperCase()}\n${user.role.toUpperCase()}\nCRP: ${user.crp}`;
@@ -59,10 +59,8 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
     const signatureText = getSignatureText();
 
-    // Helper para renderizar o bloco de assinatura do profissional (Estilo Rodapé)
     const ProfessionalSignatureBlock = () => (
         <div className="text-center">
-            {/* Espaço para a assinatura física */}
             <div className="h-8"></div>
             <div className="border-t border-black w-3/4 mx-auto mb-1"></div>
             <div className="text-[10px] uppercase font-bold leading-tight text-black">
@@ -87,12 +85,9 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                     <DocumentContainer>
                         <SPSHeader />
                         <div className="border-2 border-black mb-8">
-                            {/* Título da Tabela */}
                             <div className="bg-blue-300 border-b border-black p-2 text-center font-bold uppercase text-sm text-black">
                                 Planejamento Mensal
                             </div>
-
-                            {/* Linhas de Dados */}
                             <TableRow label="Tema:" content="Carnaval da alegria" contentInput />
                             <TableRow label="Subtema:" content="Ritmos, fantasias e tradições." contentInput />
                             <TableRow label="Área de Atuação:" content={user?.role || "Psicologia Social"} contentInput />
@@ -102,7 +97,6 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <TableRow label="Mês/Ano:" content="FEVEREIRO/2026" contentInput />
                         </div>
 
-                        {/* Tabela de Atividades */}
                         <div className="border-2 border-black mb-4">
                             <div className="grid grid-cols-12 divide-x-2 divide-black bg-blue-200 border-b-2 border-black text-center text-[10px] font-bold uppercase leading-tight">
                                 <div className="col-span-1 p-2 flex items-center justify-center">Data/<br />Horário</div>
@@ -113,7 +107,6 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <div className="col-span-3 p-2 flex items-center justify-center">Profissional</div>
                             </div>
 
-                            {/* Linha 1 (Editável) */}
                             <div className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs">
                                 <div className="col-span-1 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-center bg-transparent" defaultValue={"03/02\n09:00h"}></textarea>
@@ -135,7 +128,6 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 </div>
                             </div>
 
-                            {/* Linha 2 (Editável) */}
                             <div className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs bg-slate-50">
                                 <div className="col-span-1 p-0">
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-center bg-transparent" defaultValue={"05/02\n09:00h"}></textarea>
@@ -156,22 +148,54 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                     <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" defaultValue={signatureText}></textarea>
                                 </div>
                             </div>
-
-                            {/* Linha 3 (Vazia para preenchimento) */}
-                            <div className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs">
-                                <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent" placeholder="Data"></textarea></div>
-                                <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none font-bold bg-transparent" placeholder="Atividade"></textarea></div>
-                                <div className="col-span-4 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent" placeholder="Descreva a metodologia..."></textarea></div>
-                                <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-[11px] bg-transparent" placeholder="Recursos"></textarea></div>
-                                <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" placeholder="Público"></textarea></div>
-                                <div className="col-span-3 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center font-bold text-[9px] bg-transparent" placeholder="Profissional Responsável"></textarea></div>
-                            </div>
                         </div>
 
                         <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
 
+            // --- ATENDIMENTO INDIVIDUAL: TRIAGEM ---
+            case 'triagem':
+                return (
+                    <DocumentContainer>
+                        <SPSHeader />
+                        <div className="border-2 border-black mb-6">
+                            <div className="bg-yellow-300 border-b border-black p-2 text-center font-bold uppercase text-sm text-black">
+                                Ficha de Triagem Simplificada
+                            </div>
+                            <TableRow label="Nome Completo:" contentInput />
+                            <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
+                                <div className="flex">
+                                    <div className="bg-yellow-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">DATA:</div>
+                                    <input className="w-full p-2 outline-none text-sm bg-white" type="date" />
+                                </div>
+                                <div className="flex">
+                                    <div className="bg-yellow-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">TELEFONE:</div>
+                                    <input className="w-full p-2 outline-none text-sm bg-white" placeholder="(85) 90000-0000" />
+                                </div>
+                            </div>
+                            <TableRow label="Motivo da Procura:" contentInput />
+                        </div>
+
+                        <div className="space-y-0 border-2 border-black mb-8">
+                            <TextAreaBlock label="BREVE RELATO / DEMANDA APRESENTADA" height="h-48" />
+                            <TextAreaBlock label="OBSERVAÇÕES DO TÉCNICO" height="h-32" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-20 mt-12 mb-8 items-end">
+                            <div className="text-center">
+                                <div className="h-8"></div>
+                                <div className="border-t border-black w-3/4 mx-auto mb-1"></div>
+                                <p className="text-[10px] uppercase font-bold text-black">BENEFICIÁRIO / RESPONSÁVEL</p>
+                            </div>
+                            <ProfessionalSignatureBlock />
+                        </div>
+
+                        <SPSFooter unit={currentUnit} />
+                    </DocumentContainer>
+                );
+
+            // --- ATENDIMENTO INDIVIDUAL: ESCUTA QUALIFICADA ---
             case 'escuta':
                 return (
                     <DocumentContainer>
@@ -215,6 +239,40 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <ProfessionalSignatureBlock />
                         </div>
 
+                        <SPSFooter unit={currentUnit} />
+                    </DocumentContainer>
+                );
+
+            // --- ATENDIMENTO INDIVIDUAL: ORIENTAÇÕES ---
+            case 'orientacao':
+                return (
+                    <DocumentContainer>
+                        <SPSHeader />
+                        <div className="border-2 border-black mb-8 p-8 bg-white">
+                            <h2 className="text-center font-bold text-xl uppercase underline mb-8">REGISTRO DE ORIENTAÇÃO TÉCNICA</h2>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                                <div className="flex gap-2">
+                                    <strong>Data:</strong>
+                                    <input type="date" className="border-b border-black outline-none flex-1" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <strong>Beneficiário:</strong>
+                                    <input className="border-b border-black outline-none flex-1 uppercase" />
+                                </div>
+                            </div>
+
+                            <div className="border border-black p-4 mb-6 min-h-[400px]">
+                                <p className="text-xs font-bold mb-2 text-gray-500 uppercase">DESCRIÇÃO DA ORIENTAÇÃO PRESTADA:</p>
+                                <textarea className="w-full h-[360px] resize-none outline-none text-justify leading-relaxed font-sans"></textarea>
+                            </div>
+
+                            <div className="mt-8 text-center">
+                                <div className="w-1/2 mx-auto">
+                                    <ProfessionalSignatureBlock />
+                                </div>
+                            </div>
+                        </div>
                         <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
@@ -416,14 +474,29 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
     return (
         <section className="p-4 md:p-8 animate-fade-in bg-orange-50/50 min-h-full">
+            <div className="mb-4 text-slate-500 font-bold uppercase text-xs tracking-widest pl-2 print:hidden">Menu de Instrumentais</div>
             <div className="mb-8 border-b-2 border-orange-200 pb-4 overflow-x-auto print:hidden">
-                <div className="flex bg-white p-1.5 rounded-2xl border border-orange-100 shadow-sm min-w-max gap-2">
+                <div className="flex bg-white p-2 rounded-2xl border border-orange-100 shadow-sm min-w-max gap-2 items-center">
+
                     <InstrumentalTab label="Planejamento" active={activeInstrumental === 'planejamento'} onClick={() => setActiveInstrumental('planejamento')} icon="fa-calendar-days" />
-                    <InstrumentalTab label="Escuta Qualificada" active={activeInstrumental === 'escuta'} onClick={() => setActiveInstrumental('escuta')} icon="fa-ear-listen" />
+
+                    {/* SEPARADOR: ATENDIMENTO INDIVIDUAL */}
+                    <div className="h-8 w-px bg-slate-200 mx-2"></div>
+                    <div className="flex flex-col gap-1 items-center px-2">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tight">Atendimento Individual</span>
+                        <div className="flex gap-2">
+                            <InstrumentalTab label="Triagem" active={activeInstrumental === 'triagem'} onClick={() => setActiveInstrumental('triagem')} icon="fa-filter" color="yellow" />
+                            <InstrumentalTab label="Escuta Qualificada" active={activeInstrumental === 'escuta'} onClick={() => setActiveInstrumental('escuta')} icon="fa-ear-listen" color="blue" />
+                            <InstrumentalTab label="Orientações" active={activeInstrumental === 'orientacao'} onClick={() => setActiveInstrumental('orientacao')} icon="fa-circle-info" color="green" />
+                        </div>
+                    </div>
+
+                    <div className="h-8 w-px bg-slate-200 mx-2"></div>
+
                     <InstrumentalTab label="Ficha Inscrição" active={activeInstrumental === 'cadastro'} onClick={() => setActiveInstrumental('cadastro')} icon="fa-address-card" />
                     <InstrumentalTab label="Frequência" active={activeInstrumental === 'frequencia'} onClick={() => setActiveInstrumental('frequencia')} icon="fa-list-check" />
                     <InstrumentalTab label="Relatório Mensal" active={activeInstrumental === 'relatorio'} onClick={() => setActiveInstrumental('relatorio')} icon="fa-file-invoice" />
-                    <InstrumentalTab label="Visita Domiciliar" active={activeInstrumental === 'visita_domiciliar'} onClick={() => setActiveInstrumental('visita_domiciliar')} icon="fa-house-circle-check" />
+                    <InstrumentalTab label="Visita" active={activeInstrumental === 'visita_domiciliar'} onClick={() => setActiveInstrumental('visita_domiciliar')} icon="fa-house-circle-check" />
                     <InstrumentalTab label="Encaminhamento" active={activeInstrumental === 'encaminhamento'} onClick={() => setActiveInstrumental('encaminhamento')} icon="fa-share-nodes" />
                     <InstrumentalTab label="C.I Interna" active={activeInstrumental === 'ci'} onClick={() => setActiveInstrumental('ci')} icon="fa-envelope-open-text" />
                 </div>
@@ -479,14 +552,24 @@ const TextAreaBlock: React.FC<{ label: string, height: string, noBorder?: boolea
         <div className="bg-blue-200 p-1 text-center font-bold text-[10px] uppercase border-b border-black text-black">
             {label}
         </div>
-        <textarea className={`w-full ${height} p-2 outline-none resize-none text-sm`}></textarea>
+        <textarea className={`w-full ${height} p-2 outline-none resize-none text-sm font-sans`}></textarea>
     </div>
 );
 
-const InstrumentalTab: React.FC<{ label: string; active: boolean; onClick: () => void; icon: string }> = ({ label, active, onClick, icon }) => (
-    <button onClick={onClick} className={`flex items-center gap-2 py-2 px-4 text-[11px] font-black uppercase transition-all rounded-xl border-2 ${active ? 'bg-teal-500 text-white border-teal-500 shadow-md' : 'bg-white text-slate-500 border-transparent hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100'}`}>
-        <i className={`fa-solid ${icon}`}></i> {label}
-    </button>
-);
+const InstrumentalTab: React.FC<{ label: string; active: boolean; onClick: () => void; icon: string; color?: 'yellow' | 'blue' | 'green' }> = ({ label, active, onClick, icon, color }) => {
+    let activeClass = 'bg-teal-500 text-white border-teal-500 shadow-md';
+
+    if (active) {
+        if (color === 'yellow') activeClass = 'bg-yellow-400 text-yellow-900 border-yellow-400 shadow-md';
+        if (color === 'blue') activeClass = 'bg-blue-500 text-white border-blue-500 shadow-md';
+        if (color === 'green') activeClass = 'bg-emerald-500 text-white border-emerald-500 shadow-md';
+    }
+
+    return (
+        <button onClick={onClick} className={`flex items-center gap-2 py-2 px-4 text-[11px] font-black uppercase transition-all rounded-xl border-2 whitespace-nowrap ${active ? activeClass : 'bg-white text-slate-500 border-transparent hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100'}`}>
+            <i className={`fa-solid ${icon}`}></i> {label}
+        </button>
+    );
+};
 
 export default Instrumentais;

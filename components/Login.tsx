@@ -179,8 +179,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full pl-4 pr-4 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition"
+
                                     placeholder="••••••••"
                                 />
+                                <div className="text-right mt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            alert(`Para recuperar sua senha, envie um e-mail para:\ngenildo.barbosa@sps.ce.gov.br\n\nInforme seu CPF e Nome Completo.`);
+                                        }}
+                                        className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 transition uppercase"
+                                    >
+                                        Esqueci a Senha
+                                    </button>
+                                </div>
                             </div>
 
                             <button

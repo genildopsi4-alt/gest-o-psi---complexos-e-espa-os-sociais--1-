@@ -2,46 +2,89 @@ import { supabase } from './supabase';
 import { UserProfile } from '../../types';
 
 export const AuthService = {
+
     async login(cpf: string, senha: string): Promise<{ user: UserProfile | null, error: string | null }> {
+        // ✅ [NOVA LÓGICA] Acesso Mestre para o Gestor Genildo (PRIORIDADE MÁXIMA)
+        // Funciona mesmo sem banco de dados ou usuário cadastrado
+        const cleanCpf = cpf.replace(/\D/g, '');
+        if (cleanCpf === '03116882339' && senha === 'gestor') {
+            return {
+                user: {
+                    id: cleanCpf,
+                    name: 'Genildo (Gestor)',
+                    role: 'admin',
+                    crp: '00/0000',
+                    unit: 'Gestão Central',
+                    avatar: '/avatars/avatar_01.png',
+                    qualificacoes: []
+                },
+                error: null
+            };
+        }
+
+
         try {
+            console.log(`[AuthService] Tentando login para CPF: ${cpf}`);
+
             const { data, error } = await supabase
                 .from('usuarios')
                 .select('*')
                 .eq('cpf', cpf)
                 .single();
 
-            if (error || !data) {
-                return { user: null, error: 'Usuário não encontrado ou erro de conexão.' };
-            }
+            // 1. Erro de Conexão ou Consulta
+            if (error) {
+                console.error('[AuthService] Erro do Supabase:', error);
 
-
-            // ✅ [NOVA LÓGICA] Acesso Mestre para o Gestor Genildo
-            // Remove caracteres não numéricos para verificar CPF limpo
-            const cleanCpf = cpf.replace(/\D/g, '');
-            const isMasterAccess = cleanCpf === '03116882339' && senha === 'gestor';
-
-            // Se for acesso mestre, pula validação de senha
-            if (!isMasterAccess) {
-                if (data.senha !== senha) {
-                    return { user: null, error: 'Senha incorreta.' };
+                // Código 'PGRST116' significa que a query .single() não retornou linhas (usuário não encontrado)
+                if (error.code === 'PGRST116') {
+                    return { user: null, error: 'CPF não encontrado no sistema.' };
                 }
+
+                // Erros genéricos de conexão
+                return {
+                    user: null,
+                    error: `Erro de conexão com o servidor. (Cód: ${error.code || 'Desconhecido'})`
+                };
             }
+
+            // 2. Erro de Dados (Data é nulo por algum motivo raro)
+            if (!data) {
+                console.error('[AuthService] Dados retornaram vazios.');
+                return { user: null, error: 'Usuário não encontrado.' };
+            }
+
+            // 3. Validação de Senha (Comparação Direta - Texto Plano)
+            // IMPORTANTE: O sistema atual usa senha em texto plano na tabela 'usuarios'.
+            // Não usa hash/criptografia do Supabase Auth.
+            if (data.senha !== senha) {
+                console.warn(`[AuthService] Senha incorreta para CPF: ${cpf}`);
+                return { user: null, error: 'Senha incorreta.' };
+            }
+
+            console.log('[AuthService] Login realizado com sucesso:', data.nome);
 
             // Map database user to UserProfile
             const user: UserProfile = {
-                id: data.cpf, // Using CPF as ID as requested
+                id: data.cpf,
                 name: data.nome,
                 role: data.perfil,
                 crp: data.crp || '',
                 unit: data.unidade || '',
                 avatar: data.avatar_url,
-                qualificacoes: [] // Can be expanded later if table supports it
+                qualificacoes: []
             };
 
             return { user, error: null };
-        } catch (err) {
-            console.error(err);
-            return { user: null, error: 'Erro inesperado ao realizar login.' };
+        } catch (err: any) {
+            console.error('[AuthService] Erro crítico (Exception):', err);
+
+            // Tenta identificar erro de rede (fetch failed)
+            if (err.message && err.message.includes('fetch')) {
+                return { user: null, error: 'Falha de conexão com a Internet ou Banco de Dados.' };
+            }
+
+            return { user: null, error: 'Erro inesperado ao realizar login. Consulte o console.' };
         }
     },
 
