@@ -50,6 +50,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
 
     const [reportTotals, setReportTotals] = useState({ total: 0, coletivas: 0, rede: 0 });
+    const [reportData, setReportData] = useState<any[]>([]);
 
     useEffect(() => {
         if (activeInstrumental === 'relatorio') {
@@ -58,6 +59,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 
             RelatorioService.getRelatorioData(firstDay, lastDay).then(data => {
+                setReportData(data);
                 // Calculate Totals
                 const total = data.length;
                 const coletivas = data.filter((i: any) => i.tipo_acao === 'interna' || i.tipo_acao === 'comunitaria').length;
@@ -403,12 +405,69 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 </div>
                             </div>
 
-                            <TextAreaBlock label="1. RESUMO DAS ATIVIDADES REALIZADAS" height="h-48" noBorder />
+                            <TextAreaBlock label="1. RESUMO DAS ATIVIDADES REALIZADAS" height="h-32" noBorder />
                             <div className="border-t-2 border-black"></div>
-                            <TextAreaBlock label="2. ANÁLISE QUALITATIVA / IMPACTOS OBSERVADOS" height="h-48" noBorder />
+                            <TextAreaBlock label="2. ANÁLISE QUALITATIVA / IMPACTOS OBSERVADOS" height="h-32" noBorder />
                             <div className="border-t-2 border-black"></div>
-                            <TextAreaBlock label="3. DIFICULDADES E ENCAMINHAMENTOS" height="h-32" noBorder />
+                            <TextAreaBlock label="3. DIFICULDADES E ENCAMINHAMENTOS" height="h-24" noBorder />
                         </div>
+
+                        {/* MOSTRUÁRIO DE ATIVIDADES (NOVO) */}
+                        {reportData.map((item, index) => (
+                            <div key={index} className="border-2 border-black mb-8 break-inside-avoid bg-white shadow-sm">
+                                {/* Header do Card */}
+                                <div className="bg-slate-100 border-b-2 border-black p-2 text-center">
+                                    <p className="font-bold text-xs uppercase tracking-widest mb-1 text-slate-500">ATIVIDADES</p>
+                                    <p className="font-black text-base uppercase">RELATÓRIO MENSAL DE ATIVIDADES DA PSICOLOGIA {new Date().getFullYear()}</p>
+                                </div>
+
+                                {/* Tabela de Informações */}
+                                <div className="text-xs">
+                                    <div className="flex border-b border-black">
+                                        <div className="bg-blue-200 w-32 p-2 font-bold border-r border-black flex-shrink-0 flex items-center">Unidade:</div>
+                                        <div className="p-2 font-bold uppercase flex-1">{item.unidade}</div>
+                                    </div>
+                                    <div className="flex border-b border-black">
+                                        <div className="bg-blue-200 w-32 p-2 font-bold border-r border-black flex-shrink-0 flex items-center">Endereço:</div>
+                                        <div className="p-2 flex-1">{unitMap[item.unidade]?.address || 'Endereço não cadastrado'}</div>
+                                    </div>
+                                    <div className="flex border-b border-black">
+                                        <div className="bg-blue-200 w-32 p-2 font-bold border-r border-black flex-shrink-0 flex items-center">Objetivo:</div>
+                                        <div className="p-2 flex-1 font-medium">{item.atividade_especifica.replace(/_/g, " ").toUpperCase()}</div>
+                                    </div>
+                                    <div className="flex border-b border-black">
+                                        <div className="bg-blue-200 w-32 p-2 font-bold border-r border-black flex-shrink-0 flex items-center">Data:</div>
+                                        <div className="p-2 flex-1 font-bold">{item.data_registro.split('-').reverse().join('/')}</div>
+                                    </div>
+                                    <div className="flex border-b border-black">
+                                        <div className="bg-blue-200 w-32 p-2 font-bold border-r border-black flex-shrink-0 flex items-center">Téc. Responsável:</div>
+                                        <div className="p-2 flex-1">{user?.name || 'Técnico Responsável'}</div>
+                                    </div>
+                                    <div className="flex border-b border-black">
+                                        <div className="bg-blue-200 w-32 p-2 font-bold border-r border-black flex-shrink-0 flex items-center">Público Alvo:</div>
+                                        <div className="p-2 flex-1">Beneficiários do Complexo</div>
+                                    </div>
+                                </div>
+
+                                {/* Foto */}
+                                <div className="border-b border-black p-2 flex justify-center bg-slate-50 min-h-[250px] items-center">
+                                    {item.fotos_urls && item.fotos_urls.length > 0 ? (
+                                        <img src={item.fotos_urls[0]} alt="Registro da Atividade" className="max-h-[300px] max-w-full object-contain rounded shadow-sm border border-slate-200" />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
+                                            <i className="fa-regular fa-image text-4xl mb-2"></i>
+                                            <p className="text-xs italic font-medium">Sem registro fotográfico anexado.</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Descrição */}
+                                <div className="p-4 bg-white text-xs leading-relaxed text-justify">
+                                    <span className="font-black mr-2 uppercase text-slate-700">Descrição:</span>
+                                    <span className="font-medium text-slate-800">{item.observacoes || "Nenhuma descrição registrada para esta atividade."}</span>
+                                </div>
+                            </div>
+                        ))}
                         <SPSFooter unit={currentUnit} />
                     </DocumentContainer>
                 );
