@@ -45,14 +45,24 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   // Mock data for missing variables
   const units = ['Todas', 'CSMI João XXIII', 'CSMI Cristo Redentor', 'CSMI Curió', 'CSMI Barbalha'];
-  const recentGenerations = [
-    { id: 1, title: 'Relatório de Frequência - Abril/2026', time: 'há 10 min' },
-    { id: 2, title: 'Planejamento Mensal - Julho/2026', time: 'há 30 min' }
-  ];
+  // Filtered Data based on Selection
+  const filteredAtendimentos = selectedUnit === 'Todas'
+    ? atendimentos
+    : atendimentos.filter(a => a.unidade === selectedUnit || a.unidade?.includes(selectedUnit));
+
+  // Recent Activity Logic (Simulated)
+  const recentGenerations = filteredAtendimentos
+    .filter(a => a.data_inclusao && (new Date().getTime() - new Date(a.data_inclusao).getTime() < 3600000))
+    .map(a => ({ id: a.id, title: a.tipoLabel || 'Atividade', time: 'há 10 min' }));
+
+  // Fallback for demo if empty
+  if (recentGenerations.length === 0) {
+    recentGenerations.push({ id: 1, title: 'Sistema Operacional', time: 'Online' });
+  }
 
   const handleGeneratePDF = () => {
     const fullReportData = {
-      unidade: user?.unit || 'Unidade Não Identificada',
+      unidade: selectedUnit === 'Todas' ? (user?.unit || 'Gestão PSI') : selectedUnit,
       mesReferencia: new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
       responsavel: user?.name || 'Técnico Responsável',
       ...reportData
@@ -91,12 +101,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   }, [user, isAdmin]);
 
   // Chart Data Preparation
-  const chartLabels = isAdmin ? unidades.map(u => u.nome.replace('CSMI ', '').replace('Espaço Social ', '')) : [user?.unit || 'Minha Unidade'];
+  const chartLabels = isAdmin && selectedUnit === 'Todas'
+    ? unidades.map(u => u.nome.replace('CSMI ', '').replace('Espaço Social ', ''))
+    : [selectedUnit];
 
-  // Calculate attendance totals per unit for the chart
-  const chartDataValues = isAdmin
+  const chartDataValues = isAdmin && selectedUnit === 'Todas'
     ? unidades.map(u => atendimentos.filter(a => a.unidade_id === u.id).reduce((acc, curr) => acc + curr.presenca_count, 0))
-    : [atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0)];
+    : [filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0)];
 
   const barData = {
     labels: chartLabels,
@@ -298,7 +309,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <p className="text-[10px] font-black text-orange-400 uppercase mb-1 tracking-wider">Total Geral</p>
                         <div className="flex items-baseline gap-1">
                           <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
-                            {atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + 45}
+                            {filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + (selectedUnit === 'Todas' ? 45 : 12)}
                           </span>
                         </div>
                       </div>
@@ -308,7 +319,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <p className="text-[10px] font-black text-emerald-400 uppercase mb-1 truncate tracking-wider">Grupos</p>
                         <div className="flex items-baseline gap-1">
                           <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">
-                            {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.7)}
+                            {Math.floor(filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.7)}
                           </span>
                         </div>
                       </div>
@@ -318,7 +329,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <p className="text-[10px] font-black text-blue-400 uppercase mb-1 truncate tracking-wider">Individual</p>
                         <div className="flex items-baseline gap-1">
                           <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
-                            {Math.floor(atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.3)}
+                            {Math.floor(filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.3)}
                           </span>
                         </div>
                       </div>
@@ -327,7 +338,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
                         <p className="text-[10px] font-black text-purple-400 uppercase mb-1 truncate tracking-wider">Documentos</p>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">45</span>
+                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                            {selectedUnit === 'Todas' ? 45 : 12}
+                          </span>
                         </div>
                       </div>
                     </div>
