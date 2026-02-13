@@ -12,6 +12,7 @@ import Beneficiarios from './components/Beneficiarios';
 import Planejamento from './components/Planejamento';
 import Instrumentais from './components/Instrumentais';
 import BottomNav from './components/BottomNav';
+import DataSeeder from './components/DataSeeder'; // [NEW]
 import { Section, Beneficiario, UserProfile } from './types';
 
 type AppView = 'landing' | 'login' | 'app';
@@ -19,6 +20,7 @@ type AppView = 'landing' | 'login' | 'app';
 const App: React.FC = () => {
   // View State Management
   const [currentView, setCurrentView] = useState<AppView>('landing');
+  const [showSeeder, setShowSeeder] = useState(false); // [NEW] Control DataSeeder visibility
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeSection, setActiveSection] = useState<Section>('dashboard');
@@ -192,6 +194,21 @@ const App: React.FC = () => {
             user={user}
           />
         </div>
+
+        {/* [NEW] Dev Tool: Data Seeder Trigger */}
+        {user?.role === 'admin' && (
+          <button
+            onClick={() => setShowSeeder(true)}
+            className="fixed bottom-4 right-4 z-50 bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-700 transition"
+            title="Abrir Ferramentas de Admin"
+          >
+            <i className="fa-solid fa-database"></i>
+          </button>
+        )}
+
+        {/* [NEW] Data Seeder Modal */}
+        {showSeeder && <DataSeeder />}
+
         <div className="flex-1 overflow-y-auto scroll-smooth p-4 md:p-6 print:p-0 print:overflow-visible">
           {renderSection()}
         </div>

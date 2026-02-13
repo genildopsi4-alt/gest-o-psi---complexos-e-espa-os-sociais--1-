@@ -99,8 +99,9 @@ export const AuthService = {
         qualificacoes?: string[];
     }): Promise<{ success: boolean; error: string | null }> {
         try {
-            // Force Admin role for specific CPF
-            const finalRole = userData.cpf === '031168823-39' ? 'admin' : userData.role;
+            // Force Admin role for specific CPF (Check digits only)
+            const cleanCpf = userData.cpf.replace(/\D/g, '');
+            const finalRole = cleanCpf === '03116882339' ? 'admin' : userData.role;
 
             const { error } = await supabase
                 .from('usuarios')

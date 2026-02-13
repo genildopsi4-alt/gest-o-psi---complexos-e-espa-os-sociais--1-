@@ -304,17 +304,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                     ></div>
 
                     {/* Modal Content */}
-                    <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl rounded-none md:rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden flex flex-col animate-fade-in-up">
+                    <div className="bg-white w-full h-[100dvh] md:h-auto md:max-h-[90vh] md:max-w-4xl rounded-none md:rounded-[2.5rem] shadow-2xl relative z-10 overflow-y-auto md:overflow-hidden flex flex-col animate-fade-in-up">
 
                         {/* Close Button */}
                         <button
                             onClick={() => setSelectedNews(null)}
-                            className="absolute top-6 right-6 bg-black/20 hover:bg-black/40 text-white w-12 h-12 rounded-full flex items-center justify-center transition z-50 backdrop-blur-md border border-white/20"
+                            className="fixed md:absolute top-6 right-6 bg-black/20 hover:bg-black/40 text-white w-12 h-12 rounded-full flex items-center justify-center transition z-50 backdrop-blur-md border border-white/20"
+                            title="Fechar Notícia"
+                            aria-label="Fechar"
                         >
                             <i className="fa-solid fa-xmark text-xl"></i>
                         </button>
 
-                        <div className="flex flex-col md:flex-row h-full">
+                        <div className="flex flex-col md:flex-row md:h-full">
                             {/* Image Side */}
                             <div className="w-full md:w-1/2 h-64 md:h-auto relative shrink-0 bg-slate-100">
                                 <img
@@ -336,8 +338,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                             </div>
 
                             {/* Content Side */}
-                            <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
-                                <div className="p-8 md:p-12 overflow-y-auto custom-scrollbar flex-1">
+                            <div className="flex-1 flex flex-col md:h-full md:overflow-hidden bg-white relative">
+                                <div className="p-8 md:p-12 md:overflow-y-auto md:flex-1">
                                     <div className="hidden md:block mb-6">
                                         <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block shadow-sm ${getTagStyle(selectedNews.color)}`}>
                                             {selectedNews.tag}
@@ -372,7 +374,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                                         rel="noopener noreferrer"
                                         className="flex-1 bg-teal-600 text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-teal-700 transition text-center shadow-lg shadow-teal-200 hover:shadow-xl text-xs flex items-center justify-center gap-3 group"
                                     >
-                                        Ler matéria completa <i className="fa-solid fa-arrow-up-right-from-square group-hover:translate-x-1 transition-transform"></i>
+                                        Ler matéria no site SPS <i className="fa-solid fa-arrow-up-right-from-square group-hover:translate-x-1 transition-transform"></i>
                                     </a>
                                 </div>
                             </div>

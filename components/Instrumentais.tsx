@@ -3,6 +3,7 @@ import { UserProfile } from '../types';
 import { RelatorioService } from '../src/services/RelatorioService';
 import TimeSlider from './TimeSlider';
 import ProfileFilter, { mockProfessionals } from './ProfileFilter';
+import ImportadorRelatorios from './ImportadorRelatorios';
 
 interface InstrumentaisProps {
     user: UserProfile | null;
@@ -52,6 +53,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
     const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedProfessional, setSelectedProfessional] = useState<string | null>(null);
+    const [showImportModal, setShowImportModal] = useState(false);
 
     const [reportTotals, setReportTotals] = useState({ total: 0, coletivas: 0, rede: 0 });
     const [reportData, setReportData] = useState<any[]>([]);
@@ -155,16 +157,16 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
 
                             <div className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs">
                                 <div className="col-span-1 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center bg-transparent" defaultValue={"03/02\n09:00h"}></textarea>
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center bg-transparent" defaultValue={"03/02\n09:00h"} title="Data e Horário - Exemplo"></textarea>
                                 </div>
                                 <div className="col-span-3 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none font-bold bg-transparent" defaultValue="“Painel coletivo de carnaval.”"></textarea>
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none font-bold bg-transparent" defaultValue="“Painel coletivo de carnaval.”" title="Atividade - Exemplo"></textarea>
                                 </div>
                                 <div className="col-span-4 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular a socialização.\n\nRoda de conversa e construção de painel."}></textarea>
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-[11px] leading-snug bg-transparent text-justify" defaultValue={"Objetivo: Estimular a socialização.\n\nRoda de conversa e construção de painel."} title="Metodologia - Exemplo"></textarea>
                                 </div>
                                 <div className="col-span-2 p-0">
-                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GPI"></textarea>
+                                    <textarea className="w-full h-32 p-2 resize-none outline-none text-center font-bold text-[10px] bg-transparent" defaultValue="GPI" title="Público Alvo - Exemplo"></textarea>
                                 </div>
                                 <div className="col-span-2 p-0 flex items-center justify-center">
                                     <div className="text-[10px] items-center justify-center flex p-2 text-center">{user?.name || 'Genildo Barbosa'}</div>
@@ -174,11 +176,11 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             {/* Empty Rows Loop */}
                             {[...Array(3)].map((_, i) => (
                                 <div key={i} className="grid grid-cols-12 divide-x-2 divide-black border-b border-black text-xs bg-slate-50">
-                                    <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent"></textarea></div>
-                                    <div className="col-span-3 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none bg-transparent"></textarea></div>
-                                    <div className="col-span-4 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none bg-transparent"></textarea></div>
-                                    <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent"></textarea></div>
-                                    <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent"></textarea></div>
+                                    <div className="col-span-1 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent" title={`Data e Horário - Linha ${i + 1}`}></textarea></div>
+                                    <div className="col-span-3 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none bg-transparent" title={`Atividade - Linha ${i + 1}`}></textarea></div>
+                                    <div className="col-span-4 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none bg-transparent" title={`Metodologia - Linha ${i + 1}`}></textarea></div>
+                                    <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent" title={`Público Alvo - Linha ${i + 1}`}></textarea></div>
+                                    <div className="col-span-2 p-0"><textarea className="w-full h-24 p-2 resize-none outline-none text-center bg-transparent" title={`Técnico Responsável - Linha ${i + 1}`}></textarea></div>
                                 </div>
                             ))}
                         </div>
@@ -200,11 +202,11 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
                                 <div className="flex">
                                     <div className="bg-yellow-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">DATA:</div>
-                                    <input className="w-full p-2 outline-none text-sm bg-white" type="date" />
+                                    <input className="w-full p-2 outline-none text-sm bg-white" type="date" title="Data da Triagem" />
                                 </div>
                                 <div className="flex">
                                     <div className="bg-yellow-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">TELEFONE:</div>
-                                    <input className="w-full p-2 outline-none text-sm bg-white" placeholder="(85) 90000-0000" />
+                                    <input className="w-full p-2 outline-none text-sm bg-white" placeholder="(85) 90000-0000" title="Telefone de Contato" />
                                 </div>
                             </div>
                             <TableRow label="Motivo da Procura:" contentInput />
@@ -241,11 +243,11 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
                                 <div className="flex">
                                     <div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">DATA/HORA:</div>
-                                    <input className="w-full p-2 outline-none text-sm bg-white" type="datetime-local" />
+                                    <input className="w-full p-2 outline-none text-sm bg-white" type="datetime-local" title="Data e Hora da Escuta" />
                                 </div>
                                 <div className="flex">
                                     <div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">UNIDADE:</div>
-                                    <select className="w-full p-2 outline-none text-sm bg-white">
+                                    <select className="w-full p-2 outline-none text-sm bg-white" title="Selecione a Unidade">
                                         <option>{currentUnit.name}</option>
                                         <option>CSMI João XXIII</option>
                                         <option>CSMI Cristo Redentor</option>
@@ -287,17 +289,17 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                                 <div className="flex gap-2">
                                     <strong>Data:</strong>
-                                    <input type="date" className="border-b border-black outline-none flex-1" />
+                                    <input type="date" className="border-b border-black outline-none flex-1" title="Data da Orientação" />
                                 </div>
                                 <div className="flex gap-2">
                                     <strong>Beneficiário:</strong>
-                                    <input className="border-b border-black outline-none flex-1 uppercase" />
+                                    <input className="border-b border-black outline-none flex-1 uppercase" title="Nome do Beneficiário" />
                                 </div>
                             </div>
 
                             <div className="border border-black p-4 mb-6 min-h-[400px]">
                                 <p className="text-xs font-bold mb-2 text-gray-500 uppercase">DESCRIÇÃO DA ORIENTAÇÃO PRESTADA:</p>
-                                <textarea className="w-full h-[360px] resize-none outline-none text-justify leading-relaxed font-sans"></textarea>
+                                <textarea className="w-full h-[360px] resize-none outline-none text-justify leading-relaxed font-sans" title="Descrição da Orientação"></textarea>
                             </div>
 
                             <div className="mt-8 text-center">
@@ -322,18 +324,18 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <div className="grid grid-cols-3 divide-x divide-black border-b border-black">
                                 <div className="flex col-span-2">
                                     <div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">NASCIMENTO:</div>
-                                    <input type="date" className="w-full p-1 outline-none" />
+                                    <input type="date" className="w-full p-1 outline-none" title="Data de Nascimento" />
                                 </div>
                                 <div className="flex col-span-1">
                                     <div className="bg-blue-200 w-20 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">SEXO:</div>
-                                    <select className="w-full p-1 outline-none"><option>M</option><option>F</option></select>
+                                    <select className="w-full p-1 outline-none" title="Sexo"><option>M</option><option>F</option></select>
                                 </div>
                             </div>
                             <TableRow label="Endereço:" contentInput />
                             <TableRow label="Nome do Responsável:" contentInput />
                             <div className="flex border-b border-black">
                                 <div className="bg-blue-200 w-48 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center text-red-700">GRUPO DE INSERÇÃO:</div>
-                                <select className="w-full p-2 outline-none font-bold text-sm">
+                                <select className="w-full p-2 outline-none font-bold text-sm" title="Selecione o Grupo de Inserção">
                                     <option>GAP (Grupo de Adolescentes Participativos)</option>
                                     <option>GPI (Grupo da Pessoa Idosa)</option>
                                     <option>GFA (Grupo de Famílias Atípicas)</option>
@@ -365,9 +367,9 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 Diário de Frequência Mensal
                             </div>
                             <div className="grid grid-cols-3 divide-x divide-black border-b border-black">
-                                <div className="flex"><div className="bg-blue-200 px-2 py-1 text-xs font-bold border-r border-black w-24">GRUPO:</div><input className="w-full px-2 outline-none uppercase font-bold" /></div>
-                                <div className="flex"><div className="bg-blue-200 px-2 py-1 text-xs font-bold border-r border-black w-24">MÊS/ANO:</div><input className="w-full px-2 outline-none uppercase font-bold" /></div>
-                                <div className="flex"><div className="bg-blue-200 px-2 py-1 text-xs font-bold border-r border-black w-24">TÉCNICO:</div><input className="w-full px-2 outline-none uppercase font-bold" defaultValue={user?.name} /></div>
+                                <div className="flex"><div className="bg-blue-200 px-2 py-1 text-xs font-bold border-r border-black w-24">GRUPO:</div><input className="w-full px-2 outline-none uppercase font-bold" title="Nome do Grupo" /></div>
+                                <div className="flex"><div className="bg-blue-200 px-2 py-1 text-xs font-bold border-r border-black w-24">MÊS/ANO:</div><input className="w-full px-2 outline-none uppercase font-bold" title="Mês e Ano" /></div>
+                                <div className="flex"><div className="bg-blue-200 px-2 py-1 text-xs font-bold border-r border-black w-24">TÉCNICO:</div><input className="w-full px-2 outline-none uppercase font-bold" defaultValue={user?.name} title="Nome do Técnico" /></div>
                             </div>
                         </div>
 
@@ -383,7 +385,7 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 {Array.from({ length: 15 }, (_, i) => (
                                     <tr key={i}>
                                         <td className="border border-black text-center bg-slate-50">{i + 1}</td>
-                                        <td className="border border-black"><input className="w-full h-full px-1 outline-none uppercase" /></td>
+                                        <td className="border border-black"><input className="w-full h-full px-1 outline-none uppercase" title={`Nome do Participante ${i + 1}`} /></td>
                                         {Array.from({ length: 31 }, (_, j) => <td key={j} className="border border-black text-center"></td>)}
                                     </tr>
                                 ))}
@@ -502,8 +504,8 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                             <TableRow label="Beneficiário:" contentInput />
                             <TableRow label="Endereço:" contentInput />
                             <div className="grid grid-cols-2 divide-x divide-black border-b border-black">
-                                <div className="flex"><div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">DATA DA VISITA:</div><input type="date" className="w-full p-1 outline-none" /></div>
-                                <div className="flex"><div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">MOTIVO:</div><input className="w-full p-1 outline-none" placeholder="Busca Ativa / Acompanhamento" /></div>
+                                <div className="flex"><div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">DATA DA VISITA:</div><input type="date" className="w-full p-1 outline-none" title="Data da Visita" /></div>
+                                <div className="flex"><div className="bg-blue-200 w-32 p-2 text-xs font-bold border-r border-black flex-shrink-0 flex items-center">MOTIVO:</div><input className="w-full p-1 outline-none" placeholder="Busca Ativa / Acompanhamento" title="Motivo da Visita" /></div>
                             </div>
                         </div>
                         <div className="border-2 border-black mb-6">
@@ -524,17 +526,17 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <p><strong>De:</strong> {currentUnit.name} (SPS)</p>
                                 <div className="flex items-end gap-2">
                                     <strong>Para:</strong>
-                                    <input className="flex-1 border-b border-black outline-none px-2 font-bold uppercase" placeholder="Nome da Instituição Destino (Ex: CRAS, CAPS...)" />
+                                    <input className="flex-1 border-b border-black outline-none px-2 font-bold uppercase" placeholder="Nome da Instituição Destino (Ex: CRAS, CAPS...)" title="Instituição de Destino" />
                                 </div>
                             </div>
 
                             <div className="mb-6 text-sm leading-loose">
-                                <p>Encaminhamos o(a) Sr(a) <input className="w-3/4 border-b border-black outline-none font-bold uppercase" />, residente em <input className="w-full border-b border-black outline-none" />, para:</p>
+                                <p>Encaminhamos o(a) Sr(a) <input className="w-3/4 border-b border-black outline-none font-bold uppercase" title="Nome do Encaminhado" />, residente em <input className="w-full border-b border-black outline-none" title="Endereço do Encaminhado" />, para:</p>
                             </div>
 
                             <div className="border border-black p-4 h-64 mb-6">
                                 <p className="text-xs font-bold mb-2 text-gray-500 uppercase">MOTIVO / HISTÓRICO BREVE:</p>
-                                <textarea className="w-full h-full resize-none outline-none font-serif italic"></textarea>
+                                <textarea className="w-full h-full resize-none outline-none font-serif italic" title="Motivo do Encaminhamento"></textarea>
                             </div>
 
                             <p className="text-center text-sm font-bold mt-12">Atenciosamente,</p>
@@ -558,11 +560,11 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
                                 <p className="font-bold">Nº ______ / 2026</p>
                             </div>
                             <div className="space-y-4 mb-8">
-                                <div className="flex"><span className="font-bold w-20">PARA:</span> <input className="flex-1 border-b border-gray-400 outline-none" /></div>
-                                <div className="flex"><span className="font-bold w-20">DE:</span> <input className="flex-1 border-b border-gray-400 outline-none" defaultValue={user ? `${user.name} (${user.role})` : ''} /></div>
-                                <div className="flex"><span className="font-bold w-20">ASSUNTO:</span> <input className="flex-1 border-b border-gray-400 outline-none font-bold uppercase" /></div>
+                                <div className="flex"><span className="font-bold w-20">PARA:</span> <input className="flex-1 border-b border-gray-400 outline-none" title="Destinatário" /></div>
+                                <div className="flex"><span className="font-bold w-20">DE:</span> <input className="flex-1 border-b border-gray-400 outline-none" defaultValue={user ? `${user.name} (${user.role})` : ''} title="Remetente" /></div>
+                                <div className="flex"><span className="font-bold w-20">ASSUNTO:</span> <input className="flex-1 border-b border-gray-400 outline-none font-bold uppercase" title="Assunto" /></div>
                             </div>
-                            <textarea className="w-full h-[500px] resize-none outline-none text-justify leading-relaxed p-4 border border-gray-300"></textarea>
+                            <textarea className="w-full h-[500px] resize-none outline-none text-justify leading-relaxed p-4 border border-gray-300" title="Conteúdo da Comunicação Interna"></textarea>
 
                             <div className="mt-4 mb-4 text-center">
                                 <div className="w-1/3 mx-auto">
@@ -587,12 +589,31 @@ const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
             </div>
             <div className="mb-4 flex justify-between items-center px-2 print:hidden">
                 <span className="text-slate-500 font-bold uppercase text-xs tracking-widest">Menu de Instrumentais</span>
-                <label className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-xl transition transform active:scale-95">
-                    <i className="fa-solid fa-camera animate-pulse sm:animate-none"></i>
-                    <span className="font-bold text-[10px] uppercase tracking-wider">Digitalizar (Drive)</span>
-                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileUpload} />
-                </label>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="bg-orange-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg hover:bg-orange-600 transition transform active:scale-95"
+                    >
+                        <i className="fa-solid fa-file-pdf"></i>
+                        <span className="font-bold text-[10px] uppercase tracking-wider">Importar PDF</span>
+                    </button>
+                    <label className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg hover:shadow-xl transition transform active:scale-95">
+                        <i className="fa-solid fa-camera animate-pulse sm:animate-none"></i>
+                        <span className="font-bold text-[10px] uppercase tracking-wider">Digitalizar (Drive)</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} title="Digitalizar Documento" />
+                    </label>
+                </div>
             </div>
+
+            {showImportModal && (
+                <ImportadorRelatorios
+                    onClose={() => setShowImportModal(false)}
+                    onSuccess={() => {
+                        setShowImportModal(false);
+                        // Trigger a refresh if needed, for now just close
+                    }}
+                />
+            )}
             <div className="mb-8 border-b-2 border-orange-200 pb-4 overflow-x-auto print:hidden">
                 <div className="flex bg-white p-2 rounded-2xl border border-orange-100 shadow-sm min-w-max gap-2 items-center">
 
@@ -657,7 +678,7 @@ const TableRow: React.FC<{ label: string; content?: string; contentInput?: boole
         </div>
         <div className="flex-1 p-2 text-sm">
             {contentInput ? (
-                <input className="w-full h-full outline-none bg-transparent" defaultValue={content} />
+                <input className="w-full h-full outline-none bg-transparent" defaultValue={content} title={label.replace(':', '')} />
             ) : (
                 content
             )}
@@ -670,7 +691,7 @@ const TextAreaBlock: React.FC<{ label: string, height: string, noBorder?: boolea
         <div className="bg-blue-200 p-1 text-center font-bold text-[10px] uppercase border-b border-black text-black">
             {label}
         </div>
-        <textarea className={`w-full ${height} p-2 outline-none resize-none text-sm font-sans`}></textarea>
+        <textarea className={`w-full ${height} p-2 outline-none resize-none text-sm font-sans`} title={label}></textarea>
     </div>
 );
 

@@ -63,6 +63,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
         );
     };
 
+    // CPF Mask Helper
+    const formatCpf = (value: string) => {
+        return value
+            .replace(/\D/g, '') // Remove tudo o que não é dígito
+            .replace(/(\d{3})(\d)/, '$1.$2') // Coloca um ponto entre o terceiro e o quarto dígitos
+            .replace(/(\d{3})(\d)/, '$1.$2') // Coloca um ponto entre o terceiro e o quarto dígitos de novo (para o segundo bloco de números)
+            .replace(/(\d{3})(\d{1,2})/, '$1-$2') // Coloca um hífen entre o terceiro e o quarto dígitos
+            .replace(/(-\d{2})\d+?$/, '$1'); // Impede que sejam digitados mais de 11 dígitos
+    };
+
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -165,9 +175,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     type="text"
                                     required
                                     value={cpf}
-                                    onChange={(e) => setCpf(e.target.value)}
+                                    onChange={(e) => setCpf(formatCpf(e.target.value))}
                                     className="w-full pl-4 pr-4 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white transition"
                                     placeholder="000.000.000-00"
+                                    maxLength={14}
+                                    minLength={14}
                                 />
                             </div>
 
@@ -239,9 +251,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                 <div>
                                     <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">CPF</label>
                                     <input
-                                        type="text" required value={regCpf} onChange={e => setRegCpf(e.target.value)}
+                                        type="text" required value={regCpf} onChange={e => setRegCpf(formatCpf(e.target.value))}
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
                                         placeholder="000.000.000-00"
+                                        maxLength={14}
+                                        minLength={14}
+                                        aria-label="CPF"
                                     />
                                 </div>
                                 <div>
@@ -249,6 +264,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     <input
                                         type="text" required value={regCrp} onChange={e => setRegCrp(e.target.value)}
                                         placeholder="00/00000"
+                                        aria-label="Número CRP"
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
                                     />
                                 </div>
@@ -256,6 +272,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Nome Completo</label>
                                     <input
                                         type="text" required value={regName} onChange={e => setRegName(e.target.value)}
+                                        aria-label="Nome Completo"
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
                                     />
                                 </div>
@@ -264,6 +281,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     <input
                                         type="password" required value={regPassword} onChange={e => setRegPassword(e.target.value)}
                                         placeholder="••••••••"
+                                        aria-label="Crie sua Senha"
                                         className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-emerald-500"
                                     />
                                 </div>
@@ -277,6 +295,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                             type="radio"
                                             name="role"
                                             value="admin"
+                                            title="Perfil Gestor"
                                             checked={regRole === 'admin'}
                                             onChange={() => setRegRole('admin')}
                                             className="hidden"
@@ -289,6 +308,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                             type="radio"
                                             name="role"
                                             value="tecnico"
+                                            title="Perfil Técnico"
                                             checked={regRole === 'tecnico'}
                                             onChange={() => setRegRole('tecnico')}
                                             className="hidden"
@@ -305,6 +325,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-1">Unidade de Atuação</label>
                                     <select
                                         required
+                                        title="Selecione sua unidade"
                                         value={regUnit}
                                         onChange={(e) => setRegUnit(e.target.value)}
                                         className="w-full px-4 py-3 rounded-xl bg-slate-50 border-2 border-slate-100 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition font-bold text-slate-600 text-sm appearance-none"

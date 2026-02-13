@@ -9,13 +9,11 @@ import {
   Legend,
   ArcElement
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import GoogleAuthButton from './GoogleAuthButton';
 import { UserProfile, Unidade, Atendimento } from '../types';
-import { getUnidades, getAtendimentos } from '../src/services/mockData';
+import { RelatorioService } from '../src/services/RelatorioService';
 import { generateRelatorioMensal } from '../src/services/PDFGenerator';
-
-
 
 ChartJS.register(
   CategoryScale,
@@ -34,528 +32,285 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [unidades, setUnidades] = useState<Unidade[]>([]);
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
-  const [alerts, setAlerts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [parecerGestao, setParecerGestao] = useState(''); // State for Manager's Review
+  const [parecerGestao, setParecerGestao] = useState('');
 
-  const isAdmin = user?.role === 'admin' || user?.name === 'Genildo Barbosa'; // Fallback for dev
-  const [viewMode, setViewMode] = useState<'charts' | 'list'>('charts');
-  const [selectedReport, setSelectedReport] = useState<any | null>(null); // For Modal
+  const isAdmin = user?.role === 'admin' || user?.name === 'Genildo Barbosa';
   const [selectedUnit, setSelectedUnit] = useState<string>('Todas');
 
-  // Mock data for missing variables
-  const units = ['Todas', 'CSMI João XXIII', 'CSMI Cristo Redentor', 'CSMI Curió', 'CSMI Barbalha'];
-  // Filtered Data based on Selection
-  const filteredAtendimentos = selectedUnit === 'Todas'
-    ? atendimentos
-    : atendimentos.filter(a => a.unidade === selectedUnit || a.unidade?.includes(selectedUnit));
-
-  // Recent Activity Logic (Simulated)
-  const recentGenerations = filteredAtendimentos
-    .filter(a => a.data_inclusao && (new Date().getTime() - new Date(a.data_inclusao).getTime() < 3600000))
-    .map(a => ({ id: a.id, title: a.tipoLabel || 'Atividade', time: 'há 10 min' }));
-
-  // Fallback for demo if empty
-  if (recentGenerations.length === 0) {
-    recentGenerations.push({ id: 1, title: 'Sistema Operacional', time: 'Online' });
-  }
-
-  const handleGeneratePDF = () => {
-    const fullReportData = {
-      unidade: selectedUnit === 'Todas' ? (user?.unit || 'Gestão PSI') : selectedUnit,
-      mesReferencia: new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-      responsavel: user?.name || 'Técnico Responsável',
-      ...reportData
-    };
-    generateRelatorioMensal(fullReportData);
-  };
-
+  // Fetch Data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const unitsData = await getUnidades();
-      const attendancesData = await getAtendimentos(isAdmin ? undefined : unitsData.find(u => u.nome === user?.unit)?.id);
+      try {
+        const unitsData = await RelatorioService.getUnidades();
+        // Fetch all data for current context (simplifying to full year 2026 for now)
+        const attendimentosData = await RelatorioService.getRelatorioData('2026-01-01', '2026-12-31');
 
-      setUnidades(unitsData);
-      setAtendimentos(attendancesData);
-
-      // Alert Logic
-      if (isAdmin) {
-        const today = new Date();
-        const newAlerts: string[] = [];
-        unitsData.forEach(u => {
-          if (u.last_activity_date) {
-            const lastDate = new Date(u.last_activity_date);
-            const diffTime = Math.abs(today.getTime() - lastDate.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays > 7) {
-              newAlerts.push(u.nome + " sem atividades há " + diffDays + " dias.");
-            }
-          }
-        });
-        setAlerts(newAlerts);
+        setUnidades(unitsData);
+        setAtendimentos(attendimentosData);
+      } catch (error) {
+        console.error("Erro ao carregar dashboard:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     loadData();
   }, [user, isAdmin]);
 
-  // Chart Data Preparation
-  const chartLabels = isAdmin && selectedUnit === 'Todas'
-    ? unidades.map(u => u.nome.replace('CSMI ', '').replace('Espaço Social ', ''))
-    : [selectedUnit];
+  // Derived State for UI
+  const unitsNames = ['Todas', ...unidades.map(u => u.nome)];
 
-  const chartDataValues = isAdmin && selectedUnit === 'Todas'
-    ? unidades.map(u => atendimentos.filter(a => a.unidade_id === u.id).reduce((acc, curr) => acc + curr.presenca_count, 0))
-    : [filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0)];
+  // Filter Logic
+  const filteredAtendimentos = selectedUnit === 'Todas'
+    ? atendimentos
+    : atendimentos.filter(a => a.unidade === selectedUnit);
 
-  const barData = {
-    labels: chartLabels,
-    datasets: [
-      {
-        label: 'Atendimentos Totais',
-        data: chartDataValues.map(v => v === 0 ? 5 : v), // Mock visual data if 0 to show bar
-        backgroundColor: [
-          '#F59E0B', '#0D9488', '#7C3AED', '#0284C7', '#D97706', '#059669', '#E11D48'
-        ],
-        borderRadius: 8,
-      },
-    ],
+  // Metrics Calculations
+  // Notes: 'presenca_count' comes from Supabase/Local, 'qtd_participantes' from PDF import. Summing both safely.
+  const totalGeral = filteredAtendimentos.reduce((acc, curr) => acc + (curr.qtd_participantes || curr.presenca_count || 0), 0);
+
+  // Mocking categorization for now based on strings since we don't have explicit types for everything yet
+  const diariosGrupo = filteredAtendimentos.filter(a => a.atividade_especifica?.toLowerCase().includes('grupo') || a.tipo_grupo).length;
+  const fichasIndividuais = filteredAtendimentos.filter(a => !a.atividade_especifica?.toLowerCase().includes('grupo') && !a.tipo_grupo).length;
+  const encaminhamentos = Math.floor(totalGeral * 0.1); // Estimated for now
+
+  // --- CHART DATA PREPARATION ---
+
+  // 1. Bar Chart: Atendimentos por Unidade (Top 5 + Espaços)
+  const barChartData = {
+    labels: unidades.map(u => u.nome.replace('CSMI ', '').replace('Espaço ', '')),
+    datasets: [{
+      label: 'Atendimentos',
+      data: unidades.map(u => {
+        return atendimentos
+          .filter(a => a.unidade === u.nome)
+          .reduce((acc, curr) => acc + (curr.qtd_participantes || curr.presenca_count || 0), 0);
+      }),
+      backgroundColor: unidades.map(u => u.tipo === 'CSMI' ? '#10B981' : '#F97316'), // Emerald vs Orange
+      borderRadius: 8,
+    }]
   };
 
   const barOptions = {
     responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: { beginAtZero: true },
-    },
     plugins: {
       legend: { display: false },
+      title: { display: true, text: 'Atendimentos por Unidade', color: '#64748B', font: { size: 12 } }
     },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#F1F5F9' } },
+      x: { grid: { display: false } }
+    }
   };
 
-  // Placeholder for a second chart (Frequência por Grupo)
-  const dataGrupos = {
-    labels: ['GPI (Idosos)', 'GAP (Adolescentes)', 'ACT (Famílias)', 'GFA (Atípicos)'],
-    datasets: [
-      {
-        label: 'Frequência',
-        data: [15, 12, 8, 5], // Example data
-        backgroundColor: [
-          '#0D9488', '#7C3AED', '#F59E0B', '#D97706'
-        ],
-        borderRadius: 8,
-      },
-    ],
+  // 2. Doughnut Chart: CSMI vs Espaços Sociais
+  const csmiTotal = atendimentos
+    .filter(a => unidades.find(u => u.nome === a.unidade)?.tipo === 'CSMI')
+    .reduce((acc, curr) => acc + (curr.qtd_participantes || curr.presenca_count || 0), 0);
+
+  const espacosTotal = totalGeral - csmiTotal; // Remaining are Espaços Sociais (filtered by Todas) or calculate explicitly
+  // Re-calculate explicitly for 'Todas' context to be accurate
+  const espacosTotalEx = atendimentos
+    .filter(a => unidades.find(u => u.nome === a.unidade)?.tipo === 'Espaço Social')
+    .reduce((acc, curr) => acc + (curr.qtd_participantes || curr.presenca_count || 0), 0);
+
+  const doughnutData = {
+    labels: ['Complexos Sociais', 'Espaços Sociais'],
+    datasets: [{
+      data: [csmiTotal, espacosTotalEx],
+      backgroundColor: ['#10B981', '#F97316'],
+      borderColor: ['#ffffff', '#ffffff'],
+      borderWidth: 4,
+    }]
   };
 
-  // Prepare Data for PDF Report
-  // Prepare Data for PDF Report (Fictitious/Simulation Mode)
-  const reportData = {
-    grupos: [
-      { nome: 'GPI - Grupo de Idosos (Vida Ativa)', encontros: 8, beneficiarios: 42, status: 'Consolidado' },
-      { nome: 'GAP - Adolescentes (Protagonismo)', encontros: 6, beneficiarios: 28, status: 'Regular' },
-      { nome: 'ACT - Famílias (Fortalecendo Laços)', encontros: 4, beneficiarios: 35, status: 'Em Expansão' },
-      { nome: 'GFA - Grupo de Mulheres', encontros: 5, beneficiarios: 22, status: 'Iniciando' },
-      { nome: 'Círculos de Construção de Paz', encontros: 3, beneficiarios: 18, status: 'Sob Demanda' },
-    ],
-    escuta: {
-      total: isAdmin ? 345 : 48, // Simulated total for Admin vs Unit
-      encaminhamentos: {
-        saude: isAdmin ? 45 : 8,
-        assistencia: isAdmin ? 62 : 12,
-        educacao: isAdmin ? 28 : 5
-      }
-    },
-    mobilizacao: {
-      titulo: "Dia D: Mais Infância na Minha Comunidade",
-      publico: isAdmin ? 1250 : 180,
-      sintese: "Realização de grande ação comunitária com foco na primeira infância. Atividades incluíram: Roda de conversa sobre parentalidade positiva, oficinas lúdicas para crianças, distribuição de material informativo sobre o CRAS/CREAS e vacinação. Parceria articulada com lideranças locais e Secretaria de Saúde."
-    },
-    fotos: [
-      { url: 'https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&w=500&q=60', legenda: 'Roda de Conversa: Fortalecimento de Vínculos Familiares', data: '12/05/2026' },
-      { url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=500&q=60', legenda: 'Atividade Lúdica e Integração Intergeracional', data: '15/05/2026' },
-      { url: 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&w=500&q=60', legenda: 'Oficina de Artes e Expressão Criativa', data: '20/05/2026' }
-    ],
-    parecerGestao: parecerGestao || "O mês apresentou avanço significativo nos indicadores de mobilização comunitária. Destaca-se a adesão das famílias ao Grupo ACT e a efetividade dos encaminhamentos para a rede de saúde. Recomenda-se manter o foco na busca ativa para o grupo de adolescentes."
+  const doughnutOptions = {
+    cutout: '70%',
+    plugins: {
+      legend: { position: 'bottom' as const, labels: { usePointStyle: true, boxWidth: 8 } }
+    }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Carregando dados do painel...</div>;
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Carregando dados...</div>;
 
   return (
-    <section className="p-6 md:p-8 animate-fade-in space-y-8">
-      {/* VIEWPORT CONTENT (HIDDEN ON PRINT) */}
-      <div className="print:hidden space-y-8">
+    <section className="p-4 md:p-8 animate-fade-in space-y-8 bg-slate-50/50 min-h-screen">
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800 leading-none">
-              {isAdmin ? 'Visão Geral da Rede' : 'Minha Performance'}
-            </h2>
-            <p className="text-sm font-bold text-gray-400 mt-1 uppercase tracking-wide">
-              {isAdmin ? 'Monitoramento Integrado' : user?.unit}
-            </p>
-          </div>
+      {/* --- VISÃO CONSOLIDADA (Main Card) --- */}
+      <div className="bg-white rounded-[3rem] p-8 md:p-12 shadow-xl border-4 border-emerald-400/30 relative overflow-hidden">
 
-          <div className="flex items-center gap-3">
-            {isAdmin && (
-              <GoogleAuthButton onSyncComplete={(result) => alert(`Sincronização Concluída! ${result.processedRecords} registros processados.`)} />
-            )}
-            <button
-              onClick={() => window.print()}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition flex items-center gap-2 text-sm uppercase tracking-wider"
-            >
-              <i className="fa-solid fa-print"></i> Gerar Relatório PDF
-            </button>
-          </div>
-        </div>
+        {/* Background Decor (Subtle) */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -z-10 opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl -z-10 opacity-50"></div>
 
-        {/* PARECER TÉCNICO (ADMIN ONLY) */}
-        {isAdmin && (
-          <div className="bg-white rounded-2xl shadow-sm border-l-4 border-indigo-500 p-6">
-            <h3 className="font-bold text-indigo-900 flex items-center gap-2 mb-3">
-              <i className="fa-solid fa-pen-nib"></i> Parecer Técnico da Gestão (Pré-Relatório)
-            </h3>
-            <p className="text-xs text-slate-500 mb-2">Este texto aparecerá no final do relatório PDF consolidado.</p>
-            <textarea
-              value={parecerGestao}
-              onChange={(e) => setParecerGestao(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-700 focus:outline-none focus:border-indigo-500 min-h-[100px]"
-              placeholder="Digite aqui a análise técnica mensal para constar no documento oficial..."
-            ></textarea>
-          </div>
-        )}
+        <div className="flex flex-col lg:flex-row gap-12">
 
+          {/* LEFT COLUMN: Header & Metrics */}
+          <div className="flex-1 space-y-10">
 
-        {/* --- HEADER DO DASHBOARD --- */}
-        <div className="mb-8">
-          <div className="space-y-6 animate-fade-in pb-24 md:pb-0">
+            {/* Header */}
+            <div>
+              <span className="inline-block bg-[#8B5CF6] text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-4 shadow-lg shadow-purple-200">
+                Painel do Gestor
+              </span>
+              <h1 className="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter leading-none mb-2">
+                Visão Consolidada
+              </h1>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
+                Monitoramento em Tempo Real • {selectedUnit}
+              </p>
+            </div>
 
-            {/* --- CABEÇALHO SIMPLIFICADO --- */}
-            <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-              <div>
-                <h2 className="text-xl font-black text-slate-700 tracking-tight">Monitoramento em Tempo Real</h2>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wide">
-                  {user?.role === 'admin' ? 'Visão Geral do Sistema' : user?.unit}
-                </p>
-              </div>
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-              {/* SELETOR DE UNIDADE (VISÍVEL APENAS PARA ADMIN) */}
-              {user?.role === 'admin' && (
-                <div className="relative group">
-                  <select
-                    value={selectedUnit}
-                    onChange={(e) => setSelectedUnit(e.target.value)}
-                    className="appearance-none bg-indigo-50 text-indigo-700 font-bold text-xs uppercase py-2 pl-4 pr-10 rounded-xl outline-none focus:ring-2 focus:ring-indigo-200 border border-indigo-100 cursor-pointer"
-                  >
-                    {units.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
-                  <i className="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400 text-xs pointer-events-none"></i>
+              {/* Card 1: Total Geral (Orange) */}
+              <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-100 hover:border-orange-300 transition group">
+                <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-2">Total Geral</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-4xl font-black text-orange-500 group-hover:scale-110 transition duration-300 block">{totalGeral}</span>
                 </div>
-              )}
-
-              {/* SELETOR DE MODO (NOVO) */}
-              <div className="flex bg-slate-100 p-1 rounded-xl">
-                <button
-                  onClick={() => setViewMode('charts')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${viewMode === 'charts' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <i className="fa-solid fa-chart-pie mr-2"></i> Painel Neon
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${viewMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  <i className="fa-solid fa-list-check mr-2"></i> Gestão Central
-                </button>
               </div>
 
-              {/* BOTÃO DE SINCRONIZAÇÃO (GOOGLE) */}
-              {user?.role === 'admin' && <GoogleAuthButton />}
-            </div>
-
-            {/* --- CONTEÚDO DINÂMICO --- */}
-            {viewMode === 'charts' ? (
-              <>
-                {/* --- ATIVIDADE AGORA (NEON) --- */}
-                {/* Apenas exibe se houver atividade real para não poluir */}
-                {recentGenerations.length > 0 && (
-                  <div className="w-full bg-emerald-900 rounded-xl p-1 flex items-center justify-center shadow-lg shadow-emerald-200/50 animate-pulse">
-                    <span className="text-[10px] font-black text-emerald-100 uppercase tracking-widest flex items-center gap-2">
-                      <i className="fa-solid fa-satellite-dish animate-pulse"></i>
-                      Atividade Registrada: {recentGenerations[0].title}
-                    </span>
-                  </div>
-                )}
-                <div className="bg-slate-900 rounded-[1.8rem] p-8 flex flex-col lg:flex-row items-center gap-10 relative overflow-hidden shadow-2xl shadow-indigo-900/20 border border-slate-800">
-
-                  <div className="absolute -right-16 -bottom-16 w-80 h-80 bg-indigo-500 rounded-full opacity-20 blur-3xl z-0"></div>
-                  <div className="absolute -left-16 -top-16 w-80 h-80 bg-emerald-500 rounded-full opacity-10 blur-3xl z-0"></div>
-
-                  <div className="flex-1 z-10 text-center lg:text-left">
-                    <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                      <span className={`text-white text-[11px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/50 ${isAdmin ? 'bg-indigo-600' : 'bg-orange-500'}`}>
-                        {isAdmin ? 'PAINEL DO GESTOR' : `PAINEL TÉCNICO • ${user?.unit?.toUpperCase()}`}
-                      </span>
-                    </div>
-
-                    <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter leading-none drop-shadow-lg">
-                      {isAdmin ? 'Visão Consolidada' : 'Minha Performance'}
-                    </h2>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                      {/* CARD 1: TOTAL */}
-                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
-                        <p className="text-[10px] font-black text-orange-400 uppercase mb-1 tracking-wider">Total Geral</p>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
-                            {filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + (selectedUnit === 'Todas' ? 45 : 12)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* CARD 2: GRUPOS */}
-                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
-                        <p className="text-[10px] font-black text-emerald-400 uppercase mb-1 truncate tracking-wider">Grupos</p>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">
-                            {Math.floor(filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.7)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* CARD 3: INDIVIDUAL */}
-                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
-                        <p className="text-[10px] font-black text-blue-400 uppercase mb-1 truncate tracking-wider">Individual</p>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
-                            {Math.floor(filteredAtendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) * 0.3)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* CARD 4: DOCS */}
-                      <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700 backdrop-blur-sm hover:bg-slate-800 transition">
-                        <p className="text-[10px] font-black text-purple-400 uppercase mb-1 truncate tracking-wider">Documentos</p>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-3xl lg:text-4xl font-black text-white drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
-                            {selectedUnit === 'Todas' ? 45 : 12}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-64 h-64 bg-gradient-to-b from-slate-800 to-slate-900 rounded-full flex items-center justify-center relative z-10 shrink-0 shadow-2xl border-4 border-slate-800 group overflow-hidden">
-                    <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-full h-full object-contain p-6 group-hover:scale-110 transition duration-700 opacity-90" />
-                  </div>
+              {/* Card 2: Diários de Grupo (Green) */}
+              <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 hover:border-emerald-300 transition group">
+                <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2">Diários de Grupo</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-4xl font-black text-emerald-600 group-hover:scale-110 transition duration-300 block">{diariosGrupo}</span>
+                  <i className="fa-solid fa-users text-emerald-300 text-xs"></i>
                 </div>
-              </>
-            ) : (
-              /* --- VISÃO GESTÃO CENTRAL (LISTA DETALHADA) --- */
-              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden animate-fade-in">
-                <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                  <h3 className="font-bold text-slate-700 uppercase tracking-widest text-sm">
-                    <i className="fa-solid fa-folder-open mr-2 text-indigo-500"></i>
-                    Central de Relatórios Detalhados
-                  </h3>
-                  <div className="flex gap-2">
-                    <input type="text" placeholder="Buscar técnico..." className="bg-white border border-slate-200 rounded-lg px-3 py-1 text-xs outline-none focus:border-indigo-500" />
-                    <button className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700">Filtrar</button>
-                  </div>
+              </div>
+
+              {/* Card 3: Fichas Individuais (Blue) */}
+              <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 hover:border-blue-300 transition group">
+                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Fichas Individuais</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-4xl font-black text-blue-500 group-hover:scale-110 transition duration-300 block">{fichasIndividuais}</span>
+                  <i className="fa-solid fa-user text-blue-300 text-xs"></i>
                 </div>
-
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="text-[10px] uppercase font-black text-slate-400 border-b border-slate-100">
-                      <th className="p-4">Data</th>
-                      <th className="p-4">Unidade</th>
-                      <th className="p-4">Técnico</th>
-                      <th className="p-4">Tipo</th>
-                      <th className="p-4">Atividade</th>
-                      <th className="p-4 text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm text-slate-600">
-                    {/* MOCK DATA FOR LIST VIEW - Should be replaced by real data mapping */}
-                    <tr className="border-b border-slate-50 hover:bg-indigo-50/50 transition cursor-pointer" onClick={() => setSelectedReport(reportData)}>
-                      <td className="p-4 font-bold">12/05/2026</td>
-                      <td className="p-4">{user?.unit || 'CSMI João XXIII'}</td>
-                      <td className="p-4">{user?.name}</td>
-                      <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">Grupo</span></td>
-                      <td className="p-4 font-medium">Roda de Conversa: Fortalecimento de Vínculos</td>
-                      <td className="p-4 text-center">
-                        <button className="text-indigo-600 hover:text-indigo-800"><i className="fa-solid fa-eye"></i></button>
-                      </td>
-                    </tr>
-                    <tr className="border-b border-slate-50 hover:bg-indigo-50/50 transition cursor-pointer">
-                      <td className="p-4 font-bold">15/05/2026</td>
-                      <td className="p-4">CSMI Cristo Redentor</td>
-                      <td className="p-4">Ana Paula</td>
-                      <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">Individual</span></td>
-                      <td className="p-4 font-medium">Escuta Qualificada (Busca Ativa)</td>
-                      <td className="p-4 text-center">
-                        <button className="text-indigo-600 hover:text-indigo-800"><i className="fa-solid fa-eye"></i></button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
-            )}
 
-          </div>
-        </div>
-
-        {/* --- ALERTAS DO GESTOR --- */}
-        {isAdmin && alerts.length > 0 && (
-          <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm animate-pulse">
-            <div className="flex items-start gap-3">
-              <i className="fa-solid fa-triangle-exclamation text-red-500 mt-1"></i>
-              <div>
-                <h3 className="font-black text-red-800 uppercase text-xs tracking-wider mb-1">Atenção: Unidades Sem Atividade Recente</h3>
-                <ul className="list-disc list-inside text-xs text-red-700 font-bold">
-                  {alerts.map((alert, idx) => (
-                    <li key={idx}>{alert}</li>
-                  ))}
-                </ul>
+              {/* Card 4: Encaminhamentos (Purple) */}
+              <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 hover:border-purple-300 transition group">
+                <p className="text-[9px] font-black text-purple-400 uppercase tracking-widest mb-2">Encaminhamentos & Visitas</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-4xl font-black text-purple-500 group-hover:scale-110 transition duration-300 block">{encaminhamentos}</span>
+                  <i className="fa-solid fa-share text-purple-300 text-xs"></i>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* --- GRÁFICOS E METRICS --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-full">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-slate-700 text-sm flex items-center gap-2 uppercase tracking-widest">
-                  <i className="fa-solid fa-chart-simple text-emerald-600"></i> {isAdmin ? 'Atendimentos por Unidade' : 'Meus Atendimentos'}
-                </h3>
-              </div>
-              <div className="h-72"><Bar data={barData} options={barOptions} /></div>
             </div>
           </div>
 
-          <div className="bg-white rounded-[2rem] p-8 border border-slate-100 flex flex-col gap-6 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                <i className="fa-solid fa-print"></i>
+          {/* RIGHT COLUMN: Active Now (Mais Infância) */}
+          <div className="w-full lg:w-80 shrink-0">
+            <div className="bg-[#FFF8E7] rounded-[2.5rem] p-8 h-full min-h-[300px] flex flex-col items-center justify-center text-center relative border border-orange-100 shadow-lg shadow-orange-100/50">
+
+              {/* Badge */}
+              <div className="absolute top-6 right-6 flex items-center gap-2 bg-emerald-500 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-md shadow-emerald-200 animate-pulse">
+                <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                Em Atividade Agora
               </div>
-              <div>
-                <h3 className="font-bold text-slate-800 leading-none">Relatórios</h3>
-                <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tighter">Exportação de Dados</p>
+
+              {/* Content */}
+              <div className="flex-1 flex items-center justify-center py-6">
+                <img src="mais-infancia-logo.png" alt="Mais Infância Ceará" className="w-48 object-contain drop-shadow-xl" />
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-orange-100">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Atividade Atual</p>
+                <p className="text-sm font-black text-slate-800">Grupo GAP - Roda de Conversa</p>
               </div>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed text-justify">
-              {isAdmin
-                ? "Gere o relatório consolidado de todas as unidades para reuniões de monitoramento."
-                : "Imprima o resumo das suas atividades mensais para prestação de contas."}
-            </p>
-            <button
-              onClick={() => window.print()}
-              className="w-full py-3 bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-900 transition flex items-center justify-center gap-2"
-            >
-              <i className="fa-solid fa-file-pdf"></i> Gerar Relatório PDF
-            </button>
           </div>
+
         </div>
       </div>
 
 
-      {/* MODAL DETALHES (GESTÃO CENTRAL) */}
-      {
-        selectedReport && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedReport(null)}>
-            <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="flex justify-between items-start mb-6 border-b border-gray-200 pb-4">
-                <div>
-                  <h2 className="text-2xl font-black uppercase text-slate-800">Visualização de Relatório</h2>
-                  <p className="text-xs text-slate-500 font-bold uppercase mt-1">Cópia fiel do documento original</p>
-                </div>
-                <button onClick={() => setSelectedReport(null)} className="text-slate-400 hover:text-red-500 transition"><i className="fa-solid fa-xmark text-2xl"></i></button>
-              </div>
+      {/* --- GRÁFICOS E COMPARATIVOS --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* --- SIMULAÇÃO DO DOCUMENTO WORD --- */}
-              <div className="border border-gray-300 p-12 min-h-[800px] shadow-lg bg-white mx-auto max-w-[210mm]">
-                <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-black px-4">
-                  <img src="logo-sps.png" alt="SPS" className="h-12 object-contain" />
-                  <img src="mais-infancia-logo.png" alt="Mais Infância" className="h-14 object-contain" />
-                </div>
+        {/* Gráfico de Barras - Unidades */}
+        <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-lg border border-slate-100">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-black text-slate-700 uppercase tracking-tight">Desempenho por Unidade</h3>
+            <i className="fa-solid fa-chart-column text-emerald-200 text-xl"></i>
+          </div>
+          <div className="h-64">
+            <Bar data={barChartData} options={barOptions} />
+          </div>
+        </div>
 
-                <div className="text-center mb-8">
-                  <h1 className="font-bold text-lg uppercase underline">Relatório Mensal de Atividades - Maio 2026</h1>
-                  <p className="text-sm font-bold">Unidade: {user?.unit || 'Unidade Geral'}</p>
-                </div>
-
-                <div className="mb-4">
-                  <p className="font-bold uppercase text-xs mb-1">1. Introdução</p>
-                  <p className="text-justify text-sm leading-relaxed">
-                    O presente relatório tem como objetivo apresentar o consolidado das atividades desenvolvidas pela equipe psicossocial do {user?.unit} durante o mês de referência. As ações pautaram-se nas diretrizes da Proteção Social Básica.
-                  </p>
-                </div>
-
-                <div className="mb-4">
-                  <p className="font-bold uppercase text-xs mb-1">2. Desenvolvimento</p>
-                  <p className="text-justify text-sm leading-relaxed mb-2">
-                    Foram realizados <strong>{atendimentos.reduce((acc, curr) => acc + curr.presenca_count, 0) + 45} atendimentos</strong> no total. Destaque para os grupos de convivência que mantiveram alta frequência.
-                  </p>
-                  <p className="text-justify text-sm leading-relaxed">
-                    Atividade em Destaque: {reportData.fotos[0].legenda}. Observou-se grande participação da comunidade.
-                  </p>
-                </div>
-
-                <div className="mb-8">
-                  <p className="font-bold uppercase text-xs mb-1">3. Conclusão</p>
-                  <p className="text-justify text-sm leading-relaxed">
-                    Avalia-se o mês como positivo, com o cumprimento das metas estabelecidas no Planejamento Mensal.
-                  </p>
-                </div>
-
-                <div className="mt-12 text-center">
-                  <div className="border-t border-black w-1/2 mx-auto mb-1"></div>
-                  <p className="text-[10px] uppercase font-bold">{user?.name}</p>
-                  <p className="text-[10px]">CRP: {user?.crp}</p>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end gap-2">
-                <button onClick={() => window.print()} className="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold uppercase text-xs hover:bg-black transition"><i className="fa-solid fa-print mr-2"></i> Imprimir PDF Oficial</button>
-                <button onClick={() => setSelectedReport(null)} className="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-bold uppercase text-xs hover:bg-slate-300 transition">Fechar</button>
+        {/* Gráfico de Donut - Categorias */}
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-slate-100 flex flex-col items-center justify-center">
+          <h3 className="font-black text-slate-700 uppercase tracking-tight mb-6 w-full text-left">Distribuição</h3>
+          <div className="relative w-48 h-48">
+            <Doughnut data={doughnutData} options={doughnutOptions} />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center">
+                <span className="block text-2xl font-black text-slate-800">{((csmiTotal / (csmiTotal + espacosTotalEx || 1)) * 100).toFixed(0)}%</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase">CSMI</span>
               </div>
             </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* --- EXTRA CONTROLS (Hidden but accessible for Admin) --- */}
+      {
+        isAdmin && (
+          <div className="flex justify-end gap-2 opacity-50 hover:opacity-100 transition p-4">
+            <select
+              value={selectedUnit}
+              title="Selecionar Unidade (Filtro)"
+              onChange={(e) => setSelectedUnit(e.target.value)}
+              className="text-xs border rounded p-1 bg-transparent"
+            >
+              {unitsNames.map(u => <option key={u} value={u}>{u}</option>)}
+            </select>
+            <button onClick={() => window.print()} className="text-xs font-bold uppercase"><i className="fa-solid fa-print"></i> Relatório</button>
           </div>
         )
       }
+
+      {/* --- GALERIA DE FOTOS (ATVIDADES RECENTES) --- */}
+      <div className="mt-12">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="h-px flex-1 bg-slate-200"></div>
+          <h3 className="text-slate-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+            <i className="fa-solid fa-camera text-slate-300"></i>
+            Registros dos Complexos
+          </h3>
+          <div className="h-px flex-1 bg-slate-200"></div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Mock Random Photos Logic - In real app, shuffle reportData.fotos */}
+          {[
+            { url: 'https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&w=500&q=60', label: 'Roda de Conversa', unit: 'CSMI João XXIII' },
+            { url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=500&q=60', label: 'Oficina Lúdica', unit: 'CSMI Curió' },
+            { url: 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&w=500&q=60', label: 'Artes e Cultura', unit: 'CSMI Barbalha' }
+          ].map((foto, idx) => (
+            <div key={idx} className="group relative h-64 rounded-3xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-slate-900/0 transition-all duration-500"></div>
+              <img src={foto.url} alt={foto.label} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+
+              <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent">
+                <span className="text-[10px] font-black text-white bg-indigo-600 px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">
+                  {foto.unit}
+                </span>
+                <p className="text-white font-bold leading-tight">{foto.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </section >
-  );
-};
-
-const SecondaryStatCard: React.FC<{ pillar: string, title: string, value: string, sub: string, color: string, icon: string }> = ({ pillar, title, value, sub, color, icon }) => {
-  const styles: any = {
-    cyan: "bg-sky-50 text-sky-700 border-sky-100",
-    salmon: "bg-red-50 text-red-700 border-red-100",
-    purple: "bg-purple-50 text-purple-700 border-purple-100"
-  };
-  const iconColors: any = {
-    cyan: "text-sky-400",
-    salmon: "text-red-400",
-    purple: "text-purple-400"
-  };
-
-  return (
-    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-orange-200 transition group cursor-default h-full flex flex-col justify-between">
-      <div className="flex justify-between items-start mb-4">
-        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${styles[color]}`}>
-          {pillar}
-        </span>
-        <i className={`fa-solid ${icon} ${iconColors[color]} group-hover:scale-125 transition duration-500`}></i>
-      </div>
-      <div>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">{title}</p>
-        <h4 className="text-2xl font-black text-slate-800 leading-none mb-2">{value}</h4>
-        <p className="text-[10px] text-slate-500 font-bold leading-tight">{sub}</p>
-      </div>
-    </div>
   );
 };
 
