@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Section } from '../types';
+import { Section, UserProfile } from '../types';
 
 interface Grupo {
   id: number;
@@ -24,9 +24,11 @@ interface Unit {
 
 interface GruposProps {
   onNavigate?: (section: Section, group: string) => void;
+  user?: UserProfile | null;
 }
 
-const Grupos: React.FC<GruposProps> = ({ onNavigate }) => {
+const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
+  const isAdmin = user?.role === 'admin';
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
 
   // 1. DATA: Units
@@ -35,10 +37,20 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate }) => {
     { id: 'cristo', name: 'CSMI Cristo Redentor', type: 'Complexo Social', icon: 'fa-hands-holding-child', color: 'bg-teal-600', location: 'Cristo Redentor' },
     { id: 'curio', name: 'CSMI Curió', type: 'Complexo Social', icon: 'fa-hands-holding-child', color: 'bg-emerald-600', location: 'Curió' },
     { id: 'barbalha', name: 'CSMI Barbalha', type: 'Complexo Social', icon: 'fa-hands-holding-child', color: 'bg-purple-600', location: 'Barbalha' },
-    { id: 'quintino', name: 'ES Quintino Cunha', type: 'Espaço Social', icon: 'fa-hands-holding-child', color: 'bg-blue-500', location: 'Quintino Cunha' },
-    { id: 'barra', name: 'ES Barra do Ceará', type: 'Espaço Social', icon: 'fa-hands-holding-child', color: 'bg-cyan-600', location: 'Barra do Ceará' },
-    { id: 'dias_macedo', name: 'ES Dias Macedo', type: 'Espaço Social', icon: 'fa-hands-holding-child', color: 'bg-indigo-500', location: 'Dias Macedo' },
+    { id: 'quintino', name: 'Espaço Social Quintino Cunha', type: 'Espaço Social', icon: 'fa-hands-holding-child', color: 'bg-blue-500', location: 'Quintino Cunha' },
+    { id: 'barra', name: 'Espaço Social Barra do Ceará', type: 'Espaço Social', icon: 'fa-hands-holding-child', color: 'bg-cyan-600', location: 'Barra do Ceará' },
+    { id: 'dias_macedo', name: 'Espaço Social Dias Macedo', type: 'Espaço Social', icon: 'fa-hands-holding-child', color: 'bg-indigo-500', location: 'Dias Macedo' },
   ];
+
+  // Auto-select unit for technicians (skip unit selection screen)
+  React.useEffect(() => {
+    if (!isAdmin && user?.unit) {
+      const matchedUnit = units.find(u => u.name === user.unit);
+      if (matchedUnit) {
+        setSelectedUnit(matchedUnit.id);
+      }
+    }
+  }, [user]);
 
   // 2. DATA: Groups (Mapping to Units)
   // 2. DATA: Groups (Mapping to Units)
@@ -150,13 +162,17 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate }) => {
         <>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
             <div>
-              <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Unidades Móveis & Fixas</h2>
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Selecione o Complexo ou Espaço Social para gerenciar</p>
+              <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">
+                {isAdmin ? 'Unidades Móveis & Fixas' : `Minha Unidade`}
+              </h2>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                {isAdmin ? 'Selecione o Complexo ou Espaço Social para gerenciar' : user?.unit || 'Sua unidade de atuação'}
+              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {units.map((unit) => (
+            {units.filter(u => isAdmin ? true : u.name === user?.unit).map((unit) => (
               <div
                 key={unit.id}
                 onClick={() => setSelectedUnit(unit.id)}
@@ -195,6 +211,7 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate }) => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSelectedUnit(null)}
+                title="Voltar para unidades"
                 className="w-12 h-12 rounded-full bg-white border-2 border-slate-100 hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-orange-500 transition shadow-sm"
               >
                 <i className="fa-solid fa-arrow-left"></i>

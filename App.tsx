@@ -144,7 +144,7 @@ const App: React.FC = () => {
     switch (activeSection) {
       case 'dashboard': return <Dashboard user={user} />;
       case 'diario': return <Diario beneficiarios={beneficiariosList} initialGroupFilter={selectedGroupFilter} />;
-      case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} />;
+      case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} user={user} />;
       case 'eventos': return <Eventos />;
       case 'rede': return <Rede />;
       case 'instrumentais': return <Instrumentais user={user} />;
