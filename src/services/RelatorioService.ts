@@ -129,28 +129,8 @@ export const RelatorioService = {
         return [...supabaseData, ...localData];
     },
 
-    // 3. Buscar Unidades do Supabase (com fallback hardcoded)
+    // 3. Unidades oficiais (lista fixa com as 7 unidades corretas)
     async getUnidades(): Promise<Unidade[]> {
-        try {
-            const { data, error } = await supabase
-                .from('unidades')
-                .select('*')
-                .order('id', { ascending: true });
-
-            if (!error && data && data.length > 0) {
-                console.log('✅ Unidades carregadas do Supabase:', data.length);
-                return data.map((u: any) => ({
-                    id: u.id,
-                    nome: u.nome,
-                    tipo: u.tipo,
-                    bairro: u.endereco || u.nome.split(' ').pop() || ''
-                }));
-            }
-        } catch (e) {
-            console.warn('⚠️ Falha ao buscar unidades do Supabase, usando fallback local.', e);
-        }
-
-        // Fallback hardcoded (caso o banco esteja vazio ou offline)
         return [
             { id: 1, nome: 'CSMI João XXIII', tipo: 'CSMI', bairro: 'João XXIII' },
             { id: 2, nome: 'CSMI Cristo Redentor', tipo: 'CSMI', bairro: 'Cristo Redentor' },
