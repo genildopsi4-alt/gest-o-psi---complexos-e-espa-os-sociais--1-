@@ -1,5 +1,5 @@
 -- Create the 'usuarios' table
-create table usuarios (
+create table if not exists usuarios (
     cpf text primary key,
     senha text not null,
     nome text not null,
@@ -12,6 +12,18 @@ create table usuarios (
 );
 -- Enable Row Level Security (RLS)
 alter table usuarios enable row level security;
--- Create a policy that allows anyone to read/insert (since we are handling auth manually for now without Supabase Auth UI)
--- WARNING: In a production environment with sensitive data, you would want stricter policies.
-create policy "Public Access" on usuarios for all using (true) with check (true);
+-- Drop existing policies if present (for re-running this script)
+drop policy if exists "Public Access" on usuarios;
+drop policy if exists "Allow public read" on usuarios;
+drop policy if exists "Allow public insert" on usuarios;
+drop policy if exists "Allow public update" on usuarios;
+-- Create separate policies for each operation
+-- SELECT: permite que qualquer pessoa leia usuários
+create policy "Allow public read" on usuarios for
+select using (true);
+-- INSERT: permite que qualquer pessoa crie um novo cadastro
+create policy "Allow public insert" on usuarios for
+insert with check (true);
+-- UPDATE: permite que qualquer pessoa atualize (para futuro uso)
+create policy "Allow public update" on usuarios for
+update using (true) with check (true);

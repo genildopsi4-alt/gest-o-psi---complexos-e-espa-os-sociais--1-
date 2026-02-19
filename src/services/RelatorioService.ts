@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Atendimento, Beneficiario, AtividadePlanejada } from '../../types';
+import { Atendimento, Beneficiario, AtividadePlanejada, RelatorioMensal, Unidade } from '../../types';
 
 // Tipo para o objeto de dados salvo
 export interface AtendimentoDB {
@@ -16,20 +16,20 @@ export interface AtendimentoDB {
 }
 
 const LOCAL_STORAGE_KEY = 'psi_diario_db';
+const CONSOLIDATED_REPORTS_KEY = 'psi_consolidated_reports';
 
 export const RelatorioService = {
 
     // Internal Helper: Save to LocalStorage
-    saveToLocalStorage(record: any) {
+    saveToLocalStorage(key: string, record: any) {
         try {
-            const existing = localStorage.getItem(LOCAL_STORAGE_KEY);
+            const existing = localStorage.getItem(key);
             let data = existing ? JSON.parse(existing) : [];
             if (!Array.isArray(data)) data = [];
             data.push(record);
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-            console.log("💾 Salvo no LocalStorage:", record);
+            localStorage.setItem(key, JSON.stringify(data));
         } catch (e) {
-            console.error("Erro ao salvar no localStorage:", e);
+            console.error(`Erro ao salvar no localStorage (${key}):`, e);
         }
     },
 
@@ -68,7 +68,7 @@ export const RelatorioService = {
             }
 
             // Backup Local
-            this.saveToLocalStorage({ ...data, id: atendimento.id, created_at: new Date().toISOString(), source: 'supabase' });
+            this.saveToLocalStorage(LOCAL_STORAGE_KEY, { ...data, id: atendimento.id, created_at: new Date().toISOString(), source: 'supabase' });
 
             return { success: true, id: atendimento.id };
 
@@ -77,7 +77,7 @@ export const RelatorioService = {
 
             const localId = Date.now();
             const localRecord = { ...data, id: localId, created_at: new Date().toISOString(), source: 'local' };
-            this.saveToLocalStorage(localRecord);
+            this.saveToLocalStorage(LOCAL_STORAGE_KEY, localRecord);
 
             return { success: true, id: localId, local: true };
         }
@@ -129,33 +129,97 @@ export const RelatorioService = {
         return [...supabaseData, ...localData];
     },
 
-    // 3. Buscar Unidades
-    async getUnidades() {
-        const { data, error } = await supabase.from('unidades').select('*');
+    // 3. Buscar Unidades do Supabase (com fallback hardcoded)
+    async getUnidades(): Promise<Unidade[]> {
+        try {
+            const { data, error } = await supabase
+                .from('unidades')
+                .select('*')
+                .order('id', { ascending: true });
 
-        const defaultUnits = [
-            { id: 1, nome: 'CSMI João XXIII', tipo: 'CSMI' },
-            { id: 2, nome: 'CSMI Cristo Redentor', tipo: 'CSMI' },
-            { id: 3, nome: 'CSMI Curió', tipo: 'CSMI' },
-            { id: 4, nome: 'CSMI Barbalha', tipo: 'CSMI' },
-            // Espaços Sociais
-            { id: 5, nome: 'CRAS João XXIII', tipo: 'Espaço Social' },
-            { id: 6, nome: 'CREAS Regional', tipo: 'Espaço Social' },
-            { id: 7, nome: 'Centro de Convivência', tipo: 'Espaço Social' },
-            { id: 8, nome: 'Espaço Mais Infância', tipo: 'Espaço Social' }
-        ];
-
-        if (!error && data && data.length > 0) {
-            // Merge or return DB data. Ideally DB mirrors this.
-            // For now, if DB lacks 'tipo', we might need to map it.
-            // But let's assume if DB exists, use it.
-            // To be safe for the "Real Data" request which explicitly asked for these categories:
-            // We will append Espaços if they are missing from DB names.
-            const dbNames = data.map((u: any) => u.nome);
-            const missing = defaultUnits.filter(u => !dbNames.includes(u.nome));
-            return [...data, ...missing];
+            if (!error && data && data.length > 0) {
+                console.log('✅ Unidades carregadas do Supabase:', data.length);
+                return data.map((u: any) => ({
+                    id: u.id,
+                    nome: u.nome,
+                    tipo: u.tipo,
+                    bairro: u.endereco || u.nome.split(' ').pop() || ''
+                }));
+            }
+        } catch (e) {
+            console.warn('⚠️ Falha ao buscar unidades do Supabase, usando fallback local.', e);
         }
 
-        return defaultUnits;
+        // Fallback hardcoded (caso o banco esteja vazio ou offline)
+        return [
+            { id: 1, nome: 'CSMI João XXIII', tipo: 'CSMI', bairro: 'João XXIII' },
+            { id: 2, nome: 'CSMI Curió', tipo: 'CSMI', bairro: 'Curió' },
+            { id: 3, nome: 'CSMI Barbalha', tipo: 'CSMI', bairro: 'Barbalha' },
+            { id: 4, nome: 'CSMI Cristo Redentor', tipo: 'CSMI', bairro: 'Cristo Redentor' },
+            { id: 5, nome: 'CSMI Quintino Cunha', tipo: 'CSMI', bairro: 'Quintino Cunha' },
+            { id: 6, nome: 'Espaço Social Palmeiras', tipo: 'Espaço Social', bairro: 'Palmeiras' },
+            { id: 7, nome: 'Espaço Social Prefeito José Walter', tipo: 'Espaço Social', bairro: 'José Walter' },
+            { id: 8, nome: 'Espaço Social Jangurussu', tipo: 'Espaço Social', bairro: 'Jangurussu' }
+        ];
+    },
+
+    // 4. Salvar Relatório Consolidado no Supabase (com backup localStorage)
+    async saveRelatorioConsolidado(report: RelatorioMensal) {
+        try {
+            const { error } = await supabase
+                .from('relatorios_consolidados')
+                .upsert({
+                    id: report.id,
+                    unidade_id: report.unidadeId,
+                    unidade_nome: report.unidadeNome,
+                    unidade_tipo: report.unidadeTipo || '',
+                    mes: report.mes,
+                    ano: report.ano,
+                    qtd_atendimentos: report.qtdAtendimentos,
+                    timestamp: report.timestamp || new Date().toISOString()
+                }, { onConflict: 'id' });
+
+            if (error) throw error;
+            console.log('✅ Relatório Consolidado salvo no Supabase:', report.id);
+        } catch (e) {
+            console.warn('⚠️ Falha ao salvar no Supabase, salvando no localStorage.', e);
+        }
+
+        // Backup localStorage sempre
+        const existingJSON = localStorage.getItem(CONSOLIDATED_REPORTS_KEY);
+        let reports: RelatorioMensal[] = existingJSON ? JSON.parse(existingJSON) : [];
+        reports = reports.filter(r => r.id !== report.id);
+        reports.push(report);
+        localStorage.setItem(CONSOLIDATED_REPORTS_KEY, JSON.stringify(reports));
+    },
+
+    // 5. Buscar Relatórios Consolidados do Supabase (com fallback localStorage)
+    async getRelatoriosConsolidados(): Promise<RelatorioMensal[]> {
+        try {
+            const { data, error } = await supabase
+                .from('relatorios_consolidados')
+                .select('*')
+                .order('timestamp', { ascending: false });
+
+            if (!error && data && data.length > 0) {
+                console.log('✅ Relatórios carregados do Supabase:', data.length);
+                return data.map((r: any) => ({
+                    id: r.id,
+                    unidadeId: r.unidade_id,
+                    unidadeNome: r.unidade_nome,
+                    unidadeTipo: r.unidade_tipo,
+                    mes: r.mes,
+                    ano: r.ano,
+                    qtdAtendimentos: r.qtd_atendimentos,
+                    timestamp: r.timestamp
+                }));
+            }
+        } catch (e) {
+            console.warn('⚠️ Falha ao buscar do Supabase, usando localStorage.', e);
+        }
+
+        // Fallback localStorage
+        const existingJSON = localStorage.getItem(CONSOLIDATED_REPORTS_KEY);
+        return existingJSON ? JSON.parse(existingJSON) : [];
     }
 };

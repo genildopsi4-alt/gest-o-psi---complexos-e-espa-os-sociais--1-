@@ -24,12 +24,14 @@ export const AuthService = {
 
 
         try {
-            console.log(`[AuthService] Tentando login para CPF: ${cpf}`);
+            // Remove máscara do CPF para busca consistente
+            const cleanLoginCpf = cpf.replace(/\D/g, '');
+            console.log(`[AuthService] Tentando login para CPF: ${cleanLoginCpf}`);
 
             const { data, error } = await supabase
                 .from('usuarios')
                 .select('*')
-                .eq('cpf', cpf)
+                .eq('cpf', cleanLoginCpf)
                 .single();
 
             // 1. Erro de Conexão ou Consulta
@@ -99,15 +101,22 @@ export const AuthService = {
         qualificacoes?: string[];
     }): Promise<{ success: boolean; error: string | null }> {
         try {
-            // Force Admin role for specific CPF (Check digits only)
+            // Limpa CPF (remove máscara) para armazenar apenas dígitos
             const cleanCpf = userData.cpf.replace(/\D/g, '');
             const finalRole = cleanCpf === '03116882339' ? 'admin' : userData.role;
 
-            const { error } = await supabase
+            console.log('[AuthService] Tentando registrar:', {
+                cpf: cleanCpf,
+                nome: userData.nome,
+                perfil: finalRole,
+                unidade: userData.unidade
+            });
+
+            const { data, error } = await supabase
                 .from('usuarios')
                 .insert([
                     {
-                        cpf: userData.cpf,
+                        cpf: cleanCpf,
                         senha: userData.senha,
                         nome: userData.nome,
                         crp: userData.crp,
@@ -115,18 +124,36 @@ export const AuthService = {
                         avatar_url: userData.avatar,
                         perfil: finalRole
                     }
-                ]);
+                ])
+                .select();
 
             if (error) {
-                console.error('Registration Error:', error);
-                if (error.code === '23505') return { success: false, error: 'CPF já cadastrado.' };
+                console.error('[AuthService] Erro no registro:', error);
+                console.error('[AuthService] Código:', error.code, 'Mensagem:', error.message, 'Detalhes:', error.details, 'Hint:', error.hint);
+
+                if (error.code === '23505') {
+                    return { success: false, error: 'CPF já cadastrado no sistema.' };
+                }
+                if (error.code === '42501' || error.message?.includes('policy')) {
+                    return { success: false, error: 'Erro de permissão no banco de dados. Verifique as políticas RLS da tabela "usuarios" no Supabase.' };
+                }
+                if (error.code === '23514') {
+                    return { success: false, error: 'Valor inválido para o campo "perfil". Valores aceitos: admin, tecnico, Psicólogo Social.' };
+                }
+                if (error.message?.includes('relation') && error.message?.includes('does not exist')) {
+                    return { success: false, error: 'A tabela "usuarios" não existe no banco de dados. Execute o script SQL de criação.' };
+                }
                 return { success: false, error: 'Erro ao salvar cadastro: ' + error.message };
             }
 
+            console.log('[AuthService] Registro realizado com sucesso:', data);
             return { success: true, error: null };
-        } catch (err) {
-            console.error(err);
-            return { success: false, error: 'Erro inesperado no cadastro.' };
+        } catch (err: any) {
+            console.error('[AuthService] Erro crítico no cadastro:', err);
+            if (err.message?.includes('fetch')) {
+                return { success: false, error: 'Falha de conexão com a Internet ou Banco de Dados.' };
+            }
+            return { success: false, error: 'Erro inesperado no cadastro: ' + (err.message || 'Consulte o console.') };
         }
     }
 };

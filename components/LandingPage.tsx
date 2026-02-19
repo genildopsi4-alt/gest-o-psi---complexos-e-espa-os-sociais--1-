@@ -395,7 +395,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                     {/* Container do Diagrama SEM SCROLL horizontal em Desktop */}
                     <div className="bg-white p-4 lg:p-8 rounded-[2rem] shadow-2xl border border-slate-300 relative overflow-hidden flex items-stretch min-h-[500px]">
                         {/* Papel Milimetrado */}
-                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                        <div className="absolute inset-0 opacity-10 pointer-events-none bg-grid-pattern"></div>
 
                         {/* Pool Sidebar - Título solicitado */}
                         <div className="w-12 bg-slate-200 border-r-2 border-slate-300 flex items-center justify-center rounded-l-[1.8rem] shrink-0 shadow-inner overflow-hidden">
@@ -460,8 +460,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
 
                             {/* Seta de Decisão */}
                             <div className="hidden lg:flex relative w-12 h-40 flex-col justify-between py-6">
-                                <div className="h-px w-12 bg-slate-400" style={{ transform: 'translateY(10px) rotate(-30deg)' }}></div>
-                                <div className="h-px w-12 bg-slate-400" style={{ transform: 'translateY(-10px) rotate(30deg)' }}></div>
+                                <div className="h-px w-12 bg-slate-400 translate-y-[10px] -rotate-[30deg]"></div>
+                                <div className="h-px w-12 bg-slate-400 -translate-y-[10px] rotate-[30deg]"></div>
                             </div>
 
                             {/* Coluna 3: Saídas e Finalização */}

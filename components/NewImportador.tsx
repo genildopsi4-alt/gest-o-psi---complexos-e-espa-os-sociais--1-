@@ -9,7 +9,7 @@ interface ImportadorProps {
 
 type ImportStep = 'upload' | 'review' | 'done';
 
-const ImportadorRelatorios: React.FC<ImportadorProps> = ({ onClose, onSuccess }) => {
+const NewImportador: React.FC<ImportadorProps> = ({ onClose, onSuccess }) => {
     const [step, setStep] = useState<ImportStep>('upload');
     const [units, setUnits] = useState<Unidade[]>([]);
     const [loading, setLoading] = useState(true);
@@ -435,4 +435,4 @@ const ImportadorRelatorios: React.FC<ImportadorProps> = ({ onClose, onSuccess })
     );
 };
 
-export default ImportadorRelatorios;
+export default NewImportador;

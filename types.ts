@@ -16,10 +16,20 @@ export interface Unidade {
     nome: string;
     full_name?: string;
     tipo: 'CSMI' | 'Espaço Social';
-    bairro: string;
-    address?: string; // Endereço completo
-    email?: string;   // E-mail da unidade
-    last_activity_date?: string; // Para o alerta de inatividade
+    bairro?: string;
+    address?: string;
+    email?: string;
+}
+
+export interface RelatorioMensal {
+    id: string; // unique ID based on Unit-Month-Year
+    unidadeId: number;
+    unidadeNome: string;
+    unidadeTipo: 'CSMI' | 'Espaço Social';
+    mes: number; // 0-11
+    ano: number;
+    qtdAtendimentos: number;
+    timestamp: string;
 }
 
 export interface Atendimento {
