@@ -10,40 +10,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
 
     const [newsItems, setNewsItems] = React.useState([
         {
-            tag: 'Benefício Social',
-            title: 'Governo do Ceará disponibiliza consulta ao novo lote do Vale Gás Social',
-            desc: 'Confira se seu nome está na lista. As entregas ocorrem nos CRAS e Complexos Sociais Mais Infância.',
-            date: 'JANEIRO/2026',
-            color: 'emerald',
-            image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800&auto=format&fit=crop',
-            link: 'https://www.sps.ce.gov.br'
-        },
-        {
             tag: 'Cidadania',
-            title: 'Balcão da Cidadania leva serviços essenciais a territórios indígenas',
-            desc: 'Emissão de documentação básica e cadastro único para comunidades tradicionais em Cavcaia.',
-            date: '29 JAN - 02 FEV',
+            title: 'Caminhão do Cidadão leva serviços de cidadania a bairros de Fortaleza',
+            desc: 'Após o feriado do Carnaval, o Caminhão do Cidadão retoma sua agenda de atendimentos levando serviços essenciais aos bairros de Fortaleza.',
+            date: '18 FEVEREIRO 2026',
             color: 'blue',
-            image: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=800&auto=format&fit=crop',
-            link: 'https://www.sps.ce.gov.br'
+            image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/IMG_7750-600x400.jpg',
+            link: 'https://www.sps.ce.gov.br/2026/02/18/caminhao-do-cidadao-leva-servicos-a-bairros-de-fortaleza-e-ao-pecem-no-pos-carnaval/'
         },
         {
             tag: 'Política Sobre Drogas',
-            title: 'Projeto Acolher chega a Sobral com oferta de serviços gratuitos',
-            desc: 'Ação itinerante promove cidadania, saúde e qualificação profissional nos bairros.',
-            date: '05 FEV',
+            title: 'Projeto Acolher leva serviços gratuitos ao Cits Jangurussu',
+            desc: 'O Projeto Acolher oferta serviços gratuitos de saúde, inclusão social e orientação jurídica à população em situação de vulnerabilidade.',
+            date: '12 FEVEREIRO 2026',
             color: 'emerald',
-            image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop',
-            link: 'https://www.sps.ce.gov.br'
+            image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/Acolher-22-2-600x400.jpg',
+            link: 'https://www.sps.ce.gov.br/2026/02/12/projeto-acolher-leva-servicos-gratuitos-ao-cits-jangurussu-nesta-sexta-13/'
         },
         {
-            tag: 'Artesanato',
-            title: 'Ceará feito a mão: CeArt percorre Aracati e amplia o acesso',
-            desc: 'Caminhão da CeArt leva cadastramento e curadoria para artesãos do litoral leste.',
-            date: 'FEVEREIRO/2026',
+            tag: 'Editais',
+            title: 'Seleção para a 4ª Mostra de Experiências Exitosas em Vigilância Socioassistencial',
+            desc: 'Inscrição e seleção de experiências exitosas municipais em Vigilância Socioassistencial no âmbito da CGSuas.',
+            date: '12 FEVEREIRO 2026',
+            color: 'purple',
+            image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2024/06/Marca-SPS-500x500-1.png',
+            link: 'https://www.sps.ce.gov.br/2026/02/12/selecao-para-a-4a-mostra-de-experiencias-exitosas-em-vigilancia-socioassistencial-do-ceara/'
+        },
+        {
+            tag: 'Mais Infância',
+            title: 'Casa da Criança e do Adolescente do Ceará abre seleção para OSC em Juazeiro do Norte',
+            desc: 'Edital seleciona Organizações da Sociedade Civil para gerenciamento e execução da Casa da Criança e do Adolescente.',
+            date: '11 FEVEREIRO 2026',
             color: 'orange',
-            image: 'https://images.unsplash.com/photo-1606105961732-683267d532b2?q=80&w=800&auto=format&fit=crop',
-            link: 'https://www.sps.ce.gov.br'
+            image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2024/06/Marca-SPS-500x500-1.png',
+            link: 'https://www.sps.ce.gov.br/2026/02/11/selecao-de-osc-para-gerenciamento-e-execucao-da-casa-da-crianca-e-do-adolescente-do-ceara-na-regiao-de-juazeiro-do-norte/'
         }
     ]);
 
@@ -53,40 +53,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
             // Fallback data (Real SPS Content Simulation)
             const fallbackNews = [
                 {
-                    tag: 'Inclusão Social',
-                    title: 'SPS realiza entrega de certificados do projeto Criando Oportunidades',
-                    desc: 'Mais de 500 jovens foram qualificados em cursos profissionalizantes nas áreas de gastronomia, beleza e informática. A costura e a moda também ganharam destaque na formação.',
-                    date: '06 FEVEREIRO 2026',
-                    color: 'purple',
-                    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop',
-                    link: 'https://www.sps.ce.gov.br'
+                    tag: 'Cidadania',
+                    title: 'Caminhão do Cidadão leva serviços de cidadania a bairros de Fortaleza e ao Pecém',
+                    desc: 'Após o feriado do Carnaval, o Caminhão do Cidadão retoma sua agenda de atendimentos levando serviços essenciais aos bairros de Fortaleza e ao município de São Gonçalo do Amarante.',
+                    date: '18 FEVEREIRO 2026',
+                    color: 'blue',
+                    image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/IMG_7750-600x400.jpg',
+                    link: 'https://www.sps.ce.gov.br/2026/02/18/caminhao-do-cidadao-leva-servicos-a-bairros-de-fortaleza-e-ao-pecem-no-pos-carnaval/'
                 },
                 {
-                    tag: 'Cidadania',
-                    title: 'Caminhão do Cidadão atende comunidades do Grande Bom Jardim',
-                    desc: 'A unidade móvel da SPS levará serviços de emissão de RG e CPF para os moradores, facilitando o acesso à documentação básica e cidadania.',
-                    date: '05 FEVEREIRO 2026',
-                    color: 'blue',
-                    image: 'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=800&auto=format&fit=crop',
-                    link: 'https://www.sps.ce.gov.br'
+                    tag: 'Política Sobre Drogas',
+                    title: 'Projeto Acolher leva serviços gratuitos ao Cits Jangurussu',
+                    desc: 'O Projeto Acolher, iniciativa da Secretaria da Proteção Social, oferta serviços gratuitos de saúde, inclusão social e orientação jurídica.',
+                    date: '12 FEVEREIRO 2026',
+                    color: 'emerald',
+                    image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/Acolher-22-2-600x400.jpg',
+                    link: 'https://www.sps.ce.gov.br/2026/02/12/projeto-acolher-leva-servicos-gratuitos-ao-cits-jangurussu-nesta-sexta-13/'
+                },
+                {
+                    tag: 'Editais',
+                    title: 'Seleção para a 4ª Mostra de Experiências Exitosas em Vigilância Socioassistencial do Ceará',
+                    desc: 'A 4ª Mostra de Experiências em Vigilância Socioassistencial é uma iniciativa da SPS no âmbito da Coordenadoria de Gestão do SUAS.',
+                    date: '12 FEVEREIRO 2026',
+                    color: 'purple',
+                    image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2024/06/Marca-SPS-500x500-1.png',
+                    link: 'https://www.sps.ce.gov.br/2026/02/12/selecao-para-a-4a-mostra-de-experiencias-exitosas-em-vigilancia-socioassistencial-do-ceara/'
                 },
                 {
                     tag: 'Mais Infância',
-                    title: 'Cartão Mais Infância Ceará beneficia 150 mil famílias em vulnerabilidade',
-                    desc: 'O programa de transferência de renda estadual continua sendo um pilar fundamental no combate à insegurança alimentar na primeira infância.',
-                    date: '03 FEVEREIRO 2026',
-                    color: 'emerald',
-                    image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
-                    link: 'https://www.sps.ce.gov.br'
-                },
-                {
-                    tag: 'Esporte e Lazer',
-                    title: 'Complexos Sociais oferecem atividades de férias para crianças e adolescentes',
-                    desc: 'Durante o período letivo, os espaços localizados em Fortaleza e no interior promoveram colônias de férias com esporte, arte e lazer.',
-                    date: '01 FEVEREIRO 2026',
+                    title: 'Casa da Criança e do Adolescente do Ceará abre seleção para OSC em Juazeiro do Norte',
+                    desc: 'Edital seleciona Organizações da Sociedade Civil para gerenciamento e execução da Casa da Criança e do Adolescente do Ceará.',
+                    date: '11 FEVEREIRO 2026',
                     color: 'orange',
-                    image: 'https://images.unsplash.com/photo-1596464716127-f9a0859b4b41?q=80&w=800&auto=format&fit=crop',
-                    link: 'https://www.sps.ce.gov.br'
+                    image: 'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2024/06/Marca-SPS-500x500-1.png',
+                    link: 'https://www.sps.ce.gov.br/2026/02/11/selecao-de-osc-para-gerenciamento-e-execucao-da-casa-da-crianca-e-do-adolescente-do-ceara-na-regiao-de-juazeiro-do-norte/'
                 }
             ];
 
