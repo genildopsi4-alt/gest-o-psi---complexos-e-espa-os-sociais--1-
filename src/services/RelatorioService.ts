@@ -153,13 +153,12 @@ export const RelatorioService = {
         // Fallback hardcoded (caso o banco esteja vazio ou offline)
         return [
             { id: 1, nome: 'CSMI João XXIII', tipo: 'CSMI', bairro: 'João XXIII' },
-            { id: 2, nome: 'CSMI Curió', tipo: 'CSMI', bairro: 'Curió' },
-            { id: 3, nome: 'CSMI Barbalha', tipo: 'CSMI', bairro: 'Barbalha' },
-            { id: 4, nome: 'CSMI Cristo Redentor', tipo: 'CSMI', bairro: 'Cristo Redentor' },
-            { id: 5, nome: 'CSMI Quintino Cunha', tipo: 'CSMI', bairro: 'Quintino Cunha' },
-            { id: 6, nome: 'Espaço Social Palmeiras', tipo: 'Espaço Social', bairro: 'Palmeiras' },
-            { id: 7, nome: 'Espaço Social Prefeito José Walter', tipo: 'Espaço Social', bairro: 'José Walter' },
-            { id: 8, nome: 'Espaço Social Jangurussu', tipo: 'Espaço Social', bairro: 'Jangurussu' }
+            { id: 2, nome: 'CSMI Cristo Redentor', tipo: 'CSMI', bairro: 'Cristo Redentor' },
+            { id: 3, nome: 'CSMI Curió', tipo: 'CSMI', bairro: 'Curió' },
+            { id: 4, nome: 'CSMI Barbalha', tipo: 'CSMI', bairro: 'Barbalha' },
+            { id: 5, nome: 'Espaço Social Quintino Cunha', tipo: 'Espaço Social', bairro: 'Quintino Cunha' },
+            { id: 6, nome: 'Espaço Social Barra do Ceará', tipo: 'Espaço Social', bairro: 'Barra do Ceará' },
+            { id: 7, nome: 'Espaço Social Dias Macedo', tipo: 'Espaço Social', bairro: 'Dias Macedo' }
         ];
     },
 
