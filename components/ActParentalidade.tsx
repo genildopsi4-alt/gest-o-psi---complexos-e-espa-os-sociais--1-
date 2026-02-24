@@ -82,18 +82,18 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
     };
 
     return (
-        <section className="p-4 md:p-8 animate-fade-in bg-teal-50/30 min-h-full">
+        <section className="p-4 md:p-8 animate-fade-in bg-[#FFF0EE]/30 min-h-full">
             <div className="max-w-3xl mx-auto space-y-6">
 
                 {/* ── HERO VISUAL ACT ── */}
-                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-teal-100">
+                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-[#EDA59E]/30">
                     {/* Banner Principal */}
                     <div className="relative">
                         <img src="act-banner.png" alt="Programa ACT - Para Educar Crianças em Ambientes Seguros" className="w-full h-auto object-cover" />
                     </div>
 
                     {/* Crescer com Afeto */}
-                    <div className="bg-gradient-to-r from-rose-50 to-teal-50 border-y border-teal-100">
+                    <div className="bg-gradient-to-r from-[#FFF0EE] to-[#FDE8C8]/50 border-y border-[#EDA59E]/20">
                         <img src="act-crescer-afeto.jpg" alt="Crescer com Afeto, Sem Violência" className="w-full h-auto object-cover" />
                     </div>
 
@@ -105,9 +105,9 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
 
                         {/* Quick Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div className="bg-teal-50 rounded-xl p-3 text-center border border-teal-100">
-                                <p className="text-xl font-black text-teal-600">8</p>
-                                <p className="text-[9px] font-black text-teal-400 uppercase tracking-wider">Sessões</p>
+                            <div className="bg-[#FFF0EE] rounded-xl p-3 text-center border border-[#EDA59E]/20">
+                                <p className="text-xl font-black text-[#D4776E]">8</p>
+                                <p className="text-[9px] font-black text-[#EDA59E] uppercase tracking-wider">Sessões</p>
                             </div>
                             <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
                                 <p className="text-xl font-black text-amber-600">24</p>
@@ -124,19 +124,19 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                         </div>
 
                         <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                            <i className="fa-solid fa-shield-halved mr-1 text-teal-400"></i>
+                            <i className="fa-solid fa-shield-halved mr-1 text-[#EDA59E]"></i>
                             Programa validado pela APA — American Psychological Association
                         </p>
                     </div>
                 </div>
 
                 {/* ── FORMULÁRIO DE REGISTRO ── */}
-                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-teal-100">
+                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-[#EDA59E]/30">
                     {/* Header */}
-                    <div className="bg-teal-600 p-6 text-white flex justify-between items-center">
+                    <div className="bg-gradient-to-r from-[#EDA59E] to-[#D4776E] p-6 text-white flex justify-between items-center">
                         <div>
                             <h2 className="text-2xl font-black uppercase tracking-tight">ACT - Parentalidade</h2>
-                            <p className="text-teal-100 text-sm font-medium">Adultos e Crianças Juntos com Carinho</p>
+                            <p className="text-white/80 text-sm font-medium">Adultos e Crianças Juntos com Carinho</p>
                         </div>
                         <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
                             <i className="fa-solid fa-hands-holding-child text-3xl"></i>
@@ -149,7 +149,7 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Unidade</label>
                                 <select
-                                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-bold text-slate-700"
+                                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-[#EDA59E] transition font-bold text-slate-700"
                                     value={selectedUnidade}
                                     onChange={(e) => setSelectedUnidade(e.target.value)}
                                     title="Selecionar Unidade"
@@ -167,7 +167,7 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                                     value={dataAtividade}
                                     onChange={(e) => setDataAtividade(e.target.value)}
                                     title="Data do Encontro"
-                                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-bold text-slate-700"
+                                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-[#EDA59E] transition font-bold text-slate-700"
                                 />
                             </div>
                         </div>
@@ -182,7 +182,7 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                                         type="button"
                                         onClick={() => { setActSessao(sessao); setTemaAbordado(sessaoTemas[sessao]); }}
                                         className={`p-3 rounded-xl border-2 font-black text-center transition-all ${actSessao === sessao
-                                            ? 'border-teal-500 bg-teal-50 text-teal-900 shadow-md scale-105'
+                                            ? 'border-[#EDA59E] bg-[#FFF0EE] text-[#D4776E] shadow-md scale-105'
                                             : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}
                                     >
                                         {sessao}ª
@@ -193,12 +193,12 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
 
                         {/* Tema (automático) */}
                         {actSessao && (
-                            <div className="bg-teal-50 border-2 border-teal-200 rounded-2xl p-4 flex items-center gap-3 animate-fade-in">
-                                <div className="w-10 h-10 bg-teal-500 text-white rounded-xl flex items-center justify-center font-black">
+                            <div className="bg-[#FFF0EE] border-2 border-[#EDA59E]/30 rounded-2xl p-4 flex items-center gap-3 animate-fade-in">
+                                <div className="w-10 h-10 bg-[#EDA59E] text-white rounded-xl flex items-center justify-center font-black">
                                     {actSessao}ª
                                 </div>
                                 <div>
-                                    <p className="text-xs font-black text-teal-700 uppercase">Tema da Sessão</p>
+                                    <p className="text-xs font-black text-[#D4776E] uppercase">Tema da Sessão</p>
                                     <p className="text-sm font-bold text-slate-700">{sessaoTemas[actSessao]}</p>
                                 </div>
                             </div>
@@ -212,7 +212,7 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                                 min="0"
                                 value={qtdParticipantes || ''}
                                 onChange={(e) => setQtdParticipantes(parseInt(e.target.value) || 0)}
-                                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 font-black text-slate-700 text-lg"
+                                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-[#EDA59E] font-black text-slate-700 text-lg"
                                 placeholder="0"
                             />
                         </div>
@@ -220,11 +220,11 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                         {/* Fotos */}
                         <div className="space-y-3">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <i className="fa-solid fa-camera text-teal-500"></i> Evidência Fotográfica
+                                <i className="fa-solid fa-camera text-[#EDA59E]"></i> Evidência Fotográfica
                             </h3>
-                            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-teal-50/50 hover:border-teal-300 transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-[#FFF0EE]/50 hover:border-[#EDA59E] transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} title="Anexar foto" />
-                                <i className="fa-solid fa-cloud-arrow-up text-2xl text-teal-400 mb-2"></i>
+                                <i className="fa-solid fa-cloud-arrow-up text-2xl text-[#EDA59E] mb-2"></i>
                                 <p className="text-xs font-black text-slate-500">Tirar foto ou anexar</p>
                             </div>
                             {selectedImages.length > 0 && (
@@ -247,13 +247,13 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
                             <textarea
                                 value={observacoes}
                                 onChange={(e) => setObservacoes(e.target.value)}
-                                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-medium text-slate-700 h-20 resize-none"
+                                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-[#EDA59E] transition font-medium text-slate-700 h-20 resize-none"
                                 placeholder="Como foi o encontro de hoje..."
                             />
                         </div>
 
                         {/* Salvar */}
-                        <button type="submit" className="w-full bg-teal-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 hover:bg-teal-700 transition-all hover:-translate-y-0.5 active:scale-[0.98]">
+                        <button type="submit" className="w-full bg-gradient-to-r from-[#EDA59E] to-[#D4776E] text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 hover:shadow-2xl transition-all hover:-translate-y-0.5 active:scale-[0.98]">
                             <i className="fa-solid fa-check-double text-lg"></i> Salvar Encontro ACT
                         </button>
                     </form>

@@ -44,6 +44,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
   // 🔒 SIGILO: Itens visíveis apenas para admin
   const adminOnlySections: Section[] = ['instrumentais', 'planejamento', 'beneficiarios', 'rede', 'eventos'];
 
+  // Cores dos pilares Mais Infância Ceará
+  const sectionColors: Record<string, { bg: string; text: string; border: string; iconBg: string }> = {
+    vinculos: { bg: 'bg-[#3AADD9]/10', text: 'text-[#3AADD9]', border: 'border-[#3AADD9]/30', iconBg: 'text-[#3AADD9]' },
+    act: { bg: 'bg-[#EDA59E]/15', text: 'text-[#D4776E]', border: 'border-[#EDA59E]/30', iconBg: 'text-[#D4776E]' },
+    compaz: { bg: 'bg-[#4D9B8A]/10', text: 'text-[#4D9B8A]', border: 'border-[#4D9B8A]/30', iconBg: 'text-[#4D9B8A]' },
+    atendimento: { bg: 'bg-[#7B5EA7]/10', text: 'text-[#7B5EA7]', border: 'border-[#7B5EA7]/30', iconBg: 'text-[#7B5EA7]' },
+    grupos: { bg: 'bg-[#3AADD9]/10', text: 'text-[#3AADD9]', border: 'border-[#3AADD9]/30', iconBg: 'text-[#3AADD9]' },
+    dashboard: { bg: 'bg-[#00BFA6]/10', text: 'text-[#00897B]', border: 'border-[#00BFA6]/30', iconBg: 'text-[#00BFA6]' },
+  };
+  const defaultColor = { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200', iconBg: 'text-slate-500' };
+
   const menuItems: { id: Section; label: string; icon: string; badge?: number; separator?: string }[] = [
     { id: 'dashboard', label: 'Painel de Controle', icon: 'fa-grip-vertical' },
     { id: 'vinculos', label: 'Grupos de Vínculos', icon: 'fa-users', separator: 'Registro de Atividades' },
@@ -59,17 +70,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
   ].filter(item => isAdmin || !adminOnlySections.includes(item.id as Section)) as { id: Section; label: string; icon: string; badge?: number; separator?: string }[];
 
   return (
-    <aside className="w-64 bg-white border-r-2 border-orange-100 h-full flex flex-col flex-shrink-0 transition-all duration-300 font-sans z-30 shadow-xl rounded-r-[2rem]">
+    <aside className="w-64 bg-white border-r-2 border-[#00BFA6]/20 h-full flex flex-col flex-shrink-0 transition-all duration-300 font-sans z-30 shadow-xl rounded-r-[2rem]">
 
       {/* --- BRAND --- */}
-      <div className="h-24 flex items-center px-6 border-b-2 border-orange-50 flex-shrink-0 bg-teal-500 rounded-tr-[2rem]">
+      <div className="h-24 flex items-center px-6 border-b-2 border-[#00BFA6]/10 flex-shrink-0 bg-gradient-to-r from-[#00BFA6] to-[#3AADD9] rounded-tr-[2rem]">
         {/* Ícone Branco com Texto Verde (Conforme Imagem) */}
-        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-teal-600 text-2xl font-black shadow-lg mr-3 transform -rotate-6 border-2 border-teal-200">
+        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#00BFA6] text-2xl font-black shadow-lg mr-3 transform -rotate-6 border-2 border-white/50">
           Ψ
         </div>
         <div className="flex flex-col text-white">
           <h1 className="font-black text-2xl tracking-tight leading-none drop-shadow-sm">Gestão PSI</h1>
-          <span className="text-[10px] font-bold text-teal-50 uppercase tracking-widest mt-0.5">Complexos e Espaços Sociais</span>
+          <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest mt-0.5">Complexos e Espaços Sociais</span>
         </div>
       </div>
 
@@ -112,11 +123,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
                 className={`
                   w-full flex items-center px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 relative group
                   ${isActive
-                    ? 'bg-orange-100 text-orange-600 shadow-sm border-2 border-orange-200'
-                    : 'text-slate-500 hover:bg-teal-50 hover:text-teal-600 border-2 border-transparent hover:border-teal-100'}
+                    ? `${(sectionColors[item.id] || defaultColor).bg} ${(sectionColors[item.id] || defaultColor).text} shadow-sm border-2 ${(sectionColors[item.id] || defaultColor).border}`
+                    : 'text-slate-500 hover:bg-[#00BFA6]/5 hover:text-[#00897B] border-2 border-transparent hover:border-[#00BFA6]/15'}
                 `}
               >
-                <div className={`w-8 flex justify-center mr-2 ${isActive ? 'text-orange-500' : 'text-slate-400 group-hover:text-teal-500'}`}>
+                <div className={`w-8 flex justify-center mr-2 ${isActive ? (sectionColors[item.id] || defaultColor).iconBg : 'text-slate-400 group-hover:text-[#00BFA6]'}`}>
                   <i className={`fa-solid ${item.icon} text-lg`}></i>
                 </div>
 

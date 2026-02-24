@@ -73,14 +73,14 @@ const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user }) =
     };
 
     return (
-        <section className="p-4 md:p-8 animate-fade-in bg-violet-50/30 min-h-full">
+        <section className="p-4 md:p-8 animate-fade-in bg-[#F3EFF8]/30 min-h-full">
             <div className="max-w-3xl mx-auto space-y-6">
-                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-violet-100">
+                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-[#7B5EA7]/20">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-6 text-white flex justify-between items-center">
+                    <div className="bg-gradient-to-r from-[#7B5EA7] to-[#9B7EC6] p-6 text-white flex justify-between items-center">
                         <div>
                             <h2 className="text-2xl font-black uppercase tracking-tight">Atendimento</h2>
-                            <p className="text-violet-100 text-sm font-medium">Registro rápido e simplificado</p>
+                            <p className="text-white/80 text-sm font-medium">Registro rápido e simplificado</p>
                         </div>
                         <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
                             <i className="fa-solid fa-user-pen text-3xl"></i>

@@ -77,14 +77,14 @@ const Compaz: React.FC<CompazProps> = ({ user }) => {
     };
 
     return (
-        <section className="p-4 md:p-8 animate-fade-in bg-indigo-50/30 min-h-full">
+        <section className="p-4 md:p-8 animate-fade-in bg-[#EAF5F2]/30 min-h-full">
             <div className="max-w-3xl mx-auto space-y-6">
-                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-indigo-100">
+                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-[#4D9B8A]/25">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white flex justify-between items-center">
+                    <div className="bg-gradient-to-r from-[#4D9B8A] to-[#6DB5A5] p-6 text-white flex justify-between items-center">
                         <div>
                             <h2 className="text-2xl font-black uppercase tracking-tight">COMPAZ</h2>
-                            <p className="text-indigo-100 text-sm font-medium">Cultura de Paz e Resolução de Conflitos</p>
+                            <p className="text-white/80 text-sm font-medium">Cultura de Paz e Resolução de Conflitos</p>
                         </div>
                         <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
                             <i className="fa-solid fa-peace text-3xl"></i>
