@@ -137,6 +137,218 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   if (loading) return <div className="p-8 text-center text-slate-500">Carregando dados...</div>;
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🖼️ PAINEL DO TÉCNICO — Visual Profissional
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  if (!isAdmin) {
+    const pilares = [
+      {
+        title: 'Grupos de Vínculo',
+        subtitle: 'GAP • GPI • GFA',
+        icon: 'fa-users',
+        color: 'from-orange-500 to-amber-500',
+        borderColor: 'border-orange-200',
+        bgLight: 'bg-orange-50',
+        shadowColor: 'shadow-orange-200/50',
+        desc: 'Construção de identidade, senescência ativa e equidade familiar',
+        fundamento: 'Erikson • Mead • Vygotsky',
+        indicador: 'Retenção Grupal > 80%',
+        items: [
+          { label: 'GAP', detail: 'Adolescente Participativo — Identidade e Projeto de Vida' },
+          { label: 'GPI', detail: 'Pessoa Idosa — Senescência Ativa e Combate ao Idadismo' },
+          { label: 'GFA', detail: 'Famílias Atípicas — Equidade, Resiliência e Inclusão' },
+        ]
+      },
+      {
+        title: 'ACT — Parentalidade',
+        subtitle: 'Adultos e Crianças Juntos',
+        icon: 'fa-hands-holding-child',
+        color: 'from-teal-500 to-emerald-500',
+        borderColor: 'border-teal-200',
+        bgLight: 'bg-teal-50',
+        shadowColor: 'shadow-teal-200/50',
+        desc: 'Programa de prevenção da violência intrafamiliar em 8 sessões',
+        fundamento: 'APA — American Psychological Association',
+        indicador: 'Redução de comportamentos punitivos',
+        items: [
+          { label: '8 Sessões', detail: 'Ciclo completo de formação parental' },
+          { label: 'Evidência', detail: 'Programa validado internacionalmente' },
+          { label: 'Foco', detail: 'Disciplina Positiva e Resolução de Conflitos' },
+        ]
+      },
+      {
+        title: 'COMPAZ',
+        subtitle: 'Cultura de Paz',
+        icon: 'fa-peace',
+        color: 'from-indigo-500 to-blue-500',
+        borderColor: 'border-indigo-200',
+        bgLight: 'bg-indigo-50',
+        shadowColor: 'shadow-indigo-200/50',
+        desc: 'Círculos de paz, justiça restaurativa e mediação de conflitos',
+        fundamento: 'Pranis • Zehr • Rosenberg (CNV)',
+        indicador: 'Resolutividade via Círculos de Consenso',
+        items: [
+          { label: 'Círculos', detail: 'Construção de Paz e Restauração' },
+          { label: 'CNV', detail: 'Comunicação Não-Violenta' },
+          { label: 'Mediação', detail: 'Conflitos e Competências Socioemocionais' },
+        ]
+      }
+    ];
+
+    return (
+      <section className="p-4 md:p-8 animate-fade-in bg-gradient-to-b from-slate-50 to-orange-50/30 min-h-screen space-y-8">
+
+        {/* ── HERO WELCOME ── */}
+        <div className="relative bg-white rounded-[3rem] overflow-hidden shadow-2xl border-2 border-orange-100">
+          {/* Background decorations */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-teal-100/40 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-orange-100/40 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-indigo-50/20 to-purple-50/20 rounded-full blur-3xl"></div>
+
+          <div className="relative p-8 md:p-12">
+            {/* Top Badge */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+              <div>
+                <span className="inline-block bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2.5 rounded-full mb-4 shadow-lg shadow-teal-200">
+                  <i className="fa-solid fa-shield-halved mr-2"></i>Painel Profissional
+                </span>
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-800 tracking-tighter leading-[1.1]">
+                  Promoção e Prevenção<br />
+                  <span className="bg-gradient-to-r from-teal-600 to-emerald-500 bg-clip-text text-transparent">
+                    em Saúde Mental Comunitária
+                  </span>
+                </h1>
+              </div>
+              <div className="shrink-0 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-100 rounded-2xl p-4 text-center shadow-lg shadow-orange-100/50">
+                <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-1">Sua Unidade</p>
+                <p className="text-sm font-black text-slate-700">{user?.unit || 'Não definida'}</p>
+                <p className="text-[10px] font-bold text-slate-400 mt-1">{user?.name} • CRP {user?.crp}</p>
+              </div>
+            </div>
+
+            {/* Modelo Biopsicossocial Banner */}
+            <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-6 text-white flex flex-col md:flex-row items-center gap-6 mb-10 shadow-xl">
+              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-sm border border-white/20">
+                <i className="fa-solid fa-brain text-3xl text-amber-300"></i>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="font-black text-sm uppercase tracking-wider mb-1">Modelo Biopsicossocial de Promoção e Prevenção</h3>
+                <p className="text-white/70 text-xs leading-relaxed">
+                  Transcendemos o modelo clínico tradicional para consolidar uma prática pautada na garantia inalienável de direitos, promoção da saúde mental comunitária e fortalecimento dos vínculos territoriais.
+                </p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <div className="w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                <div className="w-3 h-3 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+              </div>
+            </div>
+
+            {/* ── 3 PILARES ── */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {pilares.map((pilar, idx) => (
+                <div key={idx} className={`group relative bg-white rounded-[2rem] border-2 ${pilar.borderColor} overflow-hidden shadow-lg ${pilar.shadowColor} hover:shadow-xl transition-all duration-500 hover:-translate-y-1`}>
+                  {/* Header Gradient */}
+                  <div className={`bg-gradient-to-r ${pilar.color} p-5 text-white`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-black text-lg uppercase tracking-tight">{pilar.title}</h3>
+                        <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest">{pilar.subtitle}</p>
+                      </div>
+                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform duration-500">
+                        <i className={`fa-solid ${pilar.icon} text-xl`}></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-5 space-y-4">
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed">{pilar.desc}</p>
+
+                    {/* Fundamentação */}
+                    <div className={`${pilar.bgLight} rounded-xl p-3 border ${pilar.borderColor}`}>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Fundamentação</p>
+                      <p className="text-[11px] font-bold text-slate-700">{pilar.fundamento}</p>
+                    </div>
+
+                    {/* Items */}
+                    <div className="space-y-2">
+                      {pilar.items.map((item, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className={`shrink-0 w-2 h-2 rounded-full bg-gradient-to-r ${pilar.color} mt-1.5`}></span>
+                          <div>
+                            <span className="text-[10px] font-black text-slate-700 uppercase">{item.label}: </span>
+                            <span className="text-[10px] text-slate-500 font-medium">{item.detail}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Indicador */}
+                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center gap-2">
+                      <i className="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase">Indicador</p>
+                        <p className="text-[10px] font-bold text-emerald-700">{pilar.indicador}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── GOVERNANÇA ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-slate-100 flex items-center gap-4 hover:shadow-xl transition">
+            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-clipboard-check text-emerald-600 text-lg"></i>
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Supervisão de Campo</p>
+              <p className="text-sm font-black text-slate-700">Semanal</p>
+              <p className="text-[10px] text-slate-400 font-medium">Visitas in loco às unidades</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-slate-100 flex items-center gap-4 hover:shadow-xl transition">
+            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-users-rectangle text-indigo-600 text-lg"></i>
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Técnicos Referência</p>
+              <p className="text-sm font-black text-slate-700">Quinzenal</p>
+              <p className="text-[10px] text-slate-400 font-medium">Reuniões com equipe técnica</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-slate-100 flex items-center gap-4 hover:shadow-xl transition">
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-landmark-dome text-amber-600 text-lg"></i>
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Colegiado Geral</p>
+              <p className="text-sm font-black text-slate-700">Mensal</p>
+              <p className="text-[10px] text-slate-400 font-medium">Última sexta do mês — 7 unidades</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── CITAÇÃO ── */}
+        <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-[2rem] p-8 text-center shadow-xl">
+          <i className="fa-solid fa-quote-left text-2xl text-amber-400/50 mb-4 block"></i>
+          <p className="text-white/90 text-sm md:text-base font-medium italic leading-relaxed max-w-2xl mx-auto">
+            "Ninguém caminha sem aprender a caminhar, sem aprender a fazer o caminho caminhando, refazendo e retocando o sonho pelo qual se pôs a caminhar."
+          </p>
+          <p className="text-amber-400 font-black text-xs uppercase tracking-widest mt-4">— Paulo Freire</p>
+        </div>
+
+      </section>
+    );
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 📊 PAINEL DO ADMIN — Visão Consolidada (Original)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   return (
     <section className="p-4 md:p-8 animate-fade-in space-y-8 bg-slate-50/50 min-h-screen">
 
