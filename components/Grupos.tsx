@@ -61,7 +61,7 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
     }
     return [
       // João XXIII
-      { id: 1, tipo: 'GAP', nome: 'GAP João XXIII', dia: 'Terça', horario: '18h', facilitador: 'Genildo Barbosa', cofacilitador: 'Maria Silva', participantes: 25, unidadeId: 'joao23' },
+      { id: 1, tipo: 'GAP', nome: 'GAP João XXIII', dia: 'Terça', horario: '18h', facilitador: 'Genildo Barbosa', cofacilitador: 'Maria Silva', participantes: 16, unidadeId: 'joao23' },
       { id: 2, tipo: 'ACT', nome: 'ACT João XXIII', dia: 'Quinta', horario: '15h', facilitador: 'Sarah Araújo', participantes: 12, unidadeId: 'joao23' },
       { id: 3, tipo: 'GFA', nome: 'GFA João XXIII', dia: 'Sexta', horario: '14h', facilitador: 'Equipe Técnica', participantes: 10, unidadeId: 'joao23' },
       { id: 4, tipo: 'GPI', nome: 'GPI João XXIII', dia: 'Quarta', horario: '08h', facilitador: 'Equipe Multi', participantes: 35, unidadeId: 'joao23' },
