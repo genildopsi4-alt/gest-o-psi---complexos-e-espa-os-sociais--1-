@@ -1,0 +1,210 @@
+import React, { useState, useRef } from 'react';
+import { RelatorioService } from '../src/services/RelatorioService';
+
+const ActParentalidade: React.FC = () => {
+    const [selectedUnidade, setSelectedUnidade] = useState<string>('');
+    const [dataAtividade, setDataAtividade] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [actSessao, setActSessao] = useState<number | null>(null);
+    const [qtdParticipantes, setQtdParticipantes] = useState<number>(0);
+    const [selectedImages, setSelectedImages] = useState<string[]>([]);
+    const [observacoes, setObservacoes] = useState<string>('');
+    const [temaAbordado, setTemaAbordado] = useState<string>('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const unidades = [
+        { label: '-- Selecione a Unidade --', value: '', disabled: true },
+        { value: 'CSMI João XXIII', label: 'João XXIII' },
+        { value: 'CSMI Cristo Redentor', label: 'Cristo Redentor' },
+        { value: 'CSMI Curió', label: 'Curió' },
+        { value: 'CSMI Barbalha', label: 'Barbalha' },
+        { value: 'Espaço Social Quintino Cunha', label: 'Quintino Cunha' },
+        { value: 'Espaço Social Barra do Ceará', label: 'Barra do Ceará' },
+        { value: 'Espaço Social Dias Macedo', label: 'Dias Macedo' },
+    ];
+
+    const sessaoTemas: Record<number, string> = {
+        1: 'Conhecendo o Programa ACT',
+        2: 'Compreendendo o Comportamento Infantil',
+        3: 'Compreendendo o Comportamento dos Pais',
+        4: 'O Impacto da Violência',
+        5: 'Disciplina Positiva e Limites',
+        6: 'Controlando a Raiva',
+        7: 'Resolvendo Conflitos',
+        8: 'Encerramento e Compromissos',
+    };
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target?.result) {
+                    setSelectedImages(prev => [...prev, e.target!.result as string]);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const dataToSave = {
+            unidade: selectedUnidade || "Unidade Não Selecionada",
+            tipo_acao: 'rede',
+            atividade_especifica: 'act',
+            data_registro: dataAtividade,
+            qtd_participantes: qtdParticipantes,
+            act_sessao: actSessao,
+            fotos_urls: selectedImages,
+            observacoes: `Sessão ${actSessao}: ${temaAbordado}. ${observacoes}`
+        };
+        const result = await RelatorioService.saveAtendimento(dataToSave, []);
+        if (result.success) {
+            alert("Encontro ACT salvo com sucesso! ✅");
+            setActSessao(null);
+            setQtdParticipantes(0);
+            setSelectedImages([]);
+            setObservacoes('');
+            setTemaAbordado('');
+        } else {
+            alert("Erro ao salvar. Verifique o console.");
+        }
+    };
+
+    return (
+        <section className="p-4 md:p-8 animate-fade-in bg-teal-50/30 min-h-full">
+            <div className="max-w-3xl mx-auto space-y-6">
+                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-teal-100">
+                    {/* Header */}
+                    <div className="bg-teal-600 p-6 text-white flex justify-between items-center">
+                        <div>
+                            <h2 className="text-2xl font-black uppercase tracking-tight">ACT - Parentalidade</h2>
+                            <p className="text-teal-100 text-sm font-medium">Adultos e Crianças Juntos com Carinho</p>
+                        </div>
+                        <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm">
+                            <i className="fa-solid fa-hands-holding-child text-3xl"></i>
+                        </div>
+                    </div>
+
+                    <form className="p-6 space-y-6" onSubmit={handleSubmit}>
+                        {/* Unidade e Data */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Unidade</label>
+                                <select
+                                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-bold text-slate-700"
+                                    value={selectedUnidade}
+                                    onChange={(e) => setSelectedUnidade(e.target.value)}
+                                >
+                                    {unidades.map((u, i) => (
+                                        <option key={i} value={u.value} disabled={u.disabled}>{u.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Data do Encontro</label>
+                                <input
+                                    type="date"
+                                    value={dataAtividade}
+                                    onChange={(e) => setDataAtividade(e.target.value)}
+                                    className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-bold text-slate-700"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Sessão ACT */}
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-3">Qual Sessão?</label>
+                            <div className="grid grid-cols-4 gap-3">
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map((sessao) => (
+                                    <button
+                                        key={sessao}
+                                        type="button"
+                                        onClick={() => { setActSessao(sessao); setTemaAbordado(sessaoTemas[sessao]); }}
+                                        className={`p-3 rounded-xl border-2 font-black text-center transition-all ${actSessao === sessao
+                                            ? 'border-teal-500 bg-teal-50 text-teal-900 shadow-md scale-105'
+                                            : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}
+                                    >
+                                        {sessao}ª
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Tema (automático) */}
+                        {actSessao && (
+                            <div className="bg-teal-50 border-2 border-teal-200 rounded-2xl p-4 flex items-center gap-3 animate-fade-in">
+                                <div className="w-10 h-10 bg-teal-500 text-white rounded-xl flex items-center justify-center font-black">
+                                    {actSessao}ª
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black text-teal-700 uppercase">Tema da Sessão</p>
+                                    <p className="text-sm font-bold text-slate-700">{sessaoTemas[actSessao]}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Quantidade de Participantes */}
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Quantidade de Participantes</label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={qtdParticipantes || ''}
+                                onChange={(e) => setQtdParticipantes(parseInt(e.target.value) || 0)}
+                                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 font-black text-slate-700 text-lg"
+                                placeholder="0"
+                            />
+                        </div>
+
+                        {/* Fotos */}
+                        <div className="space-y-3">
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <i className="fa-solid fa-camera text-teal-500"></i> Evidência Fotográfica
+                            </h3>
+                            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-teal-50/50 hover:border-teal-300 transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleImageChange} />
+                                <i className="fa-solid fa-cloud-arrow-up text-2xl text-teal-400 mb-2"></i>
+                                <p className="text-xs font-black text-slate-500">Tirar foto ou anexar</p>
+                            </div>
+                            {selectedImages.length > 0 && (
+                                <div className="grid grid-cols-3 gap-3">
+                                    {selectedImages.map((img, idx) => (
+                                        <div key={idx} className="relative rounded-xl overflow-hidden border border-slate-100 aspect-square">
+                                            <img src={img} alt={`Foto ${idx}`} className="w-full h-full object-cover" />
+                                            <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px]">
+                                                <i className="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Observações */}
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Observações</label>
+                            <textarea
+                                value={observacoes}
+                                onChange={(e) => setObservacoes(e.target.value)}
+                                className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-medium text-slate-700 h-20 resize-none"
+                                placeholder="Como foi o encontro de hoje..."
+                            />
+                        </div>
+
+                        {/* Salvar */}
+                        <button type="submit" className="w-full bg-teal-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 hover:bg-teal-700 transition-all hover:-translate-y-0.5 active:scale-[0.98]">
+                            <i className="fa-solid fa-check-double text-lg"></i> Salvar Encontro ACT
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+export default ActParentalidade;

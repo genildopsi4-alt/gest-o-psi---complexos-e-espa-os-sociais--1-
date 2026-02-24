@@ -12,6 +12,10 @@ import Beneficiarios from './components/Beneficiarios';
 import Planejamento from './components/Planejamento';
 import Instrumentais from './components/Instrumentais';
 import BottomNav from './components/BottomNav';
+import GruposVinculos from './components/GruposVinculos';
+import ActParentalidade from './components/ActParentalidade';
+import Compaz from './components/Compaz';
+import AtendimentoIndividual from './components/AtendimentoIndividual';
 import DataSeeder from './components/DataSeeder'; // [NEW]
 import { Section, Beneficiario, UserProfile } from './types';
 
@@ -141,6 +145,10 @@ const App: React.FC = () => {
     switch (section) {
       case 'dashboard': return 'Painel de Controle';
       case 'diario': return 'Novo Registro';
+      case 'vinculos': return 'Grupos de Vínculos';
+      case 'act': return 'ACT Parentalidade';
+      case 'compaz': return 'COMPAZ';
+      case 'atendimento': return 'Atendimento Individual';
       case 'grupos': return 'Chamada Digital';
       case 'instrumentais': return 'Instrumentais';
       case 'planejamento': return 'Relatórios';
@@ -154,6 +162,10 @@ const App: React.FC = () => {
   const getSubtitle = (section: Section): string => {
     if (section === 'dashboard') return 'Complexos e Espaços Sociais • 29/01/2026';
     if (section === 'diario') return 'Lançamento diário, registro fotográfico e frequência.';
+    if (section === 'vinculos') return 'GAP • GPI • GFA — Frequência e registro';
+    if (section === 'act') return 'Adultos e Crianças Juntos com Carinho';
+    if (section === 'compaz') return 'Cultura de Paz e Resolução de Conflitos';
+    if (section === 'atendimento') return 'Escutas, Acolhimentos, Visitas e Buscas Ativas';
     if (section === 'beneficiarios') return 'Monitoramento de vínculos e gestão de casos.';
     return 'Complexos e Espaços Sociais';
   };
@@ -162,6 +174,10 @@ const App: React.FC = () => {
     switch (activeSection) {
       case 'dashboard': return <Dashboard user={user} />;
       case 'diario': return <Diario beneficiarios={beneficiariosList} initialGroupFilter={selectedGroupFilter} />;
+      case 'vinculos': return <GruposVinculos beneficiarios={beneficiariosList} initialGroupFilter={selectedGroupFilter} />;
+      case 'act': return <ActParentalidade />;
+      case 'compaz': return <Compaz />;
+      case 'atendimento': return <AtendimentoIndividual />;
       case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} user={user} />;
       case 'eventos': return <Eventos />;
       case 'rede': return <Rede />;

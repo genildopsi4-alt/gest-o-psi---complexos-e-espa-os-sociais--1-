@@ -38,10 +38,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
     }
   };
 
-  const menuItems: { id: Section; label: string; icon: string; badge?: number }[] = [
+  const menuItems: { id: Section; label: string; icon: string; badge?: number; separator?: string }[] = [
     { id: 'dashboard', label: 'Painel de Controle', icon: 'fa-grip-vertical' },
-    { id: 'diario', label: 'Novo Registro', icon: 'fa-plus' },
-    { id: 'grupos', label: 'Chamada Digital', icon: 'fa-users-viewfinder' },
+    { id: 'vinculos', label: 'Grupos de Vínculos', icon: 'fa-users', separator: 'Registro de Atividades' },
+    { id: 'act', label: 'ACT Parentalidade', icon: 'fa-hands-holding-child' },
+    { id: 'compaz', label: 'COMPAZ', icon: 'fa-peace' },
+    { id: 'atendimento', label: 'Atendimento', icon: 'fa-user-pen' },
+    { id: 'grupos', label: 'Chamada Digital', icon: 'fa-users-viewfinder', separator: 'Gestão' },
     { id: 'instrumentais', label: 'Instrumentais', icon: 'fa-file-signature' },
     { id: 'planejamento', label: 'Relatórios', icon: 'fa-file-lines' },
     { id: 'beneficiarios', label: 'Busca Ativa', icon: 'fa-user-clock', badge: 3 },
@@ -88,38 +91,43 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
         </div>
       )}
 
-      {/* --- NAVIGATION --- */}
-      <nav className="flex-1 py-4 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 py-4 px-4 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => {
           const isActive = activeSection === item.id;
           return (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`
-                w-full flex items-center px-4 py-3.5 rounded-2xl text-sm font-bold transition-all duration-200 relative group
-                ${isActive
-                  ? 'bg-orange-100 text-orange-600 shadow-sm border-2 border-orange-200'
-                  : 'text-slate-500 hover:bg-teal-50 hover:text-teal-600 border-2 border-transparent hover:border-teal-100'}
-              `}
-            >
-              <div className={`w-8 flex justify-center mr-2 ${isActive ? 'text-orange-500' : 'text-slate-400 group-hover:text-teal-500'}`}>
-                <i className={`fa-solid ${item.icon} text-lg`}></i>
-              </div>
-
-              <span>{item.label}</span>
-
-              {item.badge && (
-                <span className={`
-                    ml-auto text-[10px] font-black px-2 py-1 rounded-full shadow-sm
-                    ${isActive
-                    ? 'bg-red-400 text-white'
-                    : 'bg-red-100 text-red-500'}
-                `}>
-                  {item.badge}
-                </span>
+            <React.Fragment key={item.id}>
+              {item.separator && (
+                <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest pt-3 pb-1 pl-4 mt-1 border-t border-slate-100 first:border-t-0 first:mt-0">
+                  {item.separator}
+                </h3>
               )}
-            </button>
+              <button
+                onClick={() => setActiveSection(item.id)}
+                className={`
+                  w-full flex items-center px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 relative group
+                  ${isActive
+                    ? 'bg-orange-100 text-orange-600 shadow-sm border-2 border-orange-200'
+                    : 'text-slate-500 hover:bg-teal-50 hover:text-teal-600 border-2 border-transparent hover:border-teal-100'}
+                `}
+              >
+                <div className={`w-8 flex justify-center mr-2 ${isActive ? 'text-orange-500' : 'text-slate-400 group-hover:text-teal-500'}`}>
+                  <i className={`fa-solid ${item.icon} text-lg`}></i>
+                </div>
+
+                <span>{item.label}</span>
+
+                {item.badge && (
+                  <span className={`
+                      ml-auto text-[10px] font-black px-2 py-1 rounded-full shadow-sm
+                      ${isActive
+                      ? 'bg-red-400 text-white'
+                      : 'bg-red-100 text-red-500'}
+                  `}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            </React.Fragment>
           );
         })}
       </nav>

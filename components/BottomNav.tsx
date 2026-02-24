@@ -8,10 +8,11 @@ interface BottomNavProps {
 
 const BottomNav: React.FC<BottomNavProps> = ({ activeSection, setActiveSection }) => {
     const navItems = [
-        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Visão' },
-        { id: 'diario', icon: 'fa-book-open', label: 'Diário' },
-        { id: 'relatorios', icon: 'fa-file-contract', label: 'Relatórios' },
-        { id: 'perfil', icon: 'fa-user-circle', label: 'Perfil' }
+        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Painel' },
+        { id: 'vinculos', icon: 'fa-users', label: 'Vínculos' },
+        { id: 'act', icon: 'fa-hands-holding-child', label: 'ACT' },
+        { id: 'compaz', icon: 'fa-peace', label: 'COMPAZ' },
+        { id: 'atendimento', icon: 'fa-user-pen', label: 'Atend.' },
     ];
 
     return (

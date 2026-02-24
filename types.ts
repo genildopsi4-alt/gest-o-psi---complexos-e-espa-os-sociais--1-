@@ -1,5 +1,5 @@
 
-export type Section = 'dashboard' | 'diario' | 'grupos' | 'eventos' | 'rede' | 'beneficiarios' | 'planejamento' | 'instrumentais';
+export type Section = 'dashboard' | 'diario' | 'grupos' | 'eventos' | 'rede' | 'beneficiarios' | 'planejamento' | 'instrumentais' | 'vinculos' | 'act' | 'compaz' | 'atendimento';
 
 export interface UserProfile {
     id?: string;
