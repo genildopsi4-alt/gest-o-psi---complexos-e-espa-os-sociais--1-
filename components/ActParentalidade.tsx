@@ -1,8 +1,14 @@
 import React, { useState, useRef } from 'react';
+import { UserProfile } from '../types';
 import { RelatorioService } from '../src/services/RelatorioService';
 
-const ActParentalidade: React.FC = () => {
-    const [selectedUnidade, setSelectedUnidade] = useState<string>('');
+interface ActParentalidadeProps {
+    user?: UserProfile | null;
+}
+
+const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
+    const isAdmin = user?.role === 'admin' || user?.name?.includes('Genildo');
+    const [selectedUnidade, setSelectedUnidade] = useState<string>(isAdmin ? '' : (user?.unit || ''));
     const [dataAtividade, setDataAtividade] = useState<string>(new Date().toISOString().split('T')[0]);
     const [actSessao, setActSessao] = useState<number | null>(null);
     const [qtdParticipantes, setQtdParticipantes] = useState<number>(0);
@@ -99,6 +105,8 @@ const ActParentalidade: React.FC = () => {
                                     className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-bold text-slate-700"
                                     value={selectedUnidade}
                                     onChange={(e) => setSelectedUnidade(e.target.value)}
+                                    title="Selecionar Unidade"
+                                    disabled={!isAdmin && !!user?.unit}
                                 >
                                     {unidades.map((u, i) => (
                                         <option key={i} value={u.value} disabled={u.disabled}>{u.label}</option>
@@ -111,6 +119,7 @@ const ActParentalidade: React.FC = () => {
                                     type="date"
                                     value={dataAtividade}
                                     onChange={(e) => setDataAtividade(e.target.value)}
+                                    title="Data do Encontro"
                                     className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-teal-500 transition font-bold text-slate-700"
                                 />
                             </div>
@@ -167,7 +176,7 @@ const ActParentalidade: React.FC = () => {
                                 <i className="fa-solid fa-camera text-teal-500"></i> Evidência Fotográfica
                             </h3>
                             <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-teal-50/50 hover:border-teal-300 transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleImageChange} />
+                                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} title="Anexar foto" />
                                 <i className="fa-solid fa-cloud-arrow-up text-2xl text-teal-400 mb-2"></i>
                                 <p className="text-xs font-black text-slate-500">Tirar foto ou anexar</p>
                             </div>
@@ -176,7 +185,7 @@ const ActParentalidade: React.FC = () => {
                                     {selectedImages.map((img, idx) => (
                                         <div key={idx} className="relative rounded-xl overflow-hidden border border-slate-100 aspect-square">
                                             <img src={img} alt={`Foto ${idx}`} className="w-full h-full object-cover" />
-                                            <button type="button" onClick={() => removeImage(idx)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px]">
+                                            <button type="button" onClick={() => removeImage(idx)} title="Remover foto" className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px]">
                                                 <i className="fa-solid fa-xmark"></i>
                                             </button>
                                         </div>

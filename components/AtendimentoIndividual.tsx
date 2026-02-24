@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
+import { UserProfile } from '../types';
 import { RelatorioService } from '../src/services/RelatorioService';
 
-const AtendimentoIndividual: React.FC = () => {
-    const [selectedUnidade, setSelectedUnidade] = useState<string>('');
+interface AtendimentoIndividualProps {
+    user?: UserProfile | null;
+}
+
+const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user }) => {
+    const isAdmin = user?.role === 'admin' || user?.name?.includes('Genildo');
+    const [selectedUnidade, setSelectedUnidade] = useState<string>(isAdmin ? '' : (user?.unit || ''));
     const [dataAtendimento, setDataAtendimento] = useState<string>(new Date().toISOString().split('T')[0]);
     const [tipoAtendimento, setTipoAtendimento] = useState<string>('');
     const [nomeAtendido, setNomeAtendido] = useState<string>('');
@@ -90,6 +96,8 @@ const AtendimentoIndividual: React.FC = () => {
                                     className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-violet-500 transition font-bold text-slate-700"
                                     value={selectedUnidade}
                                     onChange={(e) => setSelectedUnidade(e.target.value)}
+                                    title="Selecionar Unidade"
+                                    disabled={!isAdmin && !!user?.unit}
                                 >
                                     {unidades.map((u, i) => (
                                         <option key={i} value={u.value} disabled={u.disabled}>{u.label}</option>
@@ -102,6 +110,7 @@ const AtendimentoIndividual: React.FC = () => {
                                     type="date"
                                     value={dataAtendimento}
                                     onChange={(e) => setDataAtendimento(e.target.value)}
+                                    title="Data do Atendimento"
                                     className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-violet-500 transition font-bold text-slate-700"
                                 />
                             </div>

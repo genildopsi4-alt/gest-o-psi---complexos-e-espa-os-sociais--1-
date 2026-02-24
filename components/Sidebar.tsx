@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Section } from '../types';
+import { Section, UserProfile } from '../types';
 
 interface SidebarProps {
   activeSection: Section;
   setActiveSection: (section: Section) => void;
   onLogout: () => void;
+  user?: UserProfile | null;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLogout, user }) => {
   const [time, setTime] = useState(new Date());
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -38,6 +39,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
     }
   };
 
+  const isAdmin = user?.role === 'admin' || user?.name?.includes('Genildo');
+
+  // 🔒 SIGILO: Itens visíveis apenas para admin
+  const adminOnlySections: Section[] = ['instrumentais', 'planejamento', 'beneficiarios', 'rede', 'eventos'];
+
   const menuItems: { id: Section; label: string; icon: string; badge?: number; separator?: string }[] = [
     { id: 'dashboard', label: 'Painel de Controle', icon: 'fa-grip-vertical' },
     { id: 'vinculos', label: 'Grupos de Vínculos', icon: 'fa-users', separator: 'Registro de Atividades' },
@@ -50,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
     { id: 'beneficiarios', label: 'Busca Ativa', icon: 'fa-user-clock', badge: 3 },
     { id: 'rede', label: 'Rede de Apoio', icon: 'fa-map-location-dot' },
     { id: 'eventos', label: 'Eventos', icon: 'fa-calendar-day' },
-  ];
+  ].filter(item => isAdmin || !adminOnlySections.includes(item.id as Section)) as { id: Section; label: string; icon: string; badge?: number; separator?: string }[];
 
   return (
     <aside className="w-64 bg-white border-r-2 border-orange-100 h-full flex flex-col flex-shrink-0 transition-all duration-300 font-sans z-30 shadow-xl rounded-r-[2rem]">

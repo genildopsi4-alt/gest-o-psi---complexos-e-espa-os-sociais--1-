@@ -100,6 +100,18 @@ const App: React.FC = () => {
     { id: 62, nome: 'Vitória Ferreira Rodrigues', grupo: 'GAP', unidade: 'João XXIII', frequencia: ['futuro', 'futuro', 'futuro', 'futuro'], status: 'regular', avatar_bg: 'bg-purple-100', avatar_text: 'text-purple-700', avatar_letter: 'V', age: '14 anos' },
   ]);
 
+  // 🔒 SIGILO: Filtra beneficiários pela unidade do técnico logado. Admin vê todos.
+  const isAdmin = user?.role === 'admin' || user?.name?.includes('Genildo');
+  const filteredBeneficiarios = isAdmin
+    ? beneficiariosList
+    : beneficiariosList.filter(b => {
+      if (!user?.unit) return true;
+      // Normaliza nomes para comparação: "CSMI João XXIII" vs "João XXIII"
+      const userUnit = user.unit.replace(/^(CSMI |Espaço Social )/i, '').toLowerCase();
+      const bUnit = b.unidade.toLowerCase();
+      return bUnit.includes(userUnit) || userUnit.includes(bUnit);
+    });
+
   // Session Persistence
   React.useEffect(() => {
     const savedUser = localStorage.getItem('user_session');
@@ -173,11 +185,11 @@ const App: React.FC = () => {
   const renderSection = () => {
     switch (activeSection) {
       case 'dashboard': return <Dashboard user={user} />;
-      case 'diario': return <Diario beneficiarios={beneficiariosList} initialGroupFilter={selectedGroupFilter} />;
-      case 'vinculos': return <GruposVinculos beneficiarios={beneficiariosList} initialGroupFilter={selectedGroupFilter} />;
-      case 'act': return <ActParentalidade />;
-      case 'compaz': return <Compaz />;
-      case 'atendimento': return <AtendimentoIndividual />;
+      case 'diario': return <Diario beneficiarios={filteredBeneficiarios} initialGroupFilter={selectedGroupFilter} />;
+      case 'vinculos': return <GruposVinculos beneficiarios={filteredBeneficiarios} initialGroupFilter={selectedGroupFilter} user={user} />;
+      case 'act': return <ActParentalidade user={user} />;
+      case 'compaz': return <Compaz user={user} />;
+      case 'atendimento': return <AtendimentoIndividual user={user} />;
       case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} user={user} />;
       case 'eventos': return <Eventos />;
       case 'rede': return <Rede />;
@@ -213,6 +225,7 @@ const App: React.FC = () => {
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           onLogout={handleLogout}
+          user={user}
         />
       </div>
 
