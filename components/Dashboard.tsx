@@ -146,10 +146,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         title: 'Grupos de Vínculo',
         subtitle: 'GAP • GPI • GFA',
         icon: 'fa-users',
-        color: 'from-orange-500 to-amber-500',
-        borderColor: 'border-orange-200',
-        bgLight: 'bg-orange-50',
-        shadowColor: 'shadow-orange-200/50',
+        color: 'from-[#E8726C] to-[#F4A68E]',
+        borderColor: 'border-[#F4C5B8]',
+        bgLight: 'bg-[#FFF5F2]',
+        shadowColor: 'shadow-[#F4C5B8]/50',
         desc: 'Construção de identidade, senescência ativa e equidade familiar',
         fundamento: 'Erikson • Mead • Vygotsky',
         indicador: 'Retenção Grupal > 80%',
@@ -163,10 +163,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         title: 'ACT — Parentalidade',
         subtitle: 'Adultos e Crianças Juntos',
         icon: 'fa-hands-holding-child',
-        color: 'from-teal-500 to-emerald-500',
-        borderColor: 'border-teal-200',
-        bgLight: 'bg-teal-50',
-        shadowColor: 'shadow-teal-200/50',
+        color: 'from-[#D4A853] to-[#E8C96D]',
+        borderColor: 'border-[#F0DDA0]',
+        bgLight: 'bg-[#FFFBF0]',
+        shadowColor: 'shadow-[#F0DDA0]/50',
         desc: 'Programa de prevenção da violência intrafamiliar em 8 sessões',
         fundamento: 'APA — American Psychological Association',
         indicador: 'Redução de comportamentos punitivos',
@@ -180,10 +180,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         title: 'COMPAZ',
         subtitle: 'Cultura de Paz',
         icon: 'fa-peace',
-        color: 'from-indigo-500 to-blue-500',
-        borderColor: 'border-indigo-200',
-        bgLight: 'bg-indigo-50',
-        shadowColor: 'shadow-indigo-200/50',
+        color: 'from-[#7BAF8D] to-[#9ECAAB]',
+        borderColor: 'border-[#BEE0C8]',
+        bgLight: 'bg-[#F2FAF5]',
+        shadowColor: 'shadow-[#BEE0C8]/50',
         desc: 'Círculos de paz, justiça restaurativa e mediação de conflitos',
         fundamento: 'Pranis • Zehr • Rosenberg (CNV)',
         indicador: 'Resolutividade via Círculos de Consenso',
@@ -196,40 +196,40 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     ];
 
     return (
-      <section className="p-4 md:p-8 animate-fade-in bg-gradient-to-b from-slate-50 to-orange-50/30 min-h-screen space-y-8">
+      <section className="p-4 md:p-8 animate-fade-in bg-gradient-to-b from-[#FFFBF0] to-[#FFF5F2]/30 min-h-screen space-y-8" style={{ fontFamily: "'Nunito', 'Quicksand', sans-serif" }}>
 
         {/* ── HERO WELCOME ── */}
-        <div className="relative bg-white rounded-[3rem] overflow-hidden shadow-2xl border-2 border-orange-100">
-          {/* Background decorations */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-teal-100/40 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-orange-100/40 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-indigo-50/20 to-purple-50/20 rounded-full blur-3xl"></div>
+        <div className="relative bg-white rounded-[3rem] overflow-hidden shadow-2xl border-2 border-[#F0DDA0]">
+          {/* Background decorations — Mais Infância Ceará palette */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#E8C96D]/20 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-[#F4A68E]/20 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-[#BEE0C8]/15 to-[#F0DDA0]/15 rounded-full blur-3xl"></div>
 
           <div className="relative p-8 md:p-12">
             {/* Top Badge */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
               <div>
-                <span className="inline-block bg-gradient-to-r from-teal-500 to-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2.5 rounded-full mb-4 shadow-lg shadow-teal-200">
-                  <i className="fa-solid fa-shield-halved mr-2"></i>Painel Profissional
+                <span className="inline-block bg-gradient-to-r from-[#D4A853] to-[#E8C96D] text-white text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2.5 rounded-full mb-4 shadow-lg shadow-[#F0DDA0]">
+                  <i className="fa-solid fa-child-reaching mr-2"></i>Painel Profissional
                 </span>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-800 tracking-tighter leading-[1.1]">
                   Promoção e Prevenção<br />
-                  <span className="bg-gradient-to-r from-teal-600 to-emerald-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#E8726C] to-[#D4A853] bg-clip-text text-transparent">
                     em Saúde Mental Comunitária
                   </span>
                 </h1>
               </div>
-              <div className="shrink-0 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-100 rounded-2xl p-4 text-center shadow-lg shadow-orange-100/50">
-                <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest mb-1">Sua Unidade</p>
+              <div className="shrink-0 bg-gradient-to-br from-[#FFFBF0] to-[#FFF5F2] border-2 border-[#F0DDA0] rounded-2xl p-4 text-center shadow-lg shadow-[#F0DDA0]/50">
+                <p className="text-[9px] font-black text-[#D4A853] uppercase tracking-widest mb-1">Sua Unidade</p>
                 <p className="text-sm font-black text-slate-700">{user?.unit || 'Não definida'}</p>
                 <p className="text-[10px] font-bold text-slate-400 mt-1">{user?.name} • CRP {user?.crp}</p>
               </div>
             </div>
 
             {/* Modelo Biopsicossocial Banner */}
-            <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-6 text-white flex flex-col md:flex-row items-center gap-6 mb-10 shadow-xl">
+            <div className="bg-gradient-to-r from-[#5A3E36] to-[#7A5548] rounded-2xl p-6 text-white flex flex-col md:flex-row items-center gap-6 mb-10 shadow-xl">
               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-sm border border-white/20">
-                <i className="fa-solid fa-brain text-3xl text-amber-300"></i>
+                <i className="fa-solid fa-brain text-3xl text-[#E8C96D]"></i>
               </div>
               <div className="flex-1 text-center md:text-left">
                 <h3 className="font-black text-sm uppercase tracking-wider mb-1">Modelo Biopsicossocial de Promoção e Prevenção</h3>
@@ -238,9 +238,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">
-                <div className="w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
-                <div className="w-3 h-3 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
-                <div className="w-3 h-3 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                <div className="w-3 h-3 bg-[#E8726C] rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-[#D4A853] rounded-full animate-pulse delay-300"></div>
+                <div className="w-3 h-3 bg-[#7BAF8D] rounded-full animate-pulse delay-700"></div>
               </div>
             </div>
 
@@ -285,11 +285,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     </div>
 
                     {/* Indicador */}
-                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center gap-2">
-                      <i className="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+                    <div className="bg-[#F2FAF5] rounded-xl p-3 border border-[#BEE0C8] flex items-center gap-2">
+                      <i className="fa-solid fa-chart-line text-[#7BAF8D] text-xs"></i>
                       <div>
                         <p className="text-[9px] font-black text-slate-400 uppercase">Indicador</p>
-                        <p className="text-[10px] font-bold text-emerald-700">{pilar.indicador}</p>
+                        <p className="text-[10px] font-bold text-[#5A8F6A]">{pilar.indicador}</p>
                       </div>
                     </div>
                   </div>
@@ -302,8 +302,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         {/* ── GOVERNANÇA ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-slate-100 flex items-center gap-4 hover:shadow-xl transition">
-            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
-              <i className="fa-solid fa-clipboard-check text-emerald-600 text-lg"></i>
+            <div className="w-12 h-12 bg-[#BEE0C8] rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-clipboard-check text-[#5A8F6A] text-lg"></i>
             </div>
             <div>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Supervisão de Campo</p>
@@ -312,8 +312,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             </div>
           </div>
           <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-slate-100 flex items-center gap-4 hover:shadow-xl transition">
-            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
-              <i className="fa-solid fa-users-rectangle text-indigo-600 text-lg"></i>
+            <div className="w-12 h-12 bg-[#F0DDA0] rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-users-rectangle text-[#B8912E] text-lg"></i>
             </div>
             <div>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Técnicos Referência</p>
@@ -322,8 +322,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             </div>
           </div>
           <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-slate-100 flex items-center gap-4 hover:shadow-xl transition">
-            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-              <i className="fa-solid fa-landmark-dome text-amber-600 text-lg"></i>
+            <div className="w-12 h-12 bg-[#F4C5B8] rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-landmark-dome text-[#C7564F] text-lg"></i>
             </div>
             <div>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Colegiado Geral</p>
@@ -334,12 +334,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         </div>
 
         {/* ── CITAÇÃO ── */}
-        <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-[2rem] p-8 text-center shadow-xl">
-          <i className="fa-solid fa-quote-left text-2xl text-amber-400/50 mb-4 block"></i>
+        <div className="bg-gradient-to-r from-[#5A3E36] to-[#7A5548] rounded-[2rem] p-8 text-center shadow-xl">
+          <i className="fa-solid fa-quote-left text-2xl text-[#E8C96D]/50 mb-4 block"></i>
           <p className="text-white/90 text-sm md:text-base font-medium italic leading-relaxed max-w-2xl mx-auto">
-            "Ninguém caminha sem aprender a caminhar, sem aprender a fazer o caminho caminhando, refazendo e retocando o sonho pelo qual se pôs a caminhar."
+            "Não podemos nos dar ao luxo de adiar o investimento nas crianças até que elas se tornem adultas, nem podemos esperar até que elas entrem na escola, pois pode ser muito tarde para intervir."
           </p>
-          <p className="text-amber-400 font-black text-xs uppercase tracking-widest mt-4">— Paulo Freire</p>
+          <p className="text-[#E8C96D] font-black text-xs uppercase tracking-widest mt-4">— James Heckman, Prêmio Nobel de Economia</p>
         </div>
 
       </section>
