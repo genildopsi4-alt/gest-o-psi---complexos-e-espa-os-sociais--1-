@@ -84,6 +84,53 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
     return (
         <section className="p-4 md:p-8 animate-fade-in bg-teal-50/30 min-h-full">
             <div className="max-w-3xl mx-auto space-y-6">
+
+                {/* ── HERO VISUAL ACT ── */}
+                <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-teal-100">
+                    {/* Banner Principal */}
+                    <div className="relative">
+                        <img src="act-banner.png" alt="Programa ACT - Para Educar Crianças em Ambientes Seguros" className="w-full h-auto object-cover" />
+                    </div>
+
+                    {/* Crescer com Afeto */}
+                    <div className="bg-gradient-to-r from-rose-50 to-teal-50 border-y border-teal-100">
+                        <img src="act-crescer-afeto.jpg" alt="Crescer com Afeto, Sem Violência" className="w-full h-auto object-cover" />
+                    </div>
+
+                    {/* Infográfico + Stats */}
+                    <div className="p-6 space-y-4 bg-white">
+                        <div className="flex justify-center">
+                            <img src="act-infografico.png" alt="ACT Ceará - Infográfico" className="max-h-[400px] object-contain rounded-xl" />
+                        </div>
+
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="bg-teal-50 rounded-xl p-3 text-center border border-teal-100">
+                                <p className="text-xl font-black text-teal-600">8</p>
+                                <p className="text-[9px] font-black text-teal-400 uppercase tracking-wider">Sessões</p>
+                            </div>
+                            <div className="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
+                                <p className="text-xl font-black text-amber-600">24</p>
+                                <p className="text-[9px] font-black text-amber-400 uppercase tracking-wider">Municípios</p>
+                            </div>
+                            <div className="bg-rose-50 rounded-xl p-3 text-center border border-rose-100">
+                                <p className="text-xl font-black text-rose-600">1.164</p>
+                                <p className="text-[9px] font-black text-rose-400 uppercase tracking-wider">Famílias</p>
+                            </div>
+                            <div className="bg-indigo-50 rounded-xl p-3 text-center border border-indigo-100">
+                                <p className="text-xl font-black text-indigo-600">190</p>
+                                <p className="text-[9px] font-black text-indigo-400 uppercase tracking-wider">Facilitadores</p>
+                            </div>
+                        </div>
+
+                        <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            <i className="fa-solid fa-shield-halved mr-1 text-teal-400"></i>
+                            Programa validado pela APA — American Psychological Association
+                        </p>
+                    </div>
+                </div>
+
+                {/* ── FORMULÁRIO DE REGISTRO ── */}
                 <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-teal-100">
                     {/* Header */}
                     <div className="bg-teal-600 p-6 text-white flex justify-between items-center">
