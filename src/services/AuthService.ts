@@ -11,12 +11,19 @@ export const AuthService = {
             return {
                 user: {
                     id: cleanCpf,
-                    name: 'Genildo (Gestor)',
+                    name: 'Genildo Barbosa',
                     role: 'admin',
-                    crp: '00/0000',
-                    unit: 'Gestão Central',
+                    crp: '11/17780',
+                    unit: 'CSMI João XXIII',
                     avatar: '/avatars/avatar_01.png',
-                    qualificacoes: []
+                    qualificacoes: [
+                        'ACT - Parentalidade Positiva',
+                        'Círculo de Construção de Paz',
+                        'CNV - Comunicação Não Violenta',
+                        'Justiça Restaurativa',
+                        'Competências Socioemocionais',
+                        'Mediação de Conflitos'
+                    ]
                 },
                 error: null
             };
@@ -74,7 +81,7 @@ export const AuthService = {
                 crp: data.crp || '',
                 unit: data.unidade || '',
                 avatar: data.avatar_url,
-                qualificacoes: []
+                qualificacoes: data.qualificacoes || []
             };
 
             return { user, error: null };

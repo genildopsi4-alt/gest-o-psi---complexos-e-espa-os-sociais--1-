@@ -332,7 +332,7 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
                 <h3 className="font-black text-lg uppercase tracking-tight">Novo Grupo</h3>
                 <p className="text-xs font-bold text-emerald-100">Adicionar à unidade atual</p>
               </div>
-              <button onClick={() => setIsNewGroupModalOpen(false)} className="text-white hover:rotate-90 transition duration-300 w-8 h-8 flex items-center justify-center">
+              <button onClick={() => setIsNewGroupModalOpen(false)} title="Fechar modal" className="text-white hover:rotate-90 transition duration-300 w-8 h-8 flex items-center justify-center">
                 <i className="fa-solid fa-xmark text-xl"></i>
               </button>
             </div>
@@ -340,6 +340,8 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
               <div>
                 <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Tipo de Grupo</label>
                 <select
+                  title="Tipo de Grupo"
+                  aria-label="Tipo de Grupo"
                   value={newGroupData.tipo}
                   onChange={(e) => setNewGroupData({ ...newGroupData, tipo: e.target.value as any })}
                   className="w-full border-2 border-slate-100 rounded-xl p-3 outline-none focus:border-emerald-500 transition font-bold text-slate-700"
@@ -367,6 +369,8 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
                 <div>
                   <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Dia da Semana</label>
                   <select
+                    title="Dia da Semana"
+                    aria-label="Dia da Semana"
                     value={newGroupData.dia}
                     onChange={(e) => setNewGroupData({ ...newGroupData, dia: e.target.value })}
                     required
@@ -431,7 +435,7 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
                 <h3 className="font-black text-lg uppercase tracking-tight">Equipe do Grupo</h3>
                 <p className="text-xs font-bold text-orange-100">Quem conduz as atividades?</p>
               </div>
-              <button onClick={() => setEditingGroup(null)} className="text-white hover:rotate-90 transition duration-300 w-8 h-8 flex items-center justify-center">
+              <button onClick={() => setEditingGroup(null)} title="Fechar modal" className="text-white hover:rotate-90 transition duration-300 w-8 h-8 flex items-center justify-center">
                 <i className="fa-solid fa-xmark text-xl"></i>
               </button>
             </div>

@@ -41,9 +41,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
 
   const isAdmin = user?.role === 'admin' || user?.name?.includes('Genildo');
 
-  // 🔒 SIGILO: Itens visíveis apenas para admin
-  const adminOnlySections: Section[] = ['instrumentais', 'planejamento', 'beneficiarios', 'rede', 'eventos'];
-
   // Cores dos pilares Mais Infância Ceará
   const sectionColors: Record<string, { bg: string; text: string; border: string; iconBg: string }> = {
     vinculos: { bg: 'bg-[#3AADD9]/10', text: 'text-[#3AADD9]', border: 'border-[#3AADD9]/30', iconBg: 'text-[#3AADD9]' },
@@ -67,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
     { id: 'beneficiarios', label: 'Busca Ativa', icon: 'fa-user-clock', badge: 3 },
     { id: 'rede', label: 'Rede de Apoio', icon: 'fa-map-location-dot' },
     { id: 'eventos', label: 'Eventos', icon: 'fa-calendar-day' },
-  ].filter(item => isAdmin || !adminOnlySections.includes(item.id as Section)) as { id: Section; label: string; icon: string; badge?: number; separator?: string }[];
+  ];
 
   return (
     <aside className="w-64 bg-white border-r-2 border-[#00BFA6]/20 h-full flex flex-col flex-shrink-0 transition-all duration-300 font-sans z-30 shadow-xl rounded-r-[2rem]">
@@ -149,19 +146,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
         })}
       </nav>
 
-      {/* --- ÁREA ADMINISTRATIVA --- */}
-      <div className="px-4 py-2 bg-white border-t border-slate-50">
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Área Administrativa</h3>
-        <button
-          onClick={() => setActiveSection('dashboard')}
-          className={`w-full flex items-center justify-center px-4 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm group ${activeSection === 'dashboard' ? 'bg-indigo-100 text-indigo-700 border-2 border-indigo-200' : 'bg-indigo-50 text-indigo-600 border-2 border-indigo-50 hover:bg-indigo-100'}`}
-        >
-          <div className="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-600 mr-2 group-hover:scale-110 transition-transform">
-            <i className="fa-solid fa-chart-pie"></i>
-          </div>
-          Gestão Central
-        </button>
-      </div>
+      {/* --- ÁREA ADMINISTRATIVA (somente Admin) --- */}
+      {isAdmin && (
+        <div className="px-4 py-2 bg-white border-t border-slate-50">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-2">Área Administrativa</h3>
+          <button
+            onClick={() => setActiveSection('dashboard')}
+            className={`w-full flex items-center justify-center px-4 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm group ${activeSection === 'dashboard' ? 'bg-indigo-100 text-indigo-700 border-2 border-indigo-200' : 'bg-indigo-50 text-indigo-600 border-2 border-indigo-50 hover:bg-indigo-100'}`}
+          >
+            <div className="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-600 mr-2 group-hover:scale-110 transition-transform">
+              <i className="fa-solid fa-chart-pie"></i>
+            </div>
+            Gestão Central
+          </button>
+        </div>
+      )}
 
       {/* --- FOOTER / LOGOUT --- */}
       <div className="p-4 border-t-2 border-orange-50 flex-shrink-0 bg-slate-50 rounded-br-[2rem]">

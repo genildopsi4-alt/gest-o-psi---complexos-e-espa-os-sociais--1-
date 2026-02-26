@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { AuthService } from '../src/services/AuthService';
 
@@ -17,6 +17,35 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
     const [isRegistering, setIsRegistering] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [pwaInstalled, setPwaInstalled] = useState(false);
+
+    useEffect(() => {
+        const handleBeforeInstall = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        const handleAppInstalled = () => {
+            setPwaInstalled(true);
+            setDeferredPrompt(null);
+        };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+        window.addEventListener('appinstalled', handleAppInstalled);
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
+    }, []);
+
+    const handleInstallPwa = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+            setPwaInstalled(true);
+        }
+        setDeferredPrompt(null);
+    };
     const [error, setError] = useState<string | null>(null);
 
     // Login State
@@ -226,16 +255,28 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBack }) => {
                                     Criar Cadastro Profissional
                                 </button>
 
-                                {/* Botão de Download do APK */}
+                                {/* Botão de Instalação PWA */}
                                 <div className="mt-6">
-                                    <a
-                                        href="/app-release.apk"
-                                        download="GestaoPSI.apk"
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-black uppercase text-emerald-800 hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
-                                    >
-                                        <i className="fa-brands fa-android text-base text-emerald-600 group-hover:scale-110 transition-transform"></i>
-                                        <span>Baixar App Android</span>
-                                    </a>
+                                    {pwaInstalled ? (
+                                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-[10px] font-black uppercase text-emerald-700">
+                                            <i className="fa-solid fa-circle-check text-emerald-500"></i>
+                                            <span>App Instalado!</span>
+                                        </div>
+                                    ) : deferredPrompt ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleInstallPwa}
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full text-[10px] font-black uppercase shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all group"
+                                        >
+                                            <i className="fa-solid fa-mobile-screen-button text-base group-hover:animate-bounce"></i>
+                                            <span>Instalar como App</span>
+                                        </button>
+                                    ) : (
+                                        <p className="text-[10px] text-slate-400 font-bold">
+                                            <i className="fa-solid fa-circle-info mr-1"></i>
+                                            Acesse pelo Chrome / Edge para instalar o app
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </form>

@@ -98,15 +98,45 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                     const data = await response.json();
 
                     const mappedNews = data.map((post: any) => {
-                        // Extract Image
-                        let imageUrl = 'https://www.ceara.gov.br/wp-content/themes/ceara2019/assets/images/brasao_ceara.svg';
-                        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+                        // === Extract Image ===
+                        // 1) Featured media (best quality)
+                        let imageUrl = '';
+                        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0] && post._embedded['wp:featuredmedia'][0].source_url) {
                             imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
                         }
 
-                        // Determine Color/Tag mock logic
-                        const colors = ['emerald', 'blue', 'purple', 'orange'];
-                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                        // 2) Try to extract first image from post content
+                        if (!imageUrl && post.content?.rendered) {
+                            const imgMatch = post.content.rendered.match(/<img[^>]+src=["']([^"']+)["']/);
+                            if (imgMatch && imgMatch[1]) {
+                                imageUrl = imgMatch[1];
+                            }
+                        }
+
+                        // 3) Category-based fallback images (real SPS imagery)
+                        if (!imageUrl) {
+                            const fallbackImages = [
+                                'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/IMG_9672-600x400.jpg',
+                                'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/caminhao-3-600x400.jpg',
+                                'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2026/02/Acolher-22-2-600x400.jpg',
+                                'https://www.sps.ce.gov.br/wp-content/uploads/sites/16/2024/06/Marca-SPS-500x500-1.png'
+                            ];
+                            imageUrl = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+                        }
+
+                        // === Determine Category/Tag ===
+                        let tag = 'SPS Notícias';
+                        let color = 'blue';
+                        if (post._embedded && post._embedded['wp:term'] && post._embedded['wp:term'][0] && post._embedded['wp:term'][0][0]) {
+                            const categoryName = post._embedded['wp:term'][0][0].name;
+                            tag = categoryName || 'SPS Notícias';
+                            const categorySlug = post._embedded['wp:term'][0][0].slug || '';
+                            if (categorySlug.includes('cidadania')) color = 'blue';
+                            else if (categorySlug.includes('edital') || categorySlug.includes('sexec')) color = 'purple';
+                            else if (categorySlug.includes('mais-infancia') || categorySlug.includes('crianca')) color = 'orange';
+                            else if (categorySlug.includes('aviso') || categorySlug.includes('pauta')) color = 'emerald';
+                            else color = ['emerald', 'blue', 'purple', 'orange'][Math.floor(Math.random() * 4)];
+                        }
 
                         // Strip HTML
                         const tempDiv = document.createElement('div');
@@ -117,11 +147,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnterSystem }) => {
                         const cleanTitle = tempDiv.textContent || tempDiv.innerText || '';
 
                         return {
-                            tag: 'SPS Notícias',
+                            tag,
                             title: cleanTitle,
                             desc: cleanDesc,
                             date: new Date(post.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase(),
-                            color: randomColor,
+                            color,
                             image: imageUrl,
                             link: post.link
                         };
