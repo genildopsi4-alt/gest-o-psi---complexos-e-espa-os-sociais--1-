@@ -48,8 +48,10 @@ export interface RedeItem {
     tipo: string;
     lat: number;
     lng: number;
-    regiao: 'joao23' | 'curio' | 'cristo' | 'todas';
+    regiao: 'joao23' | 'curio' | 'cristo' | 'todas' | 'SR I' | 'SR II' | 'SR III' | 'SR IV' | 'SR V/XI';
     endereco: string;
+    telefone?: string;
+    responsavel?: string;
 }
 
 export interface Beneficiario {
