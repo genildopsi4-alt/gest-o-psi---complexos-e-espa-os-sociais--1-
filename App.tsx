@@ -199,7 +199,7 @@ const App: React.FC = () => {
       case 'atendimento': return <AtendimentoIndividual user={user} onOpenInstrumental={handleOpenInstrumental} />;
       case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} user={user} onOpenInstrumental={handleOpenInstrumental} />;
       case 'eventos': return <Eventos />;
-      case 'rede': return <Rede />;
+      case 'rede': return <Rede user={user} />;
       case 'instrumentais': return <Instrumentais user={user} defaultInstrumental={openInstrumental as any} />;
       case 'gestor': return <InstrumentalGestor user={user} />;
       case 'beneficiarios': return (

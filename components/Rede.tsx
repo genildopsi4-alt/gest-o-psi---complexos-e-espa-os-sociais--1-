@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { UserProfile } from '../types';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { RedeItem } from '../types';
@@ -114,7 +115,12 @@ function getBadgeStyle(tipo: string) {
 
 type Regiao = 'todas' | 'SR I' | 'SR II' | 'SR III' | 'SR IV' | 'SR V/XI';
 
-const Rede: React.FC = () => {
+interface RedeProps {
+    user?: UserProfile | null;
+}
+
+const Rede: React.FC<RedeProps> = ({ user }) => {
+    const isGestor = user?.role === 'admin' || user?.name?.includes('Genildo');
     const [filter, setFilter] = useState<Regiao>('todas');
     const [busca, setBusca] = useState('');
     const [mapState, setMapState] = useState<{ center: [number, number]; zoom: number }>({ center: [-3.78, -38.57], zoom: 12 });
@@ -261,19 +267,21 @@ const Rede: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Articuladores */}
-                    <div className="border-t border-gray-200 bg-blue-50 px-4 py-3 flex-shrink-0">
-                        <p className="font-bold text-blue-800 text-xs mb-2">📋 Contatos de Articulação e Gestão (2024)</p>
-                        <div className="space-y-1.5">
-                            {articuladores.map((a, i) => (
-                                <div key={i} className="text-xs">
-                                    <p className="font-semibold text-blue-700">{a.nome}</p>
-                                    <p className="text-blue-500 leading-tight">{a.cargo}</p>
-                                    <a href={`mailto:${a.email}`} className="text-blue-400 hover:underline break-all">{a.email}</a>
-                                </div>
-                            ))}
+                    {/* Articuladores — só para gestor/admin */}
+                    {isGestor && (
+                        <div className="border-t border-gray-200 bg-blue-50 px-4 py-3 flex-shrink-0">
+                            <p className="font-bold text-blue-800 text-xs mb-2">📋 Contatos de Articulação e Gestão (2024)</p>
+                            <div className="space-y-1.5">
+                                {articuladores.map((a, i) => (
+                                    <div key={i} className="text-xs">
+                                        <p className="font-semibold text-blue-700">{a.nome}</p>
+                                        <p className="text-blue-500 leading-tight">{a.cargo}</p>
+                                        <a href={`mailto:${a.email}`} className="text-blue-400 hover:underline break-all">{a.email}</a>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </section>
