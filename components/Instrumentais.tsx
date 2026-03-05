@@ -9,6 +9,7 @@ import { DocumentContainer, SPSHeader, SPSFooter, TableRow, TextAreaBlock } from
 
 interface InstrumentaisProps {
     user: UserProfile | null;
+    defaultInstrumental?: InstrumentalType;
 }
 
 type InstrumentalType = 'planejamento' | 'triagem' | 'escuta' | 'orientacao' | 'cadastro' | 'frequencia' | 'relatorio' | 'visita_domiciliar' | 'encaminhamento' | 'ci';
@@ -51,8 +52,14 @@ const unitMap: Record<string, { name: string; address: string; email: string }> 
     }
 };
 
-const Instrumentais: React.FC<InstrumentaisProps> = ({ user }) => {
-    const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>('planejamento');
+const Instrumentais: React.FC<InstrumentaisProps> = ({ user, defaultInstrumental }) => {
+    const [activeInstrumental, setActiveInstrumental] = useState<InstrumentalType>(defaultInstrumental || 'planejamento');
+
+    useEffect(() => {
+        if (defaultInstrumental) {
+            setActiveInstrumental(defaultInstrumental);
+        }
+    }, [defaultInstrumental]);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedProfessional, setSelectedProfessional] = useState<string | null>(null);
     const [showImportModal, setShowImportModal] = useState(false);

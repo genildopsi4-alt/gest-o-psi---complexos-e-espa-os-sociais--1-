@@ -25,9 +25,10 @@ interface Unit {
 interface GruposProps {
   onNavigate?: (section: Section, group: string) => void;
   user?: UserProfile | null;
+  onOpenInstrumental?: (tipo: string) => void;
 }
 
-const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
+const Grupos: React.FC<GruposProps> = ({ onNavigate, user, onOpenInstrumental }) => {
   const isAdmin = user?.role === 'admin';
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
 
@@ -290,14 +291,20 @@ const Grupos: React.FC<GruposProps> = ({ onNavigate, user }) => {
                       <button onClick={() => handleAction('beneficiarios', grupo.tipo)} className="flex items-center justify-center gap-2 py-2.5 px-2 rounded-xl border-2 border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition text-xs font-bold uppercase">
                         <i className="fa-solid fa-list-ul"></i> Ver Lista
                       </button>
-                      <button onClick={() => handleAction('diario', grupo.tipo)} className="flex items-center justify-center gap-2 py-2.5 px-2 rounded-xl border-2 border-slate-100 text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition text-xs font-bold uppercase">
+                      <button
+                        onClick={() => onOpenInstrumental ? onOpenInstrumental('frequencia') : handleAction('diario', grupo.tipo)}
+                        className="flex items-center justify-center gap-2 py-2.5 px-2 rounded-xl border-2 border-slate-100 text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 transition text-xs font-bold uppercase"
+                      >
                         <i className="fa-solid fa-calendar-check"></i> Frequência
                       </button>
                     </div>
 
                     {/* Linha 2: Ação Direta (Inscrição e Avaliação) */}
                     <div className="grid grid-cols-2 gap-3">
-                      <button onClick={() => handleAction('beneficiarios', grupo.tipo)} className="flex items-center justify-center gap-2 py-3 px-2 rounded-xl bg-emerald-600 text-white shadow-md hover:bg-emerald-700 hover:shadow-lg transition text-xs font-black uppercase tracking-wide">
+                      <button
+                        onClick={() => onOpenInstrumental ? onOpenInstrumental('cadastro') : handleAction('beneficiarios', grupo.tipo)}
+                        className="flex items-center justify-center gap-2 py-3 px-2 rounded-xl bg-emerald-600 text-white shadow-md hover:bg-emerald-700 hover:shadow-lg transition text-xs font-black uppercase tracking-wide"
+                      >
                         <i className="fa-solid fa-user-plus"></i> Inscrição
                       </button>
                       <button onClick={() => alert('Funcionalidade em desenvolvimento.')} className="flex items-center justify-center gap-2 py-3 px-2 rounded-xl bg-orange-500 text-white shadow-md hover:bg-orange-600 hover:shadow-lg transition text-xs font-black uppercase tracking-wide">

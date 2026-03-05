@@ -4,9 +4,10 @@ import { RelatorioService } from '../src/services/RelatorioService';
 
 interface AtendimentoIndividualProps {
     user?: UserProfile | null;
+    onOpenInstrumental?: (tipo: string) => void;
 }
 
-const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user }) => {
+const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user, onOpenInstrumental }) => {
     const isAdmin = user?.role === 'admin' || user?.name?.includes('Genildo');
     const [selectedUnidade, setSelectedUnidade] = useState<string>(isAdmin ? '' : (user?.unit || ''));
     const [dataAtendimento, setDataAtendimento] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -27,12 +28,12 @@ const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user }) =
     ];
 
     const tiposAtendimento = [
-        { value: 'escuta', label: 'Escuta Qualificada', icon: 'fa-ear-listen', color: 'bg-violet-500', lightBg: 'bg-violet-50 border-violet-200' },
-        { value: 'acolhimento', label: 'Acolhimento', icon: 'fa-hand-holding-heart', color: 'bg-rose-500', lightBg: 'bg-rose-50 border-rose-200' },
-        { value: 'triagem', label: 'Triagem', icon: 'fa-clipboard-list', color: 'bg-amber-500', lightBg: 'bg-amber-50 border-amber-200' },
-        { value: 'visita_domiciliar', label: 'Visita Domiciliar', icon: 'fa-house-user', color: 'bg-sky-500', lightBg: 'bg-sky-50 border-sky-200' },
-        { value: 'visita_institucional', label: 'Visita Institucional', icon: 'fa-building', color: 'bg-slate-500', lightBg: 'bg-slate-50 border-slate-200' },
-        { value: 'busca_ativa', label: 'Busca Ativa', icon: 'fa-magnifying-glass-location', color: 'bg-orange-500', lightBg: 'bg-orange-50 border-orange-200' },
+        { value: 'escuta', label: 'Escuta Qualificada', icon: 'fa-ear-listen', color: 'bg-violet-500', lightBg: 'bg-violet-50 border-violet-200', instrumental: 'escuta' },
+        { value: 'acolhimento', label: 'Acolhimento', icon: 'fa-hand-holding-heart', color: 'bg-rose-500', lightBg: 'bg-rose-50 border-rose-200', instrumental: 'triagem' },
+        { value: 'triagem', label: 'Triagem', icon: 'fa-clipboard-list', color: 'bg-amber-500', lightBg: 'bg-amber-50 border-amber-200', instrumental: 'triagem' },
+        { value: 'visita_domiciliar', label: 'Visita Domiciliar', icon: 'fa-house-user', color: 'bg-sky-500', lightBg: 'bg-sky-50 border-sky-200', instrumental: 'visita_domiciliar' },
+        { value: 'visita_institucional', label: 'Visita Institucional', icon: 'fa-building', color: 'bg-slate-500', lightBg: 'bg-slate-50 border-slate-200', instrumental: 'encaminhamento' },
+        { value: 'busca_ativa', label: 'Busca Ativa', icon: 'fa-magnifying-glass-location', color: 'bg-orange-500', lightBg: 'bg-orange-50 border-orange-200', instrumental: 'orientacao' },
     ];
 
     const tipoSelecionado = tiposAtendimento.find(t => t.value === tipoAtendimento);
@@ -118,13 +119,22 @@ const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user }) =
 
                         {/* Tipo de Atendimento */}
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-3">Tipo de Atendimento</label>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Tipo de Atendimento</label>
+                            <p className="text-[10px] text-violet-500 font-bold mb-3 flex items-center gap-1">
+                                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                                Clique para selecionar e abrir o instrumental
+                            </p>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {tiposAtendimento.map((tipo) => (
                                     <button
                                         key={tipo.value}
                                         type="button"
-                                        onClick={() => setTipoAtendimento(tipo.value)}
+                                        onClick={() => {
+                                            setTipoAtendimento(tipo.value);
+                                            if (onOpenInstrumental && tipo.instrumental) {
+                                                onOpenInstrumental(tipo.instrumental);
+                                            }
+                                        }}
                                         className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${tipoAtendimento === tipo.value
                                             ? `${tipo.lightBg} shadow-md scale-[1.02]`
                                             : 'border-slate-100 hover:bg-slate-50'}`}
@@ -134,6 +144,9 @@ const AtendimentoIndividual: React.FC<AtendimentoIndividualProps> = ({ user }) =
                                         </div>
                                         <span className={`text-[10px] font-black uppercase text-center leading-tight ${tipoAtendimento === tipo.value ? 'text-slate-800' : 'text-slate-500'}`}>
                                             {tipo.label}
+                                        </span>
+                                        <span className="text-[9px] text-violet-400 font-bold flex items-center gap-0.5">
+                                            <i className="fa-solid fa-file-pen text-[8px]"></i> Abrir Ficha
                                         </span>
                                     </button>
                                 ))}

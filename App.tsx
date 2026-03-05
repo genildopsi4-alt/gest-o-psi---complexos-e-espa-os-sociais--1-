@@ -17,6 +17,7 @@ import ActParentalidade from './components/ActParentalidade';
 import Compaz from './components/Compaz';
 import AtendimentoIndividual from './components/AtendimentoIndividual';
 import DataSeeder from './components/DataSeeder'; // [NEW]
+import InstrumentalGestor from './components/InstrumentalGestor';
 import { Section, Beneficiario, UserProfile } from './types';
 
 type AppView = 'landing' | 'login' | 'app';
@@ -28,6 +29,7 @@ const App: React.FC = () => {
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeSection, setActiveSection] = useState<Section>('dashboard');
+  const [openInstrumental, setOpenInstrumental] = useState<string | undefined>(undefined);
 
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('todos');
 
@@ -153,6 +155,11 @@ const App: React.FC = () => {
     setActiveSection(section);
   };
 
+  const handleOpenInstrumental = (tipo: string) => {
+    setOpenInstrumental(tipo);
+    setActiveSection('instrumentais');
+  };
+
   const getHeaderTitle = (section: Section): string => {
     switch (section) {
       case 'dashboard': return 'Painel de Controle';
@@ -189,11 +196,12 @@ const App: React.FC = () => {
       case 'vinculos': return <GruposVinculos beneficiarios={filteredBeneficiarios} initialGroupFilter={selectedGroupFilter} user={user} />;
       case 'act': return <ActParentalidade user={user} />;
       case 'compaz': return <Compaz user={user} />;
-      case 'atendimento': return <AtendimentoIndividual user={user} />;
-      case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} user={user} />;
+      case 'atendimento': return <AtendimentoIndividual user={user} onOpenInstrumental={handleOpenInstrumental} />;
+      case 'grupos': return <Grupos onNavigate={handleNavigateToGroup} user={user} onOpenInstrumental={handleOpenInstrumental} />;
       case 'eventos': return <Eventos />;
       case 'rede': return <Rede />;
-      case 'instrumentais': return <Instrumentais user={user} />;
+      case 'instrumentais': return <Instrumentais user={user} defaultInstrumental={openInstrumental as any} />;
+      case 'gestor': return <InstrumentalGestor user={user} />;
       case 'beneficiarios': return (
         <Beneficiarios
           beneficiarios={beneficiariosList}

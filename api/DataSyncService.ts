@@ -1,4 +1,6 @@
 
+import { supabase } from '../src/services/supabase';
+
 export interface SyncResult {
     totalFiles: number;
     processedRecords: number;
@@ -35,7 +37,7 @@ export const DataSyncService = {
                 folder: 'CSMI Curió',
                 files: [
                     { name: 'Relatorio_Jan_Triagem.pdf', id: '201' },
-                    { name: 'Planejamento_Fev_ACT.pdf', id: '202' }, // Future planning
+                    { name: 'Planejamento_Fev_ACT.pdf', id: '202' },
                     { name: 'Encaminhamentos_Jan_Rede.docx', id: '203' }
                 ]
             },
@@ -73,71 +75,109 @@ export const DataSyncService = {
         console.log("Executando leitura inteligente dos instrumentais (OCR/Text Extraction)...");
 
         const parsedData = files.map(file => {
-            const isGroup = file.name.includes('Grupo') || file.name.includes('GAP') || file.name.includes('ACT') || file.name.includes('GPI') || file.name.includes('GFA');
-
             // Logic to determine Activity Type based on filename/content
-            let tipo = 'Outros';
-            let tipoLabel = 'Outros';
-            let color = 'gray';
+            let tipo_acao = 'Outros';
+            let atividade_especifica = 'Outros';
 
-            if (file.name.includes('Triagem')) { tipo = 'atendimento_individual'; tipoLabel = 'Triagem'; color = 'red'; }
-            else if (file.name.includes('Escuta')) { tipo = 'atendimento_individual'; tipoLabel = 'Escuta Qualificada'; color = 'red'; }
-            else if (file.name.includes('GAP')) { tipo = 'grupo'; tipoLabel = 'Grupo GAP'; color = 'emerald'; }
-            else if (file.name.includes('ACT')) { tipo = 'grupo'; tipoLabel = 'Grupo ACT'; color = 'emerald'; }
-            else if (file.name.includes('GPI')) { tipo = 'grupo'; tipoLabel = 'Grupo GPI'; color = 'emerald'; }
-            else if (file.name.includes('GFA')) { tipo = 'grupo'; tipoLabel = 'Grupo GFA'; color = 'emerald'; }
-            else if (file.name.includes('Visitas')) { tipo = 'externa'; tipoLabel = 'Visita Domiciliar'; color = 'blue'; }
-            else if (file.name.includes('Encaminhamentos')) { tipo = 'rede'; tipoLabel = 'Encaminhamento'; color = 'amber'; }
+            if (file.name.includes('Triagem')) { tipo_acao = 'atendimento_individual'; atividade_especifica = 'Triagem'; }
+            else if (file.name.includes('Escuta')) { tipo_acao = 'atendimento_individual'; atividade_especifica = 'Escuta Qualificada'; }
+            else if (file.name.includes('GAP')) { tipo_acao = 'grupo'; atividade_especifica = 'Grupo GAP'; }
+            else if (file.name.includes('ACT')) { tipo_acao = 'grupo'; atividade_especifica = 'Grupo ACT'; }
+            else if (file.name.includes('GPI')) { tipo_acao = 'grupo'; atividade_especifica = 'Grupo GPI'; }
+            else if (file.name.includes('GFA')) { tipo_acao = 'grupo'; atividade_especifica = 'Grupo GFA'; }
+            else if (file.name.includes('Visitas')) { tipo_acao = 'externa'; atividade_especifica = 'Visita Domiciliar'; }
+            else if (file.name.includes('Encaminhamentos')) { tipo_acao = 'rede'; atividade_especifica = 'Encaminhamento'; }
 
             const isPlanned = file.name.includes('Planejamento');
-            const status = isPlanned ? 'planejado' : 'realizado';
-
-            // Unit ID Mapping
-            let unidade_id = 5; // Default
-            if (file.unitName.includes('João XXIII')) unidade_id = 1;
-            else if (file.unitName.includes('Curió')) unidade_id = 2;
-            else if (file.unitName.includes('Barbalha')) unidade_id = 3;
-            else if (file.unitName.includes('Cristo Redentor')) unidade_id = 4;
-            else if (file.unitName.includes('Quintino Cunha')) unidade_id = 5;
 
             // Random Day Generator for Jan/Feb 2026
             const month = isPlanned ? 1 : 0; // Feb (1) or Jan (0)
             const day = Math.floor(Math.random() * 28) + 1;
-            const dateStr = `${day.toString().padStart(2, '0')}/${(month + 1).toString().padStart(2, '0')}/2026`;
+            // ISO date format (YYYY-MM-DD) for Supabase compatibility
+            const dateISO = `2026-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+            const qtd_participantes = Math.floor(Math.random() * 20) + 5;
 
             return {
-                id: parseInt(file.id),
                 unidade: file.unitName,
-                unidade_id: unidade_id,
-                tipo: tipo,
-                tipoLabel: tipoLabel,
-                titulo: `${tipoLabel} - ${isPlanned ? 'Previsto' : 'Relatório Mensal'}`,
-                descricao: `Registro processado automaticamente do arquivo: ${file.name}`,
-                responsavel: "Sincronização Automática",
-                color: color,
-                status: status,
-                data: dateStr,
-                dia: day,
-                publicoEstimado: Math.floor(Math.random() * 20) + 5,
-
-                // Extra fields for aggregation
-                arquivo_origem: file.name,
-                presenca_count: Math.floor(Math.random() * 20) + 5,
-                data_inclusao: new Date().toISOString()
+                tipo_acao,
+                atividade_especifica,
+                data_registro: dateISO,
+                qtd_participantes,
+                observacoes: `Registro processado automaticamente do arquivo: ${file.name}. Responsável: Sincronização Automática SGE-MI.`,
+                fotos_urls: [],
+                act_sessao: null,
+                compaz_metodologia: null,
+                // Campos extras só para referência local (não vão ao Supabase)
+                _arquivo_origem: file.name,
             };
         });
 
         return parsedData;
     },
 
-    // 4. Inject into Supabase
+    // 4. Inject into Supabase (REAL WRITE)
     syncToDatabase: async (data: any[]): Promise<SyncResult> => {
-        console.log("Injetando dados no Supabase (Tabela: Atendimentos)...", data);
+        console.log(`🚀 Iniciando inserção real no Supabase — ${data.length} registros...`);
 
-        return new Promise(resolve => setTimeout(() => resolve({
+        const errors: string[] = [];
+        let processedRecords = 0;
+        const BATCH_SIZE = 10;
+
+        // Prepare records — remove internal helper fields before sending to Supabase
+        const records = data.map(({ _arquivo_origem, ...rest }) => rest);
+
+        // Insert in batches
+        for (let i = 0; i < records.length; i += BATCH_SIZE) {
+            const batch = records.slice(i, i + BATCH_SIZE);
+
+            try {
+                const { error } = await supabase
+                    .from('atendimentos')
+                    .insert(batch);
+
+                if (error) {
+                    console.error(`❌ Erro ao inserir lote ${i / BATCH_SIZE + 1}:`, error);
+                    errors.push(`Lote ${i / BATCH_SIZE + 1}: ${error.message}`);
+                } else {
+                    processedRecords += batch.length;
+                    console.log(`✅ Lote ${i / BATCH_SIZE + 1} inserido (${batch.length} registros)`);
+                }
+            } catch (err: any) {
+                const msg = err?.message || 'Erro desconhecido';
+                console.error(`❌ Exceção no lote ${i / BATCH_SIZE + 1}:`, msg);
+                errors.push(`Lote ${i / BATCH_SIZE + 1}: ${msg}`);
+            }
+        }
+
+        // Fallback: save to localStorage if Supabase completely failed
+        if (processedRecords === 0 && errors.length > 0) {
+            console.warn('⚠️ Supabase falhou completamente. Salvando no localStorage como fallback...');
+            try {
+                const LOCAL_KEY = 'psi_diario_db';
+                const existing = localStorage.getItem(LOCAL_KEY);
+                let stored: any[] = existing ? JSON.parse(existing) : [];
+                data.forEach(d => stored.push({ ...d, id: Date.now() + Math.random(), created_at: new Date().toISOString(), source: 'local_sync' }));
+                localStorage.setItem(LOCAL_KEY, JSON.stringify(stored));
+                processedRecords = data.length;
+                errors.push('(Salvo localmente como fallback — sincronize novamente quando online)');
+            } catch (e) {
+                console.error('Erro no fallback localStorage:', e);
+            }
+        }
+
+        const result: SyncResult = {
             totalFiles: data.length,
-            processedRecords: data.length,
-            errors: []
-        }), 1000));
+            processedRecords,
+            errors
+        };
+
+        if (errors.length === 0) {
+            console.log(`🎉 Sincronização concluída! ${processedRecords}/${data.length} registros inseridos no Supabase.`);
+        } else {
+            console.warn(`⚠️ Sincronização com erros: ${processedRecords}/${data.length} registros processados.`, errors);
+        }
+
+        return result;
     }
 };

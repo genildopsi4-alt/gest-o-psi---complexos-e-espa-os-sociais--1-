@@ -60,6 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, onLo
     { id: 'atendimento', label: 'Atendimento', icon: 'fa-user-pen' },
     { id: 'grupos', label: 'Chamada Digital', icon: 'fa-users-viewfinder', separator: 'Gestão' },
     { id: 'instrumentais', label: 'Instrumentais', icon: 'fa-file-signature' },
+    { id: 'gestor', label: 'Instrumental do Gestor', icon: 'fa-clipboard-check' },
     { id: 'planejamento', label: 'Relatórios', icon: 'fa-file-lines' },
     { id: 'beneficiarios', label: 'Busca Ativa', icon: 'fa-user-clock', badge: 3 },
     { id: 'rede', label: 'Rede de Apoio', icon: 'fa-map-location-dot' },

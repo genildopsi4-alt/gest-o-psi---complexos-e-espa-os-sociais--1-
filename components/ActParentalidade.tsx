@@ -87,14 +87,9 @@ const ActParentalidade: React.FC<ActParentalidadeProps> = ({ user }) => {
 
                 {/* ── HERO VISUAL ACT ── */}
                 <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-[#EDA59E]/30">
-                    {/* Banner Principal */}
-                    <div className="relative">
-                        <img src="act-banner.png" alt="Programa ACT - Para Educar Crianças em Ambientes Seguros" className="w-full h-auto object-cover" />
-                    </div>
-
-                    {/* Crescer com Afeto */}
-                    <div className="bg-gradient-to-r from-[#FFF0EE] to-[#FDE8C8]/50 border-y border-[#EDA59E]/20">
-                        <img src="act-crescer-afeto.jpg" alt="Crescer com Afeto, Sem Violência" className="w-full h-auto object-cover" />
+                    {/* Banner Principal — Crescer com Afeto */}
+                    <div className="relative h-28 overflow-hidden">
+                        <img src="act-crescer-afeto.jpg" alt="Crescer com Afeto, Sem Violência" className="w-full h-full object-cover object-center" />
                     </div>
 
                     {/* Infográfico + Stats */}
